@@ -3,27 +3,24 @@ import unittest
 class Test(unittest.TestCase):
     
     def test(self):
-        from chinese import 中文數字
+        from chinese import 中文數字, 中文数字
 
-        self.assertEqual(中文數字(3.4, 簡體=True), '三点四')
-        self.assertEqual(中文數字(182.1, 簡體=True), '一百八十二点一')
+        self.assertEqual(中文数字(3.4), '三点四')
+        self.assertEqual(中文数字(182.1), '一百八十二点一')
         self.assertEqual(中文數字(16), '十六')
-        self.assertEqual(中文數字(10600, 簡體=True), '一万零六百')
         self.assertEqual(中文數字(1600), '一千六')
         self.assertEqual(中文數字(110), '一百一')
+        self.assertEqual(中文数字(10600), '一万零六百')
+        self.assertEqual(中文数字(1821010), '一百八十二万一千零一十')
+        self.assertEqual(中文数字(111180000), '一亿一千一百一十八万')
+        self.assertEqual(中文數字(23232.00518, 大寫=True)
+                        ,'貳萬參仟貳佰參拾貳點零零伍壹捌')
        
-
         """
     >>> num2cn('023232.005184132423423423300', numbering_type="high", alt_two=True, capitalize=False, traditional=True)
     '兩萬三仟兩佰三拾二點零零五一八四一三二四二三四二三四二三三'
-    >>> num2cn('023232.005184132423423423300', numbering_type="high", alt_two=False, capitalize=False, traditional=True)
-    '二萬三仟二佰三拾二點零零五一八四一三二四二三四二三四二三三'
-    >>> num2cn(111180000)
-    '一亿一千一百一十八万'
-    >>> num2cn(1821010)
-    '一百八十二万一千零一十'
+    >>> num2cn(, numbering_type="high", alt_two=False, capitalize=False, traditional=True)
+
     """
-
-
 if __name__ == '__main__':
     unittest.main()

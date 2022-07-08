@@ -1,12 +1,11 @@
 import re
 小寫數字表 = "零一二三四五六七八九"
-大寫數字表 = "零壹贰叁肆伍陆柒捌玖"
-簡體大寫數字 = "零壹贰叁肆伍陆柒捌玖"
-大寫位名 = "拾佰仟萬" # 10^1, 10^2, 10^3, 10^4.
-小寫位名表 = "十百千萬" # 10^1, 10^2, 10^3, 10^4.
-簡體小寫位名表 = "十百千万"
-大位名 = "億兆京垓秭穰溝澗正載"
-簡體大位名 = "亿兆京垓秭穰沟涧正载"
+大寫數字表 = "零壹貳參肆伍陸柒捌玖"
+大写数字表 = "零壹贰叁肆伍陆柒捌玖"
+大寫位名表 = "拾佰仟"
+小寫位名表 = "十百千"
+組名表 = "萬億兆京垓秭穰溝澗正載"
+组名表 = "万亿兆京垓秭穰沟涧正载"
 
 def 中文數字(
     n: int | float | str,
@@ -16,13 +15,11 @@ def 中文數字(
     異體二: bool = False
 ) -> str:
     # system = NumberingSystem(numbering_type)
-    位名表 = 小寫位名表
-    數字表 = 小寫數字表
-    點 = '點'
-
-    if 簡體:
-        位名表 = 簡體小寫位名表
-        點 = '点'
+    位名表 = 大寫位名表 if 大寫 else 小寫位名表
+    _組名表 = 组名表 if 簡體 else 組名表
+    數字表 = 大寫數字表 if 大寫 else 小寫數字表 
+    數字表 = 大写数字表 if 大寫 and 簡體 else 數字表 
+    點 =  '点' if 簡體 else '點' 
 
     n:str = str(n)
     i:str = n
@@ -32,14 +29,24 @@ def 中文數字(
         i, d= n.split(".", 1)
         d = d.rstrip("0")
     cn = ''
+    i = list(reversed(i))
 
-    for pos, digit in enumerate(reversed(i)):
+    def 轉中文數字(i):
+        cn = ''
+        for pos, digit in enumerate(i):
         # breakpoint()
-        位名 = ""
-        if digit != '0' and pos > 0:
-            位名 = 位名表[pos-1]
+            位名 = ""
+            if digit != '0' and pos > 0:
+                位名 = 位名表[pos-1]
+            cn = 數字表[int(digit)] + 位名 + cn
+        return cn
 
-        cn = 數字表[int(digit)] + 位名 + cn
+    for pos, 一組阿拉伯數字 in enumerate([i[idx:idx + 4] for idx in range(0, len(i), 4)]):
+        _cn = 轉中文數字(一組阿拉伯數字)
+        if pos > 0: 
+            _cn = _cn + _組名表[pos-1]
+        cn = _cn + cn 
+
 
     #一萬零六百零零 -> 一萬零六百
     cn = re.sub('零+$', '', cn)
@@ -112,3 +119,5 @@ def 中文數字(
         result = result.replace(getattr(system.digits[0], attr_name), system.digits[0].alt_s)
 
     return result
+def 中文数字(n):
+    return 中文數字(n, 簡體=True)
