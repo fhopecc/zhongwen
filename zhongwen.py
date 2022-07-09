@@ -12,15 +12,16 @@ def 中文數字(
     大寫: bool = False,
     簡體: bool = False,
     異體零: bool = False,
-    異體二: bool = False
+    兩: bool = False
 ) -> str:
     # system = NumberingSystem(numbering_type)
     位名表 = 大寫位名表 if 大寫 else 小寫位名表
     _組名表 = 组名表 if 簡體 else 組名表
     數字表 = 大寫數字表 if 大寫 else 小寫數字表 
     數字表 = 大写数字表 if 大寫 and 簡體 else 數字表 
+    數字表 = re.sub('二', '兩', 數字表) if 兩 else 數字表 
     點 =  '点' if 簡體 else '點' 
-
+    
     n:str = str(n)
     i:str = n
     d = ""

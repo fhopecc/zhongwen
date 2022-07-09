@@ -15,12 +15,8 @@ class Test(unittest.TestCase):
         self.assertEqual(中文数字(111180000), '一亿一千一百一十八万')
         self.assertEqual(中文數字(23232.00518, 大寫=True)
                         ,'貳萬參仟貳佰參拾貳點零零伍壹捌')
+        self.assertEqual(中文數字(23232.00518, 兩=True)
+                        ,'兩萬三千兩百三十兩點零零五一八')
        
-        """
-    >>> num2cn('023232.005184132423423423300', numbering_type="high", alt_two=True, capitalize=False, traditional=True)
-    '兩萬三仟兩佰三拾二點零零五一八四一三二四二三四二三四二三三'
-    >>> num2cn(, numbering_type="high", alt_two=False, capitalize=False, traditional=True)
-
-    """
 if __name__ == '__main__':
     unittest.main()
