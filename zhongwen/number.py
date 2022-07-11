@@ -159,4 +159,3 @@ def 轉標號(text):
     if m:=re.match(pat, text):
         return 標號(轉數值(m[1]), 5)
     return text 
-
