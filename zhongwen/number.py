@@ -112,6 +112,9 @@ def 中文数字(n):
 def 大寫中文數字(n):
     return 中文數字(n, 大寫=True)
 
+def 大写中文数字(n):
+    return 中文數字(n, 大寫=True, 簡體=True)
+
 def 約數(n) -> str:
     '中文萬約數表達，未達萬以全數表達'
     n = 轉數值(n)
