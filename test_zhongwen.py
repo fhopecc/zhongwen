@@ -38,6 +38,36 @@ class Test(unittest.TestCase):
         self.assertEqual(轉標號('一、'), 標號(1, 3))
         self.assertEqual(轉標號('3.'), 標號(3, 5))
 
-      
+    def test_text(self):
+        from zhongwen.text import 是否為中文字元, 字元切換
+        self.assertTrue(是否為中文字元('簡'))
+        self.assertTrue(是否為中文字元('简'))
+        self.assertFalse(是否為中文字元('a'))
+        self.assertFalse(是否為中文字元('μ'))
+        self.assertEqual(字元切換('a'), 'A')
+        self.assertEqual(字元切換('A'), 'a')
+        self.assertEqual(字元切換('B'), 'b')
+        self.assertEqual(字元切換('b'), 'B')
+        self.assertEqual(字元切換('簡'), '简')
+        self.assertEqual(字元切換('简'), '簡')
+
+        from zhongwen.text import 倉頡對照表, 倉頡首碼, 對照表, 首碼搜尋表示式
+        m = 倉頡對照表()
+        self.assertEqual(m['稜'], 'hdgce')
+        # self.assertEqual(m['函'], 'hdgce')
+        self.assertEqual(倉頡首碼('稜'), 'h')
+        self.assertEqual(倉頡首碼('a'), 'a')
+        # self.assertEqual(倉頡首碼('函'), 'u')
+
+        text = '''fa 命令原係向前搜尋字母a，
+擴充為向前搜尋字母a及中文倉頡碼首碼為a的中文字，
+如【是】倉頡碼為【amyo】。函u
+'''
+        self.assertEqual(對照表['令'], 'oini')
+        self.assertTrue('是' in 首碼搜尋表示式('a', text))
+        self.assertTrue('倉' in 首碼搜尋表示式('o', text))
+        self.assertTrue('令' in 首碼搜尋表示式('o', text))
+        self.assertTrue('係' in 首碼搜尋表示式('o', text))
+
 if __name__ == '__main__':
     unittest.main()
