@@ -42,8 +42,7 @@ def 轉數值(n, 傳回格式=False) -> int|float:
         # 具位名之中文數
         pat = r'^[零壹貳參肆伍陸柒捌玖拾一二三四五六七八九十百千萬億兆]+$'
         if m:=re.match(pat, n):
-            from pycnnum import cn2num
-            return cn2num(m.group(0))
+            return 中文數字轉數值(m.group(0))
         try:
             n = re.sub(r'[ ,，]', '', n)
             pat = r'^-?\d+$'
@@ -61,7 +60,6 @@ def 中文數字(
     異體零: bool = False,
     兩: bool = False
 ) -> str:
-    # system = NumberingSystem(numbering_type)
     位名表 = 大寫位名表 if 大寫 else 小寫位名表
     _組名表 = 组名表 if 簡體 else 組名表
     數字表 = 大寫數字表 if 大寫 else 小寫數字表 
@@ -82,7 +80,6 @@ def 中文數字(
     def 轉中文數字(i):
         cn = ''
         for pos, digit in enumerate(i):
-        # breakpoint()
             位名 = ""
             if digit != '0' and pos > 0:
                 位名 = 位名表[pos-1]
@@ -141,21 +138,68 @@ class 標號:
         # 標號階層：壹、(貳)三、(四)5.(6)
         if self.階層==1:
             return f'{大寫中文數字(self.號碼)}、'
+        if self.階層==2:
+            return f'({大寫中文數字(self.號碼)})'
+        if self.階層==3:
+            return f'{中文數字(self.號碼)}、'
         if self.階層==4:
             return f'({中文數字(self.號碼)})'
+        if self.階層==5:
+            return f'{self.號碼}.'
+        if self.階層==6:
+            return f'({self.號碼})'
 
     def __eq__(self, other):
         if isinstance(other, 標號):
             return self.號碼==other.號碼 and self.階層==other.階層
 
 def 轉標號(text):
-    pat = f'([{大寫數字表}]+)、'
+    pat = f'([{大寫數字表}{大寫位名表}{組名表}]+)、'
     if m:=re.match(pat, text):
         return 標號(轉數值(m[1]), 1)
-    pat = f'([{小寫數字表}]+)、'
+    pat = f'\\(([{大寫數字表}{大寫位名表}{組名表}]+)\\)'
+    if m:=re.match(pat, text):
+        return 標號(轉數值(m[1]), 2)
+    pat = f'([{小寫數字表}{小寫位名表}{組名表}]+)、'
     if m:=re.match(pat, text):
         return 標號(轉數值(m[1]), 3)
-    pat = f'([\d]+).'
+    pat = f'\\(([{小寫數字表}{小寫位名表}{組名表}]+)\\)'
+    if m:=re.match(pat, text):
+        return 標號(轉數值(m[1]), 4)
+    pat = f'([\\d]+).'
     if m:=re.match(pat, text):
         return 標號(轉數值(m[1]), 5)
     return text 
+    pat = f'\\(([\\d+)\\)'
+    if m:=re.match(pat, text):
+        return 標號(轉數值(m[1]), 5)
+    return text 
+ 
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--percent", help="百分比")
+    parser.add_argument("--float", help="小數")
+    parser.add_argument("--about", help="約數")
+    parser.add_argument("--test", help="測試", action='store_true')
+    parser.add_argument("--increment", help="中文數遞增")
+    parser.add_argument("--decrement", help="中文數遞減")
+    parser.add_argument("--dec_level", help="中文標號遞減層級")
+    args = parser.parse_args()
+    if args.increment:
+        n = 轉標號(args.increment)
+        # breakpoint()
+        print(標號(n.號碼+1, n.階層))
+    elif args.decrement:
+        print(中文數遞減(args.decrement))
+    elif args.percent:
+        print(百分比(eval(args.percent)))
+    elif args.float:
+        print(小數(eval(args.float)))
+    elif args.about:
+        print(約數(eval(args.about)))
+    elif args.dec_level:
+        n, l = 標號(args.dec_level)
+        print(中文標號(n, l-1))
+    elif args.test:
+        test()

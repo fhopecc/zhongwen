@@ -1,13 +1,13 @@
 import unittest
-
+from pathlib import Path
+wdir = Path(__file__).parent
 class Test(unittest.TestCase):
     def test_number(self):
         from zhongwen.number import 中文數字, 中文数字, 大寫中文數字
         self.assertEqual(中文數字(16), '十六')
-        self.assertEqual(中文數字(1600), '一千六')
         self.assertEqual(中文數字(110), '一百一')
+        self.assertEqual(中文數字(1600), '一千六')
         self.assertEqual(中文数字(3.4), '三点四')
-        self.assertEqual(中文数字(182.1), '一百八十二点一')
         self.assertEqual(中文数字(10600), '一万零六百')
         self.assertEqual(中文数字(1821010), '一百八十二万一千零一十')
         self.assertEqual(中文数字(111180000), '一亿一千一百一十八万')
@@ -24,6 +24,7 @@ class Test(unittest.TestCase):
         self.assertEqual(中文數字轉數值('拾柒'), 17)
         self.assertEqual(中文數字轉數值('十萬'), 100000)
         self.assertEqual(中文數字轉數值('十一萬'), 110000)
+        self.assertEqual(轉數值('十一萬'), 110000)
         self.assertEqual(轉數值('一五０'), 150)
         self.assertEqual(轉數值('一五0'), 150)
         self.assertEqual(轉數值('二五'), 25)
@@ -34,9 +35,12 @@ class Test(unittest.TestCase):
         from zhongwen.number import 標號, 轉標號
         self.assertEqual(str(標號(1, 1)), '壹、' )
         self.assertEqual(str(標號(1, 4)), '(一)')
+        self.assertEqual(str(標號(1, 5)), '1.')
         self.assertEqual(轉標號('壹、'), 標號(1, 1))
+        self.assertEqual(轉標號('貳拾、'), 標號(20, 1))
         self.assertEqual(轉標號('一、'), 標號(1, 3))
         self.assertEqual(轉標號('3.'), 標號(3, 5))
+        self.assertEqual(轉標號('1.'), 標號(1, 5))
 
     def test_text(self):
         from zhongwen.text import 是否為中文字元, 字元切換
@@ -69,5 +73,15 @@ class Test(unittest.TestCase):
         self.assertTrue('令' in 首碼搜尋表示式('o', text))
         self.assertTrue('係' in 首碼搜尋表示式('o', text))
 
+    def test_script(self):
+        from subprocess import check_output
+        out = check_output("py -m zhongwen.number --increment 貳拾、"
+                          ,shell=True)
+        self.assertEqual(out.decode('cp950').rstrip(), '貳拾壹、')
+
+        out = check_output("py -m zhongwen.number --increment 1."
+                          ,shell=True)
+        self.assertEqual(out.decode('cp950').rstrip(), '2.')
+      
 if __name__ == '__main__':
     unittest.main()
