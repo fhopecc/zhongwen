@@ -35,10 +35,10 @@ def 下載倉頡碼對照表():
     f = 下載('https://github.com/Jackchows/Cangjie5/raw/master/Cangjie5_TC.txt')
     return f
 
-from diskcache import FanoutCache
+from diskcache import Cache
 from pathlib import Path
 wdir = Path(__file__).parent
-cache = FanoutCache(wdir / 'cache')
+cache = Cache(wdir / 'cache')
 @cache.memoize()
 def 倉頡對照表():
     print('abc')
@@ -62,8 +62,6 @@ def 倉頡對照表():
     return d
 
 對照表 = 倉頡對照表()
-對照表 = 倉頡對照表()
-對照表 = 倉頡對照表()
 
 def 倉頡首碼(char):
     try:
@@ -78,4 +76,9 @@ def 首碼搜尋表示式(char, text):
             cs.add(c)
     return f'[{"".join(cs)}]'
 
-
+def 詞義(word):
+    from wiktionaryparser import WiktionaryParser
+    parser = WiktionaryParser()
+    # parser.url = "https://zh.wiktionary.org/wiki/{}?printable=yes"
+    word = parser.fetch(word)[0]['definitions'][0]['text']
+    return word

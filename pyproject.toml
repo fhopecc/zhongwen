@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zhongwen"
-version = "3.14121"
+version = "3.14159"
 authors = [
   { name="fhopecc", email="fhopecc@gmail.com" },
 ]
@@ -16,6 +16,9 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+]
+dependencies = [
+  "diskcache"
 ]
 
 [project.urls]
