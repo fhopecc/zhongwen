@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
                         ,'貳萬參仟貳佰參拾貳點零零伍壹捌')
         self.assertEqual(中文數字(23232.00518, 兩=True)
                         ,'兩萬三千兩百三十兩點零零五一八')
-        from zhongwen.number import 中文數字轉數值, 轉數值, 約數
+        from zhongwen.number import 中文數字轉數值, 轉數值, 約數, 百分比
         self.assertEqual(中文數字轉數值('一'), 1)
         self.assertEqual(中文數字轉數值('二十五'), 25)
         self.assertEqual(中文數字轉數值('一萬三千二百五十九'), 13259)
@@ -32,6 +32,8 @@ class Test(unittest.TestCase):
         self.assertEqual(轉數值('- 6.35'), -6.35)
         self.assertEqual(轉數值('一萬三千二百五十九'), 13259)
         self.assertEqual(約數('55,302'), '5萬餘')
+        self.assertEqual(百分比('0.8911'), '89.11％')
+
         from zhongwen.number import 標號, 轉標號
         self.assertEqual(str(標號(1, 1)), '壹、' )
         self.assertEqual(str(標號(1, 4)), '(一)')
@@ -43,6 +45,10 @@ class Test(unittest.TestCase):
         self.assertEqual(轉標號('1.'), 標號(1, 5))
 
     def test_text(self):
+        from zhongwen.text import 轉全型, 轉半型
+        self.assertEqual(轉全型('%'), '％')
+        self.assertEqual(轉半型('％'), '%')
+
         from zhongwen.text import 是否為中文字元, 字元切換
         self.assertTrue(是否為中文字元('簡'))
         self.assertTrue(是否為中文字元('简'))
@@ -72,6 +78,7 @@ class Test(unittest.TestCase):
         self.assertTrue('倉' in 首碼搜尋表示式('o', text))
         self.assertTrue('令' in 首碼搜尋表示式('o', text))
         self.assertTrue('係' in 首碼搜尋表示式('o', text))
+
         from zhongwen.text import 翻譯
         self.assertEqual(翻譯('test'), '測試')
         self.assertEqual(翻譯('取り'), '拿')

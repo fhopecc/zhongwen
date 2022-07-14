@@ -83,3 +83,13 @@ def 翻譯(word):
     text = client.translate(word, 'zh-tw')
     # breakpoint()
     return text.translatedText
+
+全型表 = {i: i + 0xFEE0 for i in range(0x21, 0x7F)}
+全型表[0x20] = 0x3000
+半型表 = {v: k for k, v in 全型表.items()}
+
+def 轉全型(s):
+    return s.translate(全型表)
+
+def 轉半型(s):
+    return s.translate(半型表).replace('—', '-')
