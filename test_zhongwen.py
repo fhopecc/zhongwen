@@ -72,9 +72,9 @@ class Test(unittest.TestCase):
         self.assertTrue('倉' in 首碼搜尋表示式('o', text))
         self.assertTrue('令' in 首碼搜尋表示式('o', text))
         self.assertTrue('係' in 首碼搜尋表示式('o', text))
-        
-        # from zhongwen.text import 詞義
-        # self.assertEqual(詞義('python'), '程式語言')
+        from zhongwen.text import 翻譯
+        self.assertEqual(翻譯('test'), '測試')
+        self.assertEqual(翻譯('取り'), '拿')
 
     def test_script(self):
         from subprocess import check_output

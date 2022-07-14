@@ -76,9 +76,10 @@ def 首碼搜尋表示式(char, text):
             cs.add(c)
     return f'[{"".join(cs)}]'
 
-def 詞義(word):
-    from wiktionaryparser import WiktionaryParser
-    parser = WiktionaryParser()
-    # parser.url = "https://zh.wiktionary.org/wiki/{}?printable=yes"
-    word = parser.fetch(word)[0]['definitions'][0]['text']
-    return word
+def 翻譯(word):
+    from pygtrans import Translate
+    client = Translate()
+    # 翻译句子
+    text = client.translate(word, 'zh-tw')
+    # breakpoint()
+    return text.translatedText
