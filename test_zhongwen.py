@@ -54,6 +54,8 @@ class Test(unittest.TestCase):
         self.assertEqual(字元切換('b'), 'B')
         self.assertEqual(字元切換('簡'), '简')
         self.assertEqual(字元切換('简'), '簡')
+        self.assertEqual(字元切換('か'), 'カ')
+        self.assertEqual(字元切換('カ'), 'か')
 
         from zhongwen.text import 倉頡對照表, 倉頡首碼, 對照表, 首碼搜尋表示式
         m = 倉頡對照表()

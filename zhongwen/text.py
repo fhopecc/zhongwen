@@ -1,6 +1,12 @@
 def 是否為中文字元(char:str):
     return '\u4e00' <= char <= '\u9fa5'
 
+def 是否為平假名(c:str):
+    return "\u3041" <= c <= "\u3096"
+
+def 是否為片假名(c:str):
+    return "\u30A1" <= c <= "\u30F6"
+
 def 中文列舉表示(串列):
     '[a,b,c] -> a、b及c'
     heads = 串列[:-1]
@@ -19,6 +25,12 @@ def 字元切換(string:str):
             if r == c:
                 return OpenCC('t2s').convert(c)
             return r
+
+        if 是否為平假名(c):
+            return chr(ord(c)-0x3041+0x30A1)
+
+        if 是否為片假名(c):
+            return chr(ord(c)-0x30A1+0x3041)
 
         if c.islower():
             return c.upper()
