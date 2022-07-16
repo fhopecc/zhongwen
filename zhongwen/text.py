@@ -47,10 +47,10 @@ def 下載倉頡碼對照表():
     f = 下載('https://github.com/Jackchows/Cangjie5/raw/master/Cangjie5_TC.txt')
     return f
 
-from diskcache import FanoutCache
+from diskcache import Cache
 from pathlib import Path
 wdir = Path(__file__).parent
-cache = FanoutCache(wdir / 'cache')
+cache = Cache(wdir / 'cache')
 @cache.memoize()
 def 倉頡對照表():
     print('abc')
@@ -74,8 +74,6 @@ def 倉頡對照表():
     return d
 
 對照表 = 倉頡對照表()
-對照表 = 倉頡對照表()
-對照表 = 倉頡對照表()
 
 def 倉頡首碼(char):
     try:
@@ -90,4 +88,20 @@ def 首碼搜尋表示式(char, text):
             cs.add(c)
     return f'[{"".join(cs)}]'
 
+def 翻譯(word):
+    from pygtrans import Translate
+    client = Translate()
+    # 翻译句子
+    text = client.translate(word, 'zh-tw')
+    # breakpoint()
+    return text.translatedText
 
+全型表 = {i: i + 0xFEE0 for i in range(0x21, 0x7F)}
+全型表[0x20] = 0x3000
+半型表 = {v: k for k, v in 全型表.items()}
+
+def 轉全型(s):
+    return s.translate(全型表)
+
+def 轉半型(s):
+    return s.translate(半型表).replace('—', '-')

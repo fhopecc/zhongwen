@@ -129,6 +129,10 @@ def 約數(n) -> str:
     if r: s+= "餘" 
     return s
 
+def 百分比(n):
+  '表達至2位小數百分比'
+  return f'{abs(float(n))*100:,.2f}％'
+
 class 標號:
     def __init__(self, 號碼, 階層):
        self.號碼 = 號碼

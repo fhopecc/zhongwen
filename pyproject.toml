@@ -4,11 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zhongwen"
-version = "3.14121"
+version = "3.14161"
 authors = [
   { name="fhopecc", email="fhopecc@gmail.com" },
 ]
-description = "中文處理工具，包含中文數轉換"
+description = "中文處理工具，包含中文數轉換，翻譯中文"
 readme = "README.md"
 license = { file="LICENSE" }
 requires-python = ">=3.7"
@@ -16,6 +16,9 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+]
+dependencies = [
+  "diskcache", "pygtrans"
 ]
 
 [project.urls]
