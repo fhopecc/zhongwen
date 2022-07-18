@@ -1,3 +1,7 @@
+def 臚列(項目):
+    "['甲', '乙', '丙'] => '甲、乙及丙'"
+    return f"{'、'.join(項目[:-1])}及{項目[-1]}" if len(項目) else ''
+
 def 是否為中文字元(char:str):
     return '\u4e00' <= char <= '\u9fa5'
 
@@ -7,15 +11,19 @@ def 是否為平假名(c:str):
 def 是否為片假名(c:str):
     return "\u30A1" <= c <= "\u30F6"
 
-def 中文列舉表示(串列):
-    '[a,b,c] -> a、b及c'
-    heads = 串列[:-1]
-    tail = 串列[-1]
-    return '、'.join(heads) + f'及{tail}'
+全型表 = {i: i + 0xFEE0 for i in range(0x21, 0x7F)}
+全型表[0x20] = 0x3000
+半型表 = {v: k for k, v in 全型表.items()}
+
+def 轉全型(s):
+    return s.translate(全型表)
+
+def 轉半型(s):
+    return s.translate(半型表).replace('—', '-')
 
 def 字元切換(string:str):
     '''輸入為大小寫字母，舉如拉丁字母，進行大小寫切換、
-中文字母進行簡繁切換、日文字母平片假名切換(Todo)。
+中文字母進行簡繁切換、日文字母平片假名切換、符號則為全半型轉換(Todo)。
 '''
     if string == '': return string
     def switch_case(c:str):
@@ -41,7 +49,6 @@ def 字元切換(string:str):
 
     return ''.join(map(switch_case, string))
 
-
 def 下載倉頡碼對照表():
     from .file import 下載
     f = 下載('https://github.com/Jackchows/Cangjie5/raw/master/Cangjie5_TC.txt')
@@ -49,8 +56,7 @@ def 下載倉頡碼對照表():
 
 from diskcache import Cache
 from pathlib import Path
-wdir = Path(__file__).parent
-cache = Cache(wdir / 'cache')
+cache = Cache(Path.home() / 'cache')
 @cache.memoize()
 def 倉頡對照表():
     print('abc')
@@ -96,12 +102,4 @@ def 翻譯(word):
     # breakpoint()
     return text.translatedText
 
-全型表 = {i: i + 0xFEE0 for i in range(0x21, 0x7F)}
-全型表[0x20] = 0x3000
-半型表 = {v: k for k, v in 全型表.items()}
 
-def 轉全型(s):
-    return s.translate(全型表)
-
-def 轉半型(s):
-    return s.translate(半型表).replace('—', '-')

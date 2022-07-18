@@ -63,6 +63,9 @@ class Test(unittest.TestCase):
         self.assertEqual(字元切換('か'), 'カ')
         self.assertEqual(字元切換('カ'), 'か')
 
+        from zhongwen.text import 臚列
+        self.assertEqual(臚列(['甲方', '乙方', '丙方']), '甲方、乙方及丙方')
+
         from zhongwen.text import 倉頡對照表, 倉頡首碼, 對照表, 首碼搜尋表示式
         m = 倉頡對照表()
         self.assertEqual(m['稜'], 'hdgce')
