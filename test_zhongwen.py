@@ -73,7 +73,6 @@ class Test(unittest.TestCase):
         self.assertEqual(倉頡首碼('稜'), 'h')
         self.assertEqual(倉頡首碼('a'), 'a')
         # self.assertEqual(倉頡首碼('函'), 'u')
-
         text = '''fa 命令原係向前搜尋字母a，
 擴充為向前搜尋字母a及中文倉頡碼首碼為a的中文字，
 如【是】倉頡碼為【amyo】。函u
@@ -87,6 +86,10 @@ class Test(unittest.TestCase):
         from zhongwen.text import 翻譯
         self.assertEqual(翻譯('test'), '測試')
         self.assertEqual(翻譯('取り'), '拿')
+
+        from zhongwen.text import 中文詞界
+        line = '化學危險物質場所資訊建置未完整，且與其他化學災害預警及資訊平台整合不佳'
+        self.assertEqual(中文詞界(10, line), (9,10))
 
     def test_script(self):
         from subprocess import check_output
