@@ -4,11 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zhongwen"
-version = "3.14162"
+version = "3.14164"
 authors = [
   { name="fhopecc", email="fhopecc@gmail.com" },
 ]
-description = "中文處理工具，包含中文數轉換，中文翻譯，字元切換"
+description = "中文處理工具，包含中文數轉換、中文翻譯、字元切換、日期處理等"
 readme = "README.md"
 license = { file="LICENSE" }
 requires-python = ">=3.7"

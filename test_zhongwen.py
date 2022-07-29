@@ -87,9 +87,13 @@ class Test(unittest.TestCase):
         self.assertEqual(翻譯('test'), '測試')
         self.assertEqual(翻譯('取り'), '拿')
 
-        from zhongwen.text import 中文詞界
-        line = '化學危險物質場所資訊建置未完整，且與其他化學災害預警及資訊平台整合不佳'
-        self.assertEqual(中文詞界(10, line), (9,10))
+        # from zhongwen.text import 中文詞界
+        # line = '化學危險物質場所資訊建置未完整，且與其他化學災害預警及資訊平台整合不佳'
+        # self.assertEqual(中文詞界(10, line), (9,10))
+    def test_date(self):
+        from zhongwen.date import 取日期
+        from datetime import datetime
+        self.assertEqual(取日期('2022/6/3 上午 12:00:00'), datetime(2022,6,3,0,0) )
 
     def test_script(self):
         from subprocess import check_output
@@ -100,6 +104,9 @@ class Test(unittest.TestCase):
         out = check_output("py -m zhongwen.number --increment 1."
                           ,shell=True)
         self.assertEqual(out.decode('cp950').rstrip(), '2.')
+
+        # from zhongwen.text import 法規
+        # self.assertEqual(法規(), 'abc')
       
 if __name__ == '__main__':
     unittest.main()

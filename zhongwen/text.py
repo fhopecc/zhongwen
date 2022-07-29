@@ -1,4 +1,3 @@
-
 def 中文詞界(curpos, line):
     import jiojio
     jiojio.init()
@@ -109,4 +108,16 @@ def 翻譯(word):
     # breakpoint()
     return text.translatedText
 
-
+def 法規():
+    from pathlib import Path
+    import pandas as pd
+    import os
+    falv = Path(__file__).parent.parent / 'FalV' / 'FalV.xml'
+    df = pd.read_xml(falv, parser='etree')
+    df = df.iloc[:100]
+    temp = Path.home() / 'TEMP'
+    html = temp / 'output.html'
+    df.to_html(html
+              ,formatters={'金額':lambda x: f'{x:,.0f}'})
+    os.system(f'start {html}')
+    return 
