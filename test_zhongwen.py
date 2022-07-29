@@ -94,6 +94,7 @@ class Test(unittest.TestCase):
         from zhongwen.date import 取日期
         from datetime import datetime
         self.assertEqual(取日期('2022/6/3 上午 12:00:00'), datetime(2022,6,3,0,0) )
+        self.assertEqual(取日期('2020.01.05'), datetime(2020,1,5,0,0))
 
     def test_script(self):
         from subprocess import check_output
@@ -104,7 +105,6 @@ class Test(unittest.TestCase):
         out = check_output("py -m zhongwen.number --increment 1."
                           ,shell=True)
         self.assertEqual(out.decode('cp950').rstrip(), '2.')
-
         # from zhongwen.text import 法規
         # self.assertEqual(法規(), 'abc')
       
