@@ -88,12 +88,20 @@ class Test(unittest.TestCase):
         self.assertEqual(翻譯('取り'), '拿')
 
         # from zhongwen.text import 中文詞界
-        # line = '化學危險物質場所資訊建置未完整，且與其他化學災害預警及資訊平台整合不佳'
+        # line = '化學法第9條規定'
         # self.assertEqual(中文詞界(10, line), (9,10))
+
     def test_date(self):
         from zhongwen.date import 取日期
         from datetime import datetime
         self.assertEqual(取日期('2022/6/3 上午 12:00:00'), datetime(2022,6,3,0,0) )
+
+    def test_law(self):
+        from zhongwen.text import 法規名稱字首樹, 法規自動完成建議
+        self.assertEqual(法規名稱字首樹().keys('漁港法')[0], '漁港法')
+        line = '依據證'
+        self.assertEqual(法規自動完成建議(line)[0], '證') # 第一個結果是找出的字首
+        self.assertEqual(法規自動完成建議(line)[1], '證券交易法') # 名稱越短的法規越重要
 
     def test_script(self):
         from subprocess import check_output
@@ -105,8 +113,6 @@ class Test(unittest.TestCase):
                           ,shell=True)
         self.assertEqual(out.decode('cp950').rstrip(), '2.')
 
-        # from zhongwen.text import 法規
-        # self.assertEqual(法規(), 'abc')
       
 if __name__ == '__main__':
     unittest.main()
