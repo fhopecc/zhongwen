@@ -103,6 +103,10 @@ class Test(unittest.TestCase):
         self.assertEqual(法規自動完成建議(line)[0], '證') # 第一個結果是找出的字首
         self.assertEqual(法規自動完成建議(line)[1], '證券交易法') # 名稱越短的法規越重要
 
+    def test_hllaw(self):
+        from zhongwen.hllaw import 爬取法規
+        self.assertTrue(爬取法規())
+
     def test_script(self):
         from subprocess import check_output
         out = check_output("py -m zhongwen.number --increment 貳拾、"
