@@ -98,15 +98,16 @@ class Test(unittest.TestCase):
         self.assertEqual(取日期('2020.01.05'), datetime(2020,1,5,0,0))
 
     def test_law(self):
-        from zhongwen.text import 法規名稱字首樹, 法規自動完成建議
+        from zhongwen.law import 法規名稱字首樹, 法規自動完成建議
         self.assertEqual(法規名稱字首樹().keys('漁港法')[0], '漁港法')
         line = '依據證'
         self.assertEqual(法規自動完成建議(line)[0], '證') # 第一個結果是找出的字首
         self.assertEqual(法規自動完成建議(line)[1], '證券交易法') # 名稱越短的法規越重要
 
     def test_hllaw(self):
-        from zhongwen.hllaw import 爬取法規
-        self.assertTrue(爬取法規())
+        # from zhongwen.hllaw import 爬取法規
+        # self.assertTrue(爬取法規())
+        pass
 
     def test_script(self):
         from subprocess import check_output
