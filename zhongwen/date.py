@@ -7,6 +7,9 @@ def 取日期(d, first=True):
     pat = r'\d{4}/\d{1,2}/\d{1,2}'
     if m:=re.match(pat, d):
         return datetime.strptime(m[0], '%Y/%m/%d')
+    pat = r'\d{4}.\d{1,2}.\d{1,2}'
+    if m:=re.match(pat, d):
+        return datetime.strptime(m[0], '%Y.%m.%d')
     return d
 
 def 取民國日期(d, last=True):

@@ -95,6 +95,7 @@ class Test(unittest.TestCase):
         from zhongwen.date import 取日期
         from datetime import datetime
         self.assertEqual(取日期('2022/6/3 上午 12:00:00'), datetime(2022,6,3,0,0) )
+        self.assertEqual(取日期('2020.01.05'), datetime(2020,1,5,0,0))
 
     def test_law(self):
         from zhongwen.text import 法規名稱字首樹, 法規自動完成建議
@@ -116,7 +117,6 @@ class Test(unittest.TestCase):
         out = check_output("py -m zhongwen.number --increment 1."
                           ,shell=True)
         self.assertEqual(out.decode('cp950').rstrip(), '2.')
-
       
 if __name__ == '__main__':
     unittest.main()
