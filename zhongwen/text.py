@@ -1,4 +1,4 @@
-from .file import 下載, 
+from .file import 下載
 
 def 中文詞界(curpos, line):
     # import jiojio
@@ -114,8 +114,8 @@ def 翻譯(word):
 cache.clear()
 @cache.memoize()
 def 法規名稱字首樹():
-    falv = 下載('https://sendlaw.moj.gov.tw/PublicData/GetFile.ashx?DType=XML&AuData=CF')
-    # falv = Path(__file__).parent.parent / 'FalV' / 'FalV.xml'
+    # falv = 下載('https://sendlaw.moj.gov.tw/PublicData/GetFile.ashx?DType=XML&AuData=CF', 'FALV.zip')
+    falv = Path(__file__).parent.parent / 'FalV' / 'FalV.xml'
     minling = Path(__file__).parent.parent / 'MingLing' / 'MingLing.xml'
     from xml.etree.cElementTree import parse
     d = parse(falv)
