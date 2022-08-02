@@ -1,7 +1,7 @@
 from .file import 下載, 解壓
 from pathlib import Path
 from diskcache import Cache
-cache = Cache(Path.home() / 'cache')
+cache = Cache(Path.home() / 'cache' / 'law')
 
 @cache.memoize()
 def 法規名稱字首樹():

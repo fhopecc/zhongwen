@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zhongwen"
-version = "3.14171"
+version = "3.14172"
 authors = [
   { name="fhopecc", email="fhopecc@gmail.com" },
 ]
@@ -18,7 +18,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-  "diskcache", "pygtrans", "marisa_trie"
+  "diskcache", "pygtrans", "marisa_trie", "hanlp"
 ]
 
 [project.urls]

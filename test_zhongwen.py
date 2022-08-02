@@ -66,7 +66,7 @@ class Test(unittest.TestCase):
         from zhongwen.text import 臚列
         self.assertEqual(臚列(['甲方', '乙方', '丙方']), '甲方、乙方及丙方')
 
-        from zhongwen.text import 倉頡對照表, 倉頡首碼, 對照表, 首碼搜尋表示式
+        from zhongwen.text import 倉頡對照表, 倉頡首碼, 首碼搜尋表示式
         m = 倉頡對照表()
         self.assertEqual(m['稜'], 'hdgce')
         # self.assertEqual(m['函'], 'hdgce')
@@ -77,7 +77,6 @@ class Test(unittest.TestCase):
 擴充為向前搜尋字母a及中文倉頡碼首碼為a的中文字，
 如【是】倉頡碼為【amyo】。函u
 '''
-        self.assertEqual(對照表['令'], 'oini')
         self.assertTrue('是' in 首碼搜尋表示式('a', text))
         self.assertTrue('倉' in 首碼搜尋表示式('o', text))
         self.assertTrue('令' in 首碼搜尋表示式('o', text))

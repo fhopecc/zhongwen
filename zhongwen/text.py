@@ -1,4 +1,7 @@
+from diskcache import Cache
+from pathlib import Path
 from .file import 下載
+cache = Cache(Path.home() / 'cache' / 'text')
 
 def 中文詞界(curpos, line):
     # import jiojio
@@ -63,12 +66,8 @@ def 下載倉頡碼對照表():
     f = 下載('https://github.com/Jackchows/Cangjie5/raw/master/Cangjie5_TC.txt')
     return f
 
-from diskcache import Cache
-from pathlib import Path
-cache = Cache(Path.home() / 'cache')
 @cache.memoize()
 def 倉頡對照表():
-    print('abc')
     from pandas import read_csv
     f = 下載倉頡碼對照表()
     df = read_csv(f, encoding='latin1'
@@ -88,11 +87,9 @@ def 倉頡對照表():
             d[row['漢字']] = row['倉頡碼']
     return d
 
-對照表 = 倉頡對照表()
-
 def 倉頡首碼(char):
     try:
-        return 對照表[char][0]
+        return 倉頡對照表()[char][0]
     except KeyError:
         return char
 
