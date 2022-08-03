@@ -10,6 +10,11 @@ def 取日期(d, first=True):
     pat = r'\d{4}.\d{1,2}.\d{1,2}'
     if m:=re.match(pat, d):
         return datetime.strptime(m[0], '%Y.%m.%d')
+
+    # 民國日期格式109/05/29
+    pat = r'(\d{3})/(\d{1,2})/(\d{1,2})'
+    if m:=re.match(pat, d):
+        return datetime(int(m[1])+1911, int(m[2]), int(m[3]))
     return d
 
 def 取民國日期(d, last=True):
