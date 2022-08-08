@@ -65,6 +65,8 @@ class Test(unittest.TestCase):
 
         from zhongwen.text import 臚列
         self.assertEqual(臚列(['甲方', '乙方', '丙方']), '甲方、乙方及丙方')
+        self.assertEqual(臚列(['單方']), '單方')
+        self.assertEqual(臚列('片面'), '片面')
 
         from zhongwen.text import 倉頡對照表, 倉頡首碼, 首碼搜尋表示式
         m = 倉頡對照表()
