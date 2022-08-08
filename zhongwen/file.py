@@ -2,6 +2,8 @@
 from pathlib import Path
 from urllib import request
 from urllib.parse import urlparse
+from diskcache import Cache
+cache = Cache(Path.home() / 'cache' / 'zhongwen.file')
 
 def 最新檔(目錄, 檔案樣式="*"):
     import os
@@ -11,24 +13,17 @@ def 最新檔(目錄, 檔案樣式="*"):
     except:
         raise FileNotFoundError(目錄)
 
-def 抓取(url, downloads=None):
-    '''抓取網頁至指定目錄 downloads，
-並且回傳本地檔案的路徑。'''
-    if not downloads:
-        downloads = Path.home() / 'Downloads'
-    fn = urlparse(url).path.split('/')[-1]
-    if not p:
-        p  = downloads / fn
-    if p.exists(): 
-        print(f'警告：已下載[{url}]至[{p}]！')
-        return p
-    downloads.mkdir(exist_ok=True)
-    with p.open('w') as f:
-        headers ={'user-agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'}
-        html = request.get(url, headers=headers)
-        f.write(html)
-        print(f'下載[{url}]至[{p}]成功！')
-        return p
+@cache.memoize(expire=100, tag='抓取')
+def 抓取(url):
+    '抓取網頁回傳原始碼。'
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    options = Options()
+    options.add_argument("--disable-notifications")
+    chrome = webdriver.Chrome(executable_path='c:\\Python\\Python310\\chromedriver.exe'
+                             ,chrome_options=options)
+    chrome.get(url)
+    return chrome.page_source
 
 def 下載(url, p=None, downloads=None):
     '''下載 URL 的檔案至指定目錄 downloads，

@@ -111,6 +111,13 @@ class Test(unittest.TestCase):
         # self.assertTrue(爬取法規())
         pass
 
+    def test_file(self):
+        from zhongwen.file import 抓取
+        url = 'https://glrs.hl.gov.tw/glrsout/index.aspx'
+        page = 抓取(url)
+        # print(page)
+        self.assertEqual(page[:5], "<html")
+
     def test_script(self):
         from subprocess import check_output
         out = check_output("py -m zhongwen.number --increment 貳拾、"

@@ -2,10 +2,18 @@
 
 def 爬取法規():
     from pathlib import Path
-    from .file import 下載
+    from zhongwen.file import 下載
     cached = Path.home() / 'temp' / 'hllaw'
-    url = 'https://glrs.hl.gov.tw/glrsout/LawContent.aspx?id=GL000719'
-    下載(url, downloads=cached)
+    url = 'https://glrs.hl.gov.tw/glrsout/index.aspx'
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    import time
+    options = Options()
+    options.add_argument("--disable-notifications")
+    chrome = webdriver.Chrome(executable_path='c:\\Python\\Python310\\chromedriver.exe'
+                             ,chrome_options=options)
+    chrome.get(url)
+    h = chrome.page_source
     return False
 
 def dataframe():
