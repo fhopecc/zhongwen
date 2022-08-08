@@ -12,8 +12,12 @@ def 中文詞界(curpos, line):
     return words
 
 def 臚列(項目):
-    "['甲', '乙', '丙'] => '甲、乙及丙'"
-    return f"{'、'.join(項目[:-1])}及{項目[-1]}" if len(項目) else ''
+    "['甲', '乙', '丙'] -> '甲、乙及丙'"
+    if type(項目) == list:
+        if len(項目) > 1:
+            return f"{'、'.join(項目[:-1])}及{項目[-1]}" if len(項目) else ''
+        return 項目[0]
+    return 項目
 
 def 是否為中文字元(char:str):
     return '\u4e00' <= char <= '\u9fa5'
