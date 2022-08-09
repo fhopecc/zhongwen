@@ -1,20 +1,15 @@
 '''花蓮縣政府主管法規資料'''
-
 def 爬取法規():
-    from pathlib import Path
-    from zhongwen.file import 下載
-    cached = Path.home() / 'temp' / 'hllaw'
-    url = 'https://glrs.hl.gov.tw/glrsout/index.aspx'
-    from selenium import webdriver
-    from selenium.webdriver.chrome.options import Options
-    import time
-    options = Options()
-    options.add_argument("--disable-notifications")
-    chrome = webdriver.Chrome(executable_path='c:\\Python\\Python310\\chromedriver.exe'
-                             ,chrome_options=options)
-    chrome.get(url)
-    h = chrome.page_source
-    return False
+    from .file import 抓取
+    import pandas as pd
+    from io import StringIO
+    url = 'https://glrs.hl.gov.tw'
+    page = 抓取(url)
+    df = pd.read_html(StringIO(page))[0]
+    from html5lib import parse
+    e = parse(page)
+    breakpoint()
+    return e
 
 def dataframe():
     '''回傳花蓮縣政府法規資料集'''

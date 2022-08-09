@@ -107,13 +107,13 @@ class Test(unittest.TestCase):
         self.assertEqual(法規自動完成建議(line)[1], '證券交易法') # 名稱越短的法規越重要
 
     def test_hllaw(self):
-        # from zhongwen.hllaw import 爬取法規
-        # self.assertTrue(爬取法規())
-        pass
+        from zhongwen.hllaw import 爬取法規
+        self.assertEqual(爬取法規(), 'abc')
+        # pass
 
     def test_file(self):
         from zhongwen.file import 抓取
-        url = 'https://glrs.hl.gov.tw/glrsout/index.aspx'
+        url = 'https://glrs.hl.gov.tw'
         page = 抓取(url)
         # print(page)
         self.assertEqual(page[:5], "<html")
