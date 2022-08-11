@@ -84,10 +84,20 @@ class Test(unittest.TestCase):
         self.assertTrue('令' in 首碼搜尋表示式('o', text))
         self.assertTrue('係' in 首碼搜尋表示式('o', text))
 
+        # diskcache
+        # functools.cache 0.025, 0.025, 0.025
+        # 模組變數 0.023, 0.036, 0.023, 0.023
+        # 顯然使用模組變數緩存對照表效率更高
+        # import cProfile
+        # with cProfile.Profile() as pr:
+            # 首碼搜尋表示式('a', text*1000)
+        # from sys import stdout
+        # pr.print_stats()
+        # breakpoint()
+
         from zhongwen.text import 翻譯
         self.assertEqual(翻譯('test'), '測試')
         self.assertEqual(翻譯('取り'), '拿')
-
         # from zhongwen.text import 中文詞界
         # line = '化學法第9條規定'
         # self.assertEqual(中文詞界(10, line), (9,10))
@@ -107,16 +117,17 @@ class Test(unittest.TestCase):
         self.assertEqual(法規自動完成建議(line)[1], '證券交易法') # 名稱越短的法規越重要
 
     def test_hllaw(self):
-        from zhongwen.hllaw import 爬取法規
-        self.assertEqual(爬取法規(), 'abc')
-        # pass
+        # from zhongwen.hllaw import 爬取法規
+        # self.assertEqual(爬取法規(), 'abc')
+        pass
 
     def test_file(self):
         from zhongwen.file import 抓取
         url = 'https://glrs.hl.gov.tw'
         page = 抓取(url)
-        # print(page)
-        self.assertEqual(page[:5], "<html")
+        print(page.find_elements_by_css_selector('table'))
+        # self.assertEqual(page[:5], "<html")
+        pass
 
     def test_script(self):
         from subprocess import check_output

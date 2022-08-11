@@ -23,7 +23,7 @@ def 抓取(url):
     chrome = webdriver.Chrome(executable_path='c:\\Python\\Python310\\chromedriver.exe'
                              ,chrome_options=options)
     chrome.get(url)
-    return chrome.page_source
+    return chrome
 
 def 下載(url, p=None, downloads=None):
     '''下載 URL 的檔案至指定目錄 downloads，

@@ -91,9 +91,10 @@ def 倉頡對照表():
             d[row['漢字']] = row['倉頡碼']
     return d
 
+對照表 = 倉頡對照表() # 以模組變數將對照表緩存在記憶體
 def 倉頡首碼(char):
     try:
-        return 倉頡對照表()[char][0]
+        return 對照表[char][0]
     except KeyError:
         return char
 
