@@ -108,6 +108,11 @@ class Test(unittest.TestCase):
         self.assertEqual(取日期('2022/6/3 上午 12:00:00'), datetime(2022,6,3,0,0) )
         self.assertEqual(取日期('2020.01.05'), datetime(2020,1,5,0,0))
         self.assertEqual(取日期('110/12/27'), datetime(2021,12,27,0,0))
+        self.assertEqual(取日期('110.11.10'), datetime(2021,11,10,0,0))
+
+        from zhongwen.date import 民國日期
+        self.assertEqual(民國日期(取日期('110/12/27')), '1101227')
+        self.assertEqual(民國日期(取日期('110/1/27'), '%Y年%M月%d日'), '110年1月27日')
 
     def test_law(self):
         from zhongwen.law import 法規名稱字首樹, 法規自動完成建議
@@ -122,10 +127,11 @@ class Test(unittest.TestCase):
         pass
 
     def test_file(self):
-        from zhongwen.file import 抓取
-        url = 'https://glrs.hl.gov.tw'
-        page = 抓取(url)
-        print(page.find_elements_by_css_selector('table'))
+        # from zhongwen.file import 抓取, cache
+        # cache.clear()
+        # url = 'https://glrs.hl.gov.tw'
+        # page = 抓取(url)
+        # print(page.find_elements_by_css_selector('table'))
         # self.assertEqual(page[:5], "<html")
         pass
 
