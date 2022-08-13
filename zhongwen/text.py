@@ -4,11 +4,10 @@ from .file import 下載
 cache = Cache(Path.home() / 'cache' / 'text')
 
 def 中文詞界(curpos, line):
-    # import jiojio
-    # jiojio.init()
     import hanlp
-    han = hanlp.load(hanlp.pretrained.mtl.CLOSE_TOK_POS_NER_SRL_DEP_SDP_CON_ELECTRA_BASE_ZH)
+    han = hanlp.load(hanlp.pretrained.tok.COARSE_ELECTRA_SMALL_ZH)
     words = (han(line))
+    print(words)
     return words
 
 def 臚列(項目):
