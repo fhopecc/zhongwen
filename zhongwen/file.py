@@ -5,6 +5,23 @@ from urllib.parse import urlparse
 from diskcache import Cache
 cache = Cache(Path.home() / 'cache' / 'zhongwen.file')
 
+class FileLocation:
+    '萃取文字內之路徑資訊'
+    模式集 ={"python":r'File "(?P<path>.+.py)", line (?P<line>\d+).*'
+            ,"jest":r'\((?P<path>.+\.js):(?P<line>\d+):(?P<pos>\d+)\)'
+            }
+    def __init__(self, 訊息):
+        for k in self.模式集:
+            模式=self.模式集[k]
+            import re 
+            if m:=re.search(模式, 訊息):
+                try:
+                    self.路徑 = m['path']
+                    self.列 = int(m['line'])
+                    self.行 = int(m['pos'])
+                    break
+                except IndexError: pass
+
 def 最新檔(目錄, 檔案樣式="*"):
     import os
     fs = [f for f in 目錄.glob(檔案樣式)]

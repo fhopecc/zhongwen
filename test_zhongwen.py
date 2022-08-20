@@ -128,15 +128,6 @@ class Test(unittest.TestCase):
         # self.assertEqual(爬取法規(), 'abc')
         pass
 
-    def test_file(self):
-        # from zhongwen.file import 抓取, cache
-        # cache.clear()
-        # url = 'https://glrs.hl.gov.tw'
-        # page = 抓取(url)
-        # print(page.find_elements_by_css_selector('table'))
-        # self.assertEqual(page[:5], "<html")
-        pass
-
     def test_script(self):
         from subprocess import check_output
         out = check_output("py -m zhongwen.number --increment 貳拾、"
