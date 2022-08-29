@@ -9,6 +9,7 @@ class FileLocation:
     '萃取文字內之路徑資訊'
     模式集 ={"python":r'File "(?P<path>.+.py)", line (?P<line>\d+).*'
             ,"jest":r'\((?P<path>.+\.js):(?P<line>\d+):(?P<pos>\d+)\)'
+            ,"path string":r'[\'"](?P<path>.+\.js)[\'"]'
             }
     def __init__(self, 訊息):
         for k in self.模式集:
@@ -21,6 +22,9 @@ class FileLocation:
                     self.行 = int(m['pos'])
                     break
                 except IndexError: pass
+        if not hasattr(self, '路徑'): raise ValueError(f'訊息："{訊息}"不包含路徑資訊！')
+        if not hasattr(self, '列'): self.列 = 0
+        if not hasattr(self, '行'): self.行 = 0
 
 def 最新檔(目錄, 檔案樣式="*"):
     import os
