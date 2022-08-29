@@ -106,9 +106,11 @@ def 法條展開(s):
 
 def 法條說明(s):
     ls = 法條查詢(s)
+
     def 條文內容(l):
+        # breakpoint()
         return f'{l[0]}第{l[1]}條規定：「{l[2]}」'
-    doc = '\n'.join([條文內容(l) for l in ls])
+    doc = '\n'.join([條文內容(l.tolist()) for l in ls.values])
     return doc
     # return str(ls)
 
