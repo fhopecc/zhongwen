@@ -43,6 +43,8 @@ def 字元切換(string:str):
 '''
     if string == '': return string
     def switch_case(c:str):
+        if c == '[': return '「'
+        if c == ']': return '」'
         if 是否為中文字元(c):
             from opencc import OpenCC
             r = OpenCC('s2t').convert(c)

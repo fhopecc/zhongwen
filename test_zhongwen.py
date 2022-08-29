@@ -62,6 +62,8 @@ class Test(unittest.TestCase):
         self.assertEqual(字元切換('简'), '簡')
         self.assertEqual(字元切換('か'), 'カ')
         self.assertEqual(字元切換('カ'), 'か')
+        self.assertEqual(字元切換('['), '「')
+        self.assertEqual(字元切換(']'), '」')
 
         from zhongwen.text import 臚列
         self.assertEqual(臚列(['甲方', '乙方', '丙方']), '甲方、乙方及丙方')

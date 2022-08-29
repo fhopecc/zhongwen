@@ -1,4 +1,4 @@
-from file import 下載, 解壓
+from .file import 下載, 解壓
 from pathlib import Path
 from diskcache import Cache
 import re
@@ -77,7 +77,7 @@ def 法規條文表():
     df = concat([law, mingling])
     return df
 
-def 法條查詢(s, keyword=None):
+def 法條查詢(s):
     pat = r'(.*(法|規則))第([-\d]+)[點條]'
     if m:=re.match(pat, s):
         法規 = m[1]
@@ -99,6 +99,10 @@ def 法條查詢(s, keyword=None):
                 )
  
     return ''
+
+def 法條展開(s):
+    l = 法條查詢(s).values[0]
+    return f'{l[0]}第{l[1]}條規定：「{l[2]}」'
 
 if __name__ == '__main__':
     df = 法條查詢('職業安全衛生法[合格]')
