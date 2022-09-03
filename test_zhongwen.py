@@ -119,6 +119,9 @@ class Test(unittest.TestCase):
         self.assertEqual(民國日期(取日期('110/12/27')), '1101227')
         self.assertEqual(民國日期(取日期('110/1/27'), '%Y年%M月%d日'), '110年1月27日')
 
+        from zhongwen.date import 經過日數
+        self.assertEqual(經過日數('108.5.13', '109.12.3'), 570)
+
     def test_law(self):
         from zhongwen.law import 法規名稱字首樹, 法規自動完成建議
         self.assertEqual(法規名稱字首樹().keys('漁港法')[0], '漁港法')

@@ -154,3 +154,4 @@ cython_debug/
 0
 *.db
 *.val
+*.swo

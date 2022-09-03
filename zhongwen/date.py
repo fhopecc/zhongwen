@@ -41,10 +41,15 @@ def 民國日期(d, fmt='%Y%m%d'):
     year = d.year-1911
     return fmt % {"year":year, "month":d.month, "date":d.day}
 
-def 約年(timedelta):
-    return f'{timedelta.days/365:0.0f}年餘'
+def 經過日數(起, 迄):
+    起=取日期(起)
+    迄=取日期(迄)
+    return (迄-起).days
 
-def 逾(start, end):
+def 約年(日數):
+    return f'{日數/365:0.0f}年餘'
+
+def 逾(起, 迄):
     return f'逾{約年(r(end) - r(start))}'
 
 def 上年度():
