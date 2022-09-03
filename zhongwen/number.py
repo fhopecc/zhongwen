@@ -40,7 +40,7 @@ def 轉數值(n, 傳回格式=False) -> int|float:
             return int(n.translate(d))
 
         # 具位名之中文數
-        pat = r'^[零壹貳參肆伍陸柒捌玖拾一二三四五六七八九十百千萬億兆]+$'
+        pat = r'^[零壹貳參肆伍陸柒捌玖拾一二三四五六七八九十百千佰仟萬億兆]+$'
         if m:=re.match(pat, n):
             return 中文數字轉數值(m.group(0))
         try:
