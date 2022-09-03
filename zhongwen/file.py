@@ -9,7 +9,7 @@ class FileLocation:
     '萃取文字內之路徑資訊'
     模式集 ={"python":r'File "(?P<path>.+.py)", line (?P<line>\d+).*'
             ,"jest":r'\((?P<path>.+\.js):(?P<line>\d+):(?P<pos>\d+)\)'
-            ,"path string":r'[\'"](?P<path>.+\.js)[\'"]'
+            ,"path":r'(?P<path>[^"\']+\.(js|py))'
             }
     def __init__(self, 訊息):
         for k in self.模式集:

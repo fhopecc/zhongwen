@@ -21,6 +21,10 @@ class Test(unittest.TestCase):
         self.assertEqual(f.列, 0)
         self.assertEqual(f.行, 0)
         
+        line = "const Series = require('./jandas.js').Series"
+        f = FileLocation(line)
+        self.assertEqual(f.路徑, './jandas.js')
+
     def test_file(self):
         # from zhongwen.file import 抓取, cache
         # cache.clear()
