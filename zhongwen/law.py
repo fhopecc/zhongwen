@@ -56,6 +56,7 @@ def 法規自動完成建議(line):
             ls = sorted(ls, key=len)
             return [prefix, *ls]
     return []
+
 # cache.clear()
 @cache.memoize()
 def 法規條文表():
@@ -78,27 +79,17 @@ def 法規條文表():
     return df
 
 def 法條查詢(s):
-    pat = r'(.*(法|規則))第([-\d]+)[點條]'
-    if m:=re.match(pat, s):
-        法規 = m[1]
-        條號 = m[3]
-        return 法規條文表().query(f'法規名稱==@法規 and 條號==@條號')
+    q = LawQuery(s)
+    if not q.法規名稱 : return ''
 
-    pat = r'(.*(法|規則))([-\d]+)'
-    if m:=re.match(pat, s):
-        法規 = m[1]
-        條號 = m[3]
-        return 法規條文表().query(f'法規名稱==@法規 and 條號==@條號')
+    def 屬性條件(a):
+        if a=='關鍵字': return '條文內容.str.contains(@q.關鍵字)'
+        return f'{a}==@q.{a}'
 
-    pat = r'(.*(法|規則))\[(.*)\]'
-    if m:=re.match(pat, s):
-        法規 = m[1]
-        關鍵字 = m[3]
-        return 法規條文表().query(
-                f'法規名稱==@法規 and 條文內容.str.contains(@關鍵字)'
-                )
- 
-    return ''
+    qstr = [屬性條件(a) for a in dir(q) if not a.startswith("__") and getattr(q, a)!=None]
+
+    qstr = ' and '.join(qstr)
+    return 法規條文表().query(qstr)
 
 def 法條展開(s):
     l = 法條查詢(s).values[0]
@@ -106,7 +97,6 @@ def 法條展開(s):
 
 def 法條說明(s):
     ls = 法條查詢(s)
-
     def 條文內容(l):
         # breakpoint()
         return f'{l[0]}第{l[1]}條規定：「{l[2]}」'
@@ -114,6 +104,29 @@ def 法條說明(s):
     return doc
     # return str(ls)
 
+class LawQuery:
+    def __init__(self, s):
+        self.法規名稱=None
+        self.條號=None
+        self.關鍵字=None
+        pat = r'(.*(法|規則))第([-\d]+)[點條]'
+        if m:=re.match(pat, s):
+            self.法規名稱=m[1]
+            self.條號 = m[3]
+            return
+
+        pat = r'(.*(法|規則))([-\d]+)'
+        if m:=re.match(pat, s):
+            self.法規名稱=m[1]
+            self.條號 = m[3]
+            return
+
+        pat = r'(.*(法|規則))\[(.*)\]'
+        if m:=re.match(pat, s):
+            self.法規名稱 = m[1]
+            self.關鍵字 = m[3]
+            return
+     
 if __name__ == '__main__':
     text = 法條說明('職業安全衛生法[合格]')
     print(text)
