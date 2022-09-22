@@ -1,89 +1,115 @@
-from lark import Lark, Tree, Token, Transformer
+from lark import Lark, Tree, Token, Transformer, Visitor
+from lark.visitors import Interpreter
+from zhongwen.date import 取日期, 民國日期
 from pathlib import Path
+import re
 wdir = Path(__file__).parent
 
-def 中文數值(中文數):
-    n1tab = str.maketrans("零壹貳參肆伍陸柒捌玖", "0123456789")
-    n2tab = str.maketrans("Ｏ一二三四五六七八九", "0123456789")
-    return int(中文數.translate(n1tab).translate(n2tab))
-
-def 中文數符(數, 大數=False):
-    n1tab = str.maketrans("0123456789", "零壹貳參肆伍陸柒捌玖")
-    n2tab = str.maketrans("0123456789", "Ｏ一二三四五六七八九")
-    if 大數:
-        return str(數).translate(n1tab)
-    return str(數).translate(n2tab)
-
-def 標號字串(標號, 層級):
-    if 層級=='T1':
-        return 中文數符(標號, True) + '、'
-    if 層級=='T2':
-        return f'({中文數符(標號, True)})'
-    if 層級=='T3':
-        return 中文數符(標號) + '、'
-    if 層級=='T4':
-        return f'({中文數符(標號)})'
-    if 層級=='T5':
-        return f'{標號}.'
-    if 層級=='T6':
-        return f'({標號})'
-
-def 標題分析(標題):
-    模式 = {'T1':r'([壹貳參肆伍陸柒捌玖拾])+、(.+)',
-            'T2':r'\(([壹貳參肆伍陸柒捌玖拾])+\)(.+)',
-            'T3':r'([一二三四五六七八九十])+、(.+)',
-            'T4':r'\(([一二三四五六七八九十])+\)(.+)',
-            'T5':r'(\d+)\.(.*)',
-            'T6':r'\((\d+)\)(.*)'
-           }[標題.type]
-    if m := re.match(模式, 標題.value):
-        標號數=int(中文數值(m[1]))
-        內容=m[2]
-    標題.value = (標號數, 內容)
-    return 標題
-
-def l():
-    return Lark(
-         r'''T: /.*(計畫|資料調閱單|工作底稿|審核通知|報告|審計會議提案|重要審核意見).*/
-            T1: N1 "、" P
-            T2: "(" N1 ")" P
-            T3: N2 "、" P
-            T4: "(" N2 ")" P
-            T5: /\d+\..*/
-            T6: /\(\d+\).*/
-            P:  /[^壹貳參肆伍陸柒捌玖拾一二三四五六七八九十\d(\s].*/
-            t: (T1 | T2 | T3 | T4 | T5 | T6) P*
-
-            N1:/[壹貳參肆伍陸柒捌玖拾]+/
-            N2:/[一二三四五六七八九十]+/
-
-            start: T t*
-            %import common.WS
-            %ignore WS
-         ''')
-    
- #''', 
-#         lexer_callbacks={
-#             'T1':標題分析,
-#             'T2':標題分析,
-#             'T3':標題分析,
-#             'T4':標題分析,
-#             'T5':標題分析,
-#             'T6':標題分析 
-#         })'''
-
-def 設定標號層次(層級, 標題):
-    層級 = f'T{層級}'
-    標題 = 標題分析(next(l().lex(標題)))
-    標號 = 標題.value[0]
-    題目 = 標題.value[1]
-    return f'{標號字串(標號, 層級)}{題目}'
-
 from docx import Document
+from docx.shared import Pt, Inches
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 
-def temppath():
-    return wdir / 'template.docx'
-import re
+def move_table_before(table, paragraph):
+    tbl, p = table._tbl, paragraph._p
+    tbl.addnext(p)
+
+class MakeDocx(Interpreter):
+    def __init__(self, docx):
+        self.doc = Document(Path(__file__).parent / 'template.docx')
+        self.docx = docx
+
+    def start(self, args):
+        print('start')
+        for _events in args.children:
+            self.visit(_events)
+        self.doc.save(self.docx)
+
+    def events(self, args):
+        # print(args)
+        title = args.children[0] 
+        _events = args.children[1:]
+        table = self.doc.add_table(rows=2, cols=2, style="Table Grid")
+        title_row = table.rows[0]
+        a, b = title_row.cells[:2]
+        a.merge(b)
+        p = a.paragraphs[0]
+        p.paragraph_format.first_line_indent = Pt(0)
+        p.paragraph_format.left_indent = Pt(0)
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        t = p.add_run(title)
+        t.font.bold = True
+
+        heading_row = table.rows[1].cells
+
+        c = heading_row[0]
+        c.width = Inches(0.1)
+        p = c.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.first_line_indent = Pt(0)
+        p.paragraph_format.left_indent = Pt(0)
+        t = p.add_run('日期')
+        t.font.size = Pt(12)
+        t.font.bold = True
+
+        c = heading_row[1]
+        c.width = Inches(12)
+        p = c.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        t = p.add_run('摘要')
+        t.font.size = Pt(12)
+        t.font.bold = True
+        p.paragraph_format.first_line_indent = Pt(0)
+        p.paragraph_format.left_indent = Pt(0)
+
+        self.work_table = table
+        for event in _events:
+            self.visit(event)
+        p = self.doc.add_paragraph() 
+        move_table_before(table, p)
+
+    def event(self, args): 
+        date = 民國日期(args.children[0])
+        event = args.children[1]
+        row = self.work_table.add_row().cells
+
+        c = row[0]
+        from docx.enum.text import WD_LINE_SPACING
+        p = c.paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.EXACTLY
+        p.paragraph_format.line_spacing = Pt(23)
+        t = p.add_run(date)
+        t.font.size = Pt(12)
+
+        c = row[1]
+        p = c.paragraphs[0]
+        p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.EXACTLY
+        p.paragraph_format.line_spacing = Pt(23)
+        t = p.add_run(event)
+        t.font.size = Pt(12)
+
+class MakeDocxTree(Transformer):
+
+    def DESC(self, args):
+        return args
+
+    def DATE(self, args):
+        return 取日期(args)
+
+def parse(doc) -> Lark: 
+    p = Lark.open(Path(__file__).parent / 'office_document.lark')
+    t = p.parse(doc)
+    t = MakeDocxTree().transform(t)
+    return t
+
+def todocx(doc, docx):
+    worksheet = Path(r'd:\g\111-2漁港建設專調\大事記.txt')
+    with open(worksheet, 'r', encoding='utf8') as f:
+        doc = '\n'.join(f.readlines())
+        l = parse(doc, docx)
+        from os import system
+        system(f'start {docx}')
+        MakeDocx(docx).visit(t)
 
 def mkdocx(tree, doc, doctype):
     if isinstance(tree, Tree):

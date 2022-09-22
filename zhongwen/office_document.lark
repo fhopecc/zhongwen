@@ -1,0 +1,21 @@
+T: /.*(計畫|資料調閱單|工作底稿|審核通知|報告|審計會議提案|重要審核意見)/
+TEXT: /.+/
+N1: /[壹貳參肆伍陸柒捌玖拾]+/
+N2: /[一二三四五六七八九十]+/
+EVENTS_TITLE: /.*大事記/
+DATE: /\d{3}\.\d{1,2}\.\d{1,2}/
+DESC: /.+/
+events.3: EVENTS_TITLE event+
+event.3: DATE "." DESC
+h1.2: N1 "、" TEXT
+h2.2: "(" N1 ")" TEXT
+h3.2: N2 "、" TEXT
+h4.2: "(" N2 ")" TEXT
+h5.2: INT "." TEXT
+h6.2: "(" INT ")" TEXT
+p: TEXT
+content: h1 | h2 | h3 | h4 | h5 | h6 | p | events
+start: T content+ 
+%import common.WS
+%import common.INT
+%ignore WS

@@ -4,9 +4,16 @@ from datetime import date
 from datetime import datetime
 
 def 取日期(d, first=True):
+    # 省略年自動推論為今年
+    pat = r'\d{1,2}\.\d{1,2}'
+    if m:=re.match(pat, d):
+        year = datetime.now().year  
+        return 取日期(f'{year}.{d}')
+ 
     pat = r'\d{4}/\d{1,2}/\d{1,2}'
     if m:=re.match(pat, d):
         return datetime.strptime(m[0], '%Y/%m/%d')
+
     pat = r'\d{4}.\d{1,2}.\d{1,2}'
     if m:=re.match(pat, d):
         return datetime.strptime(m[0], '%Y.%m.%d')
