@@ -34,6 +34,7 @@ class Test(unittest.TestCase):
         self.assertEqual(轉數值('參佰玖拾柒萬肆仟壹拾伍'), 3974015)
         self.assertEqual(轉數值('5,000'), 5000)
         self.assertEqual(約數('55,302'), '5萬餘')
+        self.assertEqual(約數('5,302'), '5,302')
         self.assertEqual(百分比('0.8911'), '89.11％')
 
         from zhongwen.number import 標號, 轉標號
