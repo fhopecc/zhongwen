@@ -32,6 +32,7 @@ class Test(unittest.TestCase):
         self.assertEqual(轉數值('- 6.35'), -6.35)
         self.assertEqual(轉數值('一萬三千二百五十九'), 13259)
         self.assertEqual(轉數值('參佰玖拾柒萬肆仟壹拾伍'), 3974015)
+        self.assertEqual(轉數值('5,000'), 5000)
         self.assertEqual(約數('55,302'), '5萬餘')
         self.assertEqual(百分比('0.8911'), '89.11％')
 
@@ -114,8 +115,19 @@ class Test(unittest.TestCase):
         self.assertEqual(取日期('2020.01.05'), datetime(2020,1,5,0,0))
         self.assertEqual(取日期('110/12/27'), datetime(2021,12,27,0,0))
         self.assertEqual(取日期('110.11.10'), datetime(2021,11,10,0,0))
+        self.assertEqual(取日期('111.9.23'), datetime(2022,9,23,0,0))
         self.assertEqual(取日期('111/07/01 02:22:34'), datetime(2022,7,1,0,0))
-        self.assertEqual(取日期('9.22'), datetime(2022,9,22))
+        now = datetime.now()
+        if datetime(now.year,12,24) > now:
+            self.assertEqual(取日期('12.24'), datetime(now.year-1,12,24))
+        else:
+            self.assertEqual(取日期('12.24'), datetime(now.year,12,24))
+        if datetime(now.year,1,3) > now:
+            self.assertEqual(取日期('1.3'), datetime(now.year-1,1,3))
+        else:
+            self.assertEqual(取日期('1.3'), datetime(now.year,1,3))
+        self.assertEqual(取日期(datetime(2022,2,1,23,11)), datetime(2022,2,1))
+        self.assertEqual(取日期(None).date(), datetime.now().date())
 
         from zhongwen.date import 民國日期
         self.assertEqual(民國日期(取日期('110/12/27')), '1101227')
@@ -123,6 +135,9 @@ class Test(unittest.TestCase):
 
         from zhongwen.date import 經過日數
         self.assertEqual(經過日數('108.5.13', '109.12.3'), 570)
+
+        from zhongwen.date import 今日
+        self.assertEqual(今日(), 取日期(datetime.now()))
 
     def test_law(self):
         from zhongwen.law import 法規名稱字首樹, 法規自動完成建議

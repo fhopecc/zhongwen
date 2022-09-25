@@ -2,32 +2,46 @@
 import re
 from datetime import date
 from datetime import datetime
+import pandas as pd
 
-def 取日期(d, first=True):
-    # 省略年自動推論為今年
-    pat = r'\d{1,2}\.\d{1,2}'
-    if m:=re.match(pat, d):
-        year = datetime.now().year  
-        return 取日期(f'{year}.{d}')
- 
-    pat = r'\d{4}/\d{1,2}/\d{1,2}'
-    if m:=re.match(pat, d):
-        return datetime.strptime(m[0], '%Y/%m/%d')
+def 今日():
+    return 取日期(datetime.now())
 
-    pat = r'\d{4}.\d{1,2}.\d{1,2}'
-    if m:=re.match(pat, d):
-        return datetime.strptime(m[0], '%Y.%m.%d')
+def 取日期(d, first=True, defaulttoday=True):
+    match d:
+        case datetime():
+            return datetime(d.year, d.month, d.day)
+        case str(d):
+            # 省略年自動推論為今年
+            pat = r'\d{1,2}([./])\d{1,2}'
+            if m:=re.match(pat, d):
+                year = datetime.now().year  
+                od = d
+                d = 取日期(f'{year}{m[1]}{d}')
+                if d > datetime.now(): # 省略年推論為今年大於今日，則推論為去年
+                    return 取日期(f'{year-1}{m[1]}{od}')
+                return d
+         
+            pat = r'\d{4}([-./])\d{1,2}[-./]\d{1,2}'
+            if m:=re.match(pat, d):
+                s = m[1]
+                return datetime.strptime(m[0], f'%Y{s}%m{s}%d')
 
-    # 民國日期格式109/05/29
-    pat = r'(\d{3})/(\d{1,2})/(\d{1,2})'
-    if m:=re.match(pat, d):
-        return datetime(int(m[1])+1911, int(m[2]), int(m[3]))
+            # 民國日期格式109/05/29
+            pat = r'(\d{3})/(\d{1,2})/(\d{1,2})'
+            if m:=re.match(pat, d):
+                return datetime(int(m[1])+1911, int(m[2]), int(m[3]))
 
-    # 民國日期格式109.05.29
-    pat = r'(\d{3}).(\d{1,2}).(\d{1,2})'
-    if m:=re.match(pat, d):
-        return datetime(int(m[1])+1911, int(m[2]), int(m[3]))
-    return d
+            # 民國日期格式109.05.29
+            pat = r'(\d{3}).(\d{1,2}).(\d{1,2})'
+            if m:=re.match(pat, d):
+                return datetime(int(m[1])+1911, int(m[2]), int(m[3]))
+            return d
+        case _:
+            if defaulttoday:
+                d = datetime.now()    
+                return datetime(d.year, d.month, d.day)
+            raise TypeError(f'不支援類型[{type(d)}]、值[{d}]！')
 
 def 上月():
     '上月'
