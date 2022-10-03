@@ -41,10 +41,12 @@ def 抓取(url):
     from selenium.webdriver.chrome.options import Options
     options = Options()
     options.add_argument("--disable-notifications")
-    chrome = webdriver.Chrome(executable_path='c:\\Python\\Python310\\chromedriver.exe'
+    from os import environ
+    driverpath = Path(environ['TEMP']) / 'chromedriver.exe'
+    chrome = webdriver.Chrome(executable_path=str(driverpath)
                              ,chrome_options=options)
     chrome.get(url)
-    return chrome
+    return chrome.page_source
 
 def 下載(url, p=None, downloads=None):
     '''下載 URL 的檔案至指定目錄 downloads，

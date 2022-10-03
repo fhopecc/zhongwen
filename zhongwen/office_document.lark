@@ -13,8 +13,9 @@ h3.2: N2 "、" TEXT
 h4.2: "(" N2 ")" TEXT
 h5.2: INT "." TEXT
 h6.2: "(" INT ")" TEXT
+proposer: "提案人：" TEXT
 p: TEXT
-content: h1 | h2 | h3 | h4 | h5 | h6 | p | events
+content: proposer | h1 | h2 | h3 | h4 | h5 | h6 | p | events
 start: T content+ 
 %import common.WS
 %import common.INT

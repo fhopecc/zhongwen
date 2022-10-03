@@ -27,6 +27,11 @@ def 取日期(d, first=True, defaulttoday=True):
                 s = m[1]
                 return datetime.strptime(m[0], f'%Y{s}%m{s}%d')
 
+            # 民國日期格式1110527
+            pat = r'(\d{3})(\d{2})(\d{2})'
+            if m:=re.match(pat, d):
+                return datetime(int(m[1])+1911, int(m[2]), int(m[3]))
+
             # 民國日期格式109/05/29
             pat = r'(\d{3})/(\d{1,2})/(\d{1,2})'
             if m:=re.match(pat, d):
