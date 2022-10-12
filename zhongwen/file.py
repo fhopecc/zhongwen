@@ -48,7 +48,7 @@ def 抓取(url):
     chrome.get(url)
     return chrome.page_source
 
-def 下載(url, p=None, downloads=None):
+def 下載(url, p=None, downloads=None, force=True):
     '''下載 URL 的檔案至指定目錄 downloads，
 並且回傳本地檔案的路徑。
 '''
@@ -57,7 +57,7 @@ def 下載(url, p=None, downloads=None):
     fn = urlparse(url).path.split('/')[-1]
     if not p:
         p  = downloads / fn
-    if p.exists(): 
+    if not force and p.exists(): 
         print(f'警告：已下載[{url}]至[{p}]！')
         return p
     downloads.mkdir(exist_ok=True)
