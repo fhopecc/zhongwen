@@ -114,10 +114,13 @@ class Test(unittest.TestCase):
         from datetime import datetime
         self.assertEqual(取日期('2022/6/3 上午 12:00:00'), datetime(2022,6,3,0,0) )
         self.assertEqual(取日期('2020.01.05'), datetime(2020,1,5,0,0))
+        self.assertEqual(取日期('111/07/01 02:22:34'), datetime(2022,7,1,0,0))
         self.assertEqual(取日期('110/12/27'), datetime(2021,12,27,0,0))
         self.assertEqual(取日期('110.11.10'), datetime(2021,11,10,0,0))
         self.assertEqual(取日期('111.9.23'), datetime(2022,9,23,0,0))
-        self.assertEqual(取日期('111/07/01 02:22:34'), datetime(2022,7,1,0,0))
+
+        self.assertEqual(取日期('111.4.29+150'), datetime(2022,9,26,0,0))
+
         now = datetime.now()
         if datetime(now.year,12,24) > now:
             self.assertEqual(取日期('12.24'), datetime(now.year-1,12,24))
@@ -127,6 +130,7 @@ class Test(unittest.TestCase):
             self.assertEqual(取日期('1.3'), datetime(now.year-1,1,3))
         else:
             self.assertEqual(取日期('1.3'), datetime(now.year,1,3))
+
         self.assertEqual(取日期(datetime(2022,2,1,23,11)), datetime(2022,2,1))
         self.assertEqual(取日期(None).date(), datetime.now().date())
         self.assertEqual(取日期('1110527'), datetime(2022,5,27))
