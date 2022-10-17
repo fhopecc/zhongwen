@@ -28,6 +28,11 @@ def 取日期(d, first=True, defaulttoday=True):
                 s = m[1]
                 return datetime.strptime(m[0], f'%Y{s}%m{s}%d')
 
+            # 日期20220527
+            pat = r'\d{4}\d{2}\d{2}'
+            if m:=re.match(pat, d):
+                return datetime.strptime(m[0], f'%Y%m%d')
+ 
             # 民國日期帶增減日數形式，如【111.4.29+150】。
             pat = r'(\d{3})[-./](\d{1,2})[-./](\d{1,2})([+])(\d+)'
             if m:=re.match(pat, d):
@@ -42,8 +47,6 @@ def 取日期(d, first=True, defaulttoday=True):
             pat = r'(\d{3})[-./](\d{1,2})[-./](\d{1,2})'
             if m:=re.match(pat, d):
                 return datetime(int(m[1])+1911, int(m[2]), int(m[3]))
-
-
 
             return d
         case _:

@@ -34,5 +34,18 @@ class Test(unittest.TestCase):
                 '危險性機械及設備安全檢查規則第3條規定：「本規則適用於'
                 )
 
+    def test_law(self):
+        from zhongwen.law import 法規名稱字首樹, 法規自動完成建議
+        self.assertEqual(法規名稱字首樹().keys('漁港法')[0], '漁港法')
+        line = '依據證'
+        self.assertEqual(法規自動完成建議(line)[0], '證') # 第一個結果是找出的字首
+        self.assertEqual(法規自動完成建議(line)[1], '證券交易法') # 名稱越短的法規越重要
+
+    def test_hllaw(self):
+        # from zhongwen.hllaw import 爬取法規
+        # self.assertEqual(爬取法規(), 'abc')
+        pass
+
+
 if __name__ == '__main__':
     unittest.main()

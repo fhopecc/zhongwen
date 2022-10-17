@@ -113,5 +113,3 @@ def 翻譯(word):
     text = client.translate(word, 'zh-tw')
     # breakpoint()
     return text.translatedText
-
-
