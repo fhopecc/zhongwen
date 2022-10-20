@@ -33,6 +33,9 @@ class Test(unittest.TestCase):
         self.assertEqual(法條展開('危險性機械及設備安全檢查規則3')[:27], 
                 '危險性機械及設備安全檢查規則第3條規定：「本規則適用於'
                 )
+        self.assertEqual(法條展開('直轄市縣市消防機關救護車輛裝備人力配置標準5')[:27], 
+                '直轄市縣市消防機關救護車輛裝備人力配置標準第5條規定：'
+                )
 
     def test_law(self):
         from zhongwen.law import 法規名稱字首樹, 法規自動完成建議

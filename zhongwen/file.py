@@ -3,6 +3,7 @@ from pathlib import Path
 from urllib import request
 from urllib.parse import urlparse
 from diskcache import Cache
+from functools import lru_cache
 cache = Cache(Path.home() / 'cache' / 'zhongwen.file')
 
 class FileLocation:
@@ -41,12 +42,17 @@ def 抓取(url):
     from selenium.webdriver.chrome.options import Options
     options = Options()
     options.add_argument("--disable-notifications")
+    chrome = chrome()
+    chrome.get(url)
+    return chrome.page_source
+
+@lru_cache
+def chrome():
     from os import environ
     driverpath = Path(environ['TEMP']) / 'chromedriver.exe'
     chrome = webdriver.Chrome(executable_path=str(driverpath)
                              ,chrome_options=options)
-    chrome.get(url)
-    return chrome.page_source
+    return chrome
 
 def 下載(url, p=None, downloads=None, force=True):
     '''下載 URL 的檔案至指定目錄 downloads，

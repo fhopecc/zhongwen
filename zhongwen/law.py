@@ -109,19 +109,19 @@ class LawQuery:
         self.法規名稱=None
         self.條號=None
         self.關鍵字=None
-        pat = r'(.*(法|規則))第([-\d]+)[點條]'
+        pat = r'(.*(法|規則|標準))第([-\d]+)[點條]'
         if m:=re.match(pat, s):
             self.法規名稱=m[1]
             self.條號 = m[3]
             return
 
-        pat = r'(.*(法|規則))([-\d]+)'
+        pat = r'(.*(法|規則|標準))([-\d]+)'
         if m:=re.match(pat, s):
             self.法規名稱=m[1]
             self.條號 = m[3]
             return
 
-        pat = r'(.*(法|規則))\[(.*)\]'
+        pat = r'(.*(法|規則|標準))\[(.*)\]'
         if m:=re.match(pat, s):
             self.法規名稱 = m[1]
             self.關鍵字 = m[3]

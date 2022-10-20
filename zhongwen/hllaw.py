@@ -6,6 +6,7 @@ from diskcache import Cache
 import pandas as pd
 import os
 import re
+
 cache = Cache(Path.home() / 'cache' / 'hllaw')
 
 @cache.memoize(expire=90*24*60*60, tag='抓取法規')
@@ -59,3 +60,9 @@ def 爬取法規連結():
 
     df = pd.concat([df, *[取連結(page_no) for page_no in range(2, page_num+1)]])
     return df
+
+df = 法規()
+df = df.iloc[:100]
+html = Path.home() / 'TEMP' / 'output.html'
+df.to_html(html)
+os.system(f'start {html}')
