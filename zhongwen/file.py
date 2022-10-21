@@ -35,24 +35,24 @@ def 最新檔(目錄, 檔案樣式="*"):
     except:
         raise FileNotFoundError(目錄)
 
-@cache.memoize(expire=100, tag='抓取')
-def 抓取(url):
-    '抓取網頁回傳原始碼。'
+@lru_cache
+def chrome():
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
     options = Options()
     options.add_argument("--disable-notifications")
-    chrome = chrome()
-    chrome.get(url)
-    return chrome.page_source
-
-@lru_cache
-def chrome():
     from os import environ
     driverpath = Path(environ['TEMP']) / 'chromedriver.exe'
     chrome = webdriver.Chrome(executable_path=str(driverpath)
                              ,chrome_options=options)
     return chrome
+
+@cache.memoize(expire=100, tag='抓取')
+def 抓取(url):
+    '抓取網頁回傳原始碼。'
+    c = chrome()
+    c.get(url)
+    return c.page_source
 
 def 下載(url, p=None, downloads=None, force=True):
     '''下載 URL 的檔案至指定目錄 downloads，
