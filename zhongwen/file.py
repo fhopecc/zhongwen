@@ -40,11 +40,12 @@ def chrome():
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
     options = Options()
+    options.add_experimental_option('excludeSwitches', ['enable-logging'])
     options.add_argument("--disable-notifications")
     from os import environ
     driverpath = Path(environ['TEMP']) / 'chromedriver.exe'
     chrome = webdriver.Chrome(executable_path=str(driverpath)
-                             ,chrome_options=options)
+                             ,options=options)
     return chrome
 
 @cache.memoize(expire=100, tag='抓取')
