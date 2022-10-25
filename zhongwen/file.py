@@ -4,6 +4,7 @@ from urllib import request
 from urllib.parse import urlparse
 from diskcache import Cache
 from functools import lru_cache
+import requests
 cache = Cache(Path.home() / 'cache' / 'zhongwen.file')
 
 class FileLocation:
@@ -49,8 +50,11 @@ def chrome():
     return chrome
 
 @cache.memoize(expire=100, tag='抓取')
-def 抓取(url):
+def 抓取(url, use_requests=None) -> str:
     '抓取網頁回傳原始碼。'
+    if use_requests:
+        user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36 Edg/106.0.1370.52'
+        return requests.get(url, headers={ 'user-agent': user_agent }).text
     c = chrome()
     c.get(url)
     return c.page_source

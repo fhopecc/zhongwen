@@ -2,6 +2,19 @@ import unittest
 
 class Test(unittest.TestCase):
 
+    def test_query_by_content(self):
+        from zhongwen.law import 法規條文表
+        df = 法規條文表()
+        # df = df.query('條文內容.str.contains("消防防護計畫")')
+        df = df.query('法規名稱=="消防勤務實施要點"')
+        from pathlib import Path
+        import pandas as pd
+        import os
+        html = Path.home() / 'TEMP' / 'output.html'
+        df.to_html(html)
+        os.system(f'start {html}')
+        # self.assertEqual('a', 'b')
+
     def test_law_query(self):
         from zhongwen.law import LawQuery
         q = LawQuery('職業安全衛生法第33條')
@@ -43,12 +56,6 @@ class Test(unittest.TestCase):
         line = '依據證'
         self.assertEqual(法規自動完成建議(line)[0], '證') # 第一個結果是找出的字首
         self.assertEqual(法規自動完成建議(line)[1], '證券交易法') # 名稱越短的法規越重要
-
-    def test_hllaw(self):
-        # from zhongwen.hllaw import 爬取法規
-        # self.assertEqual(爬取法規(), 'abc')
-        pass
-
 
 if __name__ == '__main__':
     unittest.main()

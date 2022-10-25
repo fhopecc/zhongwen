@@ -7,7 +7,6 @@ import asyncio
 import pandas as pd
 import os
 import re
-
 cache = Cache(Path.home() / 'cache' / 'hllaw')
 
 async def 抓取法規(網址):

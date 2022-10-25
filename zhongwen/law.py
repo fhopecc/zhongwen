@@ -1,4 +1,4 @@
-from .file import 下載, 解壓
+from zhongwen.file import 下載, 解壓
 from pathlib import Path
 from diskcache import Cache
 import re
@@ -100,7 +100,7 @@ def 法條說明(s):
     def 條文內容(l):
         # breakpoint()
         return f'{l[0]}第{l[1]}條規定：「{l[2]}」'
-    doc = '\n'.join([條文內容(l.tolist()) for l in ls.values])
+    doc = ''.join([條文內容(l.tolist()) for l in ls.values])
     return doc
     # return str(ls)
 
