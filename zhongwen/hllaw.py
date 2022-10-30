@@ -3,11 +3,16 @@ from bs4 import BeautifulSoup as bs
 from zhongwen.file import 抓取
 from pathlib import Path
 from diskcache import Cache
-import asyncio
 import pandas as pd
+import asyncio
 import os
 import re
 cache = Cache(Path.home() / 'cache' / 'hllaw')
+
+網址 = 'https://glrs.hl.gov.tw'
+
+def 開啟網頁():
+    os.system(f'start {網址}')
 
 async def 抓取法規(網址):
     url = f'https://glrs.hl.gov.tw/glrsout/{網址}'
