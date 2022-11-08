@@ -59,16 +59,18 @@ def 抓取(url, use_requests=None) -> str:
     c.get(url)
     return c.page_source
 
-def 下載(url, p=None, downloads=None, force=True):
-    '''下載 URL 的檔案至指定目錄 downloads，
-並且回傳本地檔案的路徑。
+def 下載(url, p=None, downloads=None, 重載=False):
+    '''
+    下載 URL 的檔案至指定目錄，
+    並且回傳本地檔案的路徑。
+    重載：指定是否要重載。
 '''
     if not downloads:
         downloads = Path.home() / 'Downloads'
     fn = urlparse(url).path.split('/')[-1]
     if not p:
         p  = downloads / fn
-    if not force and p.exists(): 
+    if not 重載 and p.exists(): 
         print(f'警告：已下載[{url}]至[{p}]！')
         return p
     downloads.mkdir(exist_ok=True)

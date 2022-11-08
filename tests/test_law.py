@@ -5,15 +5,11 @@ class Test(unittest.TestCase):
     def test_query_by_content(self):
         from zhongwen.law import 法規條文表
         df = 法規條文表()
-        # df = df.query('條文內容.str.contains("消防防護計畫")')
-        df = df.query('法規名稱=="消防勤務實施要點"')
-        from pathlib import Path
-        import pandas as pd
-        import os
-        html = Path.home() / 'TEMP' / 'output.html'
-        df.to_html(html)
-        os.system(f'start {html}')
-        # self.assertEqual('a', 'b')
+        df = df.query('法規名稱.str.contains("各類場所消防安全設備設置標準")')
+        df = df.query('條文內容.str.contains("長期")')
+        # df = df.query('法規名稱=="消防勤務實施要點"')
+        from fhopecc.pandas_tools import show_html
+        show_html(df)
 
     def test_law_query(self):
         from zhongwen.law import LawQuery
@@ -49,6 +45,7 @@ class Test(unittest.TestCase):
         self.assertEqual(法條展開('直轄市縣市消防機關救護車輛裝備人力配置標準5')[:27], 
                 '直轄市縣市消防機關救護車輛裝備人力配置標準第5條規定：'
                 )
+        
 
     def test_law(self):
         from zhongwen.law import 法規名稱字首樹, 法規自動完成建議

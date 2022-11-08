@@ -92,49 +92,34 @@ def 法條查詢(s):
     return 法規條文表().query(qstr)
 
 def 法條展開(s):
-    l = 法條查詢(s).values[0]
-    return f'{l[0]}第{l[1]}條規定：「{l[2]}」'
+    return '\n'.join([f'{l[0]}第{l[1]}條規定：「{l[2]}」' for l in 法條查詢(s).values])
 
 def 法條說明(s):
     ls = 法條查詢(s)
     def 條文內容(l):
-        # breakpoint()
         return f'{l[0]}第{l[1]}條規定：「{l[2]}」'
     doc = ''.join([條文內容(l.tolist()) for l in ls.values])
     return doc
-    # return str(ls)
 
 class LawQuery:
     def __init__(self, s):
         self.法規名稱=None
         self.條號=None
         self.關鍵字=None
-        pat = r'(.*(法|規則|標準))第([-\d]+)[點條]'
+        pat = r'(.*(法|規則|標準|細則))第([-\d]+)[點條]'
         if m:=re.match(pat, s):
             self.法規名稱=m[1]
             self.條號 = m[3]
             return
 
-        pat = r'(.*(法|規則|標準))([-\d]+)'
+        pat = r'(.*(法|規則|標準|細則))([-\d]+)'
         if m:=re.match(pat, s):
             self.法規名稱=m[1]
             self.條號 = m[3]
             return
 
-        pat = r'(.*(法|規則|標準))\[(.*)\]'
+        pat = r'(.*(法|規則|標準|細則))\[(.*)\]'
         if m:=re.match(pat, s):
             self.法規名稱 = m[1]
             self.關鍵字 = m[3]
             return
-     
-if __name__ == '__main__':
-    text = 法條說明('職業安全衛生法[合格]')
-    print(text)
-    # df = 法條('職業安全衛生法[合格]')
-    # temp = Path.home() / 'TEMP'
-    # html = temp / 'output.html'
-
-    # df.to_html(html
-              # ,formatters={'金額':lambda x: f'{x:,.0f}'})
-    # import os
-    # os.system(f'start {html}')
