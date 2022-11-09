@@ -19,6 +19,8 @@ def 取日期(d, first=True, defaulttoday=True):
     match d:
         case datetime():
             return datetime(d.year, d.month, d.day)
+        case date():
+            return datetime(d.year, d.month, d.day)
         case str(d):
             # 省略年自動推論為今年
             pat = r'\d{1,2}([./])\d{1,2}'
@@ -70,6 +72,7 @@ def 上月():
 
 def 民國日期(d, fmt='%Y%m%d'):
     '%Y表年數、%m表月數前置0、%d表日數前置0、%M表月數不前置0'
+    d = 取日期(d)
     fmt = fmt.replace(
             '%Y', '%(year)03d'
             ).replace(
