@@ -40,5 +40,10 @@ class Test(unittest.TestCase):
         from zhongwen.date import 今日
         self.assertEqual(今日(), 取日期(datetime.now()))
 
+    def test_quarter(self):
+        from zhongwen.date import 季末
+        from datetime import date
+        self.assertEqual(季末(2022, 2), date(2022, 6, 30))
+
 if __name__ == '__main__':
     unittest.main()

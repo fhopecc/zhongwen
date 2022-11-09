@@ -4,6 +4,14 @@ from datetime import date
 from datetime import datetime, timedelta
 import pandas as pd
 
+def 季末(年數, 季數):
+    '指定季之最末日'
+    match 季數:
+        case 1: return date(年數, 3, 31)
+        case 2: return date(年數, 6, 30)
+        case 3: return date(年數, 9, 30)
+        case 4: return date(年數, 12, 31)
+
 def 今日():
     return 取日期(datetime.now())
 
