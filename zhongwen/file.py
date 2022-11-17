@@ -88,6 +88,6 @@ def 解壓(壓縮檔, 目錄):
         try:
             壓縮檔 = zipfile.ZipFile(壓縮檔)
         except zipfile.BadZipFile:
-            raise Error(r'{壓縮檔}非ZipFile格式')
+            raise IOError(r'{壓縮檔}非ZipFile格式')
     壓縮檔.extractall(目錄)
     print(f'解壓[{壓縮檔}]成功！')

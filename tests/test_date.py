@@ -29,6 +29,10 @@ class Test(unittest.TestCase):
 
         self.assertEqual(取日期('1110527'), datetime(2022,5,27))
 
+        self.assertEqual(取日期(1110213.0), datetime(2022,2,13))
+
+
+
     def test_date_repr(self):
         from zhongwen.date import 民國日期
         self.assertEqual(民國日期(取日期('110/12/27')), '1101227')
@@ -39,6 +43,11 @@ class Test(unittest.TestCase):
 
         from zhongwen.date import 今日
         self.assertEqual(今日(), 取日期(datetime.now()))
+
+    def test_month(self):
+        from zhongwen.date import 月末
+        from datetime import date
+        self.assertEqual(月末(2022, 10), date(2022, 10, 31))
 
     def test_quarter(self):
         from zhongwen.date import 季末

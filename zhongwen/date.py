@@ -12,11 +12,18 @@ def 季末(年數, 季數):
         case 3: return date(年數, 9, 30)
         case 4: return date(年數, 12, 31)
 
+def 月末(年數, 月數):
+    import calendar
+    月末日數 = calendar.monthrange(年數, 月數)[1]
+    return date(年數, 月數, 月末日數)
+
 def 今日():
     return 取日期(datetime.now())
 
 def 取日期(d, first=True, defaulttoday=True):
     match d:
+        case float():
+            return 取日期(f'{d:.0f}')
         case datetime():
             return datetime(d.year, d.month, d.day)
         case date():
