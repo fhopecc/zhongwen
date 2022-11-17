@@ -24,6 +24,8 @@ def 取日期(d, first=True, defaulttoday=True):
     match d:
         case float():
             return 取日期(f'{d:.0f}')
+        case int():
+            return 取日期(f'{d:07}')
         case datetime():
             return datetime(d.year, d.month, d.day)
         case date():

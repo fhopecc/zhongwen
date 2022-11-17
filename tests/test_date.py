@@ -29,9 +29,11 @@ class Test(unittest.TestCase):
 
         self.assertEqual(取日期('1110527'), datetime(2022,5,27))
 
+        self.assertEqual(取日期('1110213.000000'), datetime(2022,2,13))
+        self.assertEqual(取日期(940101), datetime(2005,1,1))
+        self.assertEqual(取日期(1110213), datetime(2022,2,13))
         self.assertEqual(取日期(1110213.0), datetime(2022,2,13))
-
-
+  
 
     def test_date_repr(self):
         from zhongwen.date import 民國日期
