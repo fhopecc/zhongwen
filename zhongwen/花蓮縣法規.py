@@ -40,6 +40,11 @@ def 法規():
     df = asyncio.run(爬取法規())
     return df
 
+def 現行法規():
+    '非廢止法規'
+    df = 法規().query('not 法規名稱.str.contains("廢")')
+    return df
+
 async def 取連結(page_no) -> pd.DataFrame:
     url = f'https://glrs.hl.gov.tw/glrsout/?page={page_no}'
     text = 抓取(url)
