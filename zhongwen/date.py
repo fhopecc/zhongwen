@@ -20,7 +20,7 @@ def 月末(年數, 月數):
 def 今日():
     return 取日期(datetime.now())
 
-def 取日期(d, first=True, defaulttoday=True):
+def 取日期(d, first=True, defaulttoday=True, default=None):
     match d:
         case float():
             return 取日期(f'{d:.0f}')
@@ -32,20 +32,24 @@ def 取日期(d, first=True, defaulttoday=True):
             return datetime(d.year, d.month, d.day)
         case str(d):
             # 省略年自動推論為今年
-            pat = r'\d{1,2}([./])\d{1,2}'
+            pat = r'(\d{1,2})([./])\d{1,2}'
             if m:=re.match(pat, d):
-                year = datetime.now().year  
-                od = d
-                d = 取日期(f'{year}{m[1]}{d}')
-                if d > datetime.now(): # 省略年推論為今年大於今日，則推論為去年
-                    return 取日期(f'{year-1}{m[1]}{od}')
-                return d
+                if int(m[1]) <= 12: 
+                    year = datetime.now().year  
+                    od = d
+                    sep = m[2]
+                    d = 取日期(f'{year}{sep}{d}')
+                    if d > datetime.now(): # 省略年推論為今年大於今日，則推論為去年
+                        return 取日期(f'{year-1}{sep}{od}')
+                    return d
          
             # 日期2022/5/27
             pat = r'\d{4}([-./])\d{1,2}[-./]\d{1,2}'
             if m:=re.match(pat, d):
                 s = m[1]
-                return datetime.strptime(m[0], f'%Y{s}%m{s}%d')
+                try:
+                    return datetime.strptime(m[0], f'%Y{s}%m{s}%d')
+                except:breakpoint()
 
             # 日期20220527
             pat = r'\d{4}\d{2}\d{2}'
@@ -63,10 +67,10 @@ def 取日期(d, first=True, defaulttoday=True):
                 return datetime(int(m[1])+1911, int(m[2]), int(m[3]))
 
             # 民國日期其形式如 109/05/29 、109.05.29及109-5-29 等。
-            pat = r'(\d{3})[-./](\d{1,2})[-./](\d{1,2})'
+            pat = r'(\d{2,3})[-./](\d{1,2})[-./](\d{1,2})'
             if m:=re.match(pat, d):
                 return datetime(int(m[1])+1911, int(m[2]), int(m[3]))
-
+            if default: return default 
             return d
         case _:
             if defaulttoday:
