@@ -1,0 +1,13 @@
+N1: /[壹貳參肆伍陸柒捌玖拾]+/
+N2: /[一二三四五六七八九十]+/
+LAW_FIRST_PARA.2: "第" (N1|N2|INT) "條" PARA
+PARA: /.+?。/
+LAW2_FIRST_PARA.2: N2 "、" PARA
+LAW3_FIRST_PARA.2: N1 "、" PARA
+LAW4: "詳如附表所示。" 
+law: LAW_FIRST_PARA PARA*
+law2: LAW2_FIRST_PARA PARA*
+law3: LAW3_FIRST_PARA PARA*
+law4: LAW4
+start: law+|law2+|law3+|law4
+%import common.INT

@@ -1,6 +1,7 @@
 '花蓮縣政府主管法規資料'
 from bs4 import BeautifulSoup as bs
 from zhongwen.file import 抓取
+from zhongwen.number import 轉數值
 from pathlib import Path
 from diskcache import Cache
 import pandas as pd
@@ -42,7 +43,11 @@ def 法規():
 
 def 現行法規():
     '非廢止法規'
+    from zhongwen.date import 取日期
     df = 法規().query('not 法規名稱.str.contains("廢")')
+    df['修正日期'] = df.修正日期.fillna(df.公發布日)
+    df['公發布日'] = df.公發布日.map(取日期)
+    df['修正日期'] = df.修正日期.map(取日期)
     return df
 
 async def 取連結(page_no) -> pd.DataFrame:
@@ -59,7 +64,7 @@ async def 爬取法規連結():
     from io import StringIO
     url = 'https://glrs.hl.gov.tw'
     text = 抓取(url)
-    pat = '(\d+)<div class="pageno hidden-xs"'
+    pat = r'(\d+)<div class="pageno hidden-xs"'
     if m:=re.search(pat, text):
         page_num = int(m[1])
     else:
@@ -73,3 +78,72 @@ async def 爬取法規連結():
     dfs = await asyncio.gather(*[取連結(page_no) for page_no in range(2, page_num+1)])
     df = pd.concat([df, *dfs])
     return df
+
+from lark import Lark, Transformer
+def 法規分條(法規內容):
+    try:
+        p = Lark.open(Path(__file__).with_suffix('.lark'))
+        t = p.parse(法規內容)
+        t = 法規分條剖析樹().transform(t).children
+        return t
+    except:
+        return 法規內容 
+
+class 法規分條剖析樹(Transformer):
+
+    def LAW_FIRST_PARA(self, tok):
+        pat = r"第([\d壹貳參肆伍陸柒捌玖拾一二三四五六七八九十]+)條(.*)"
+        if m := re.match(pat, tok.value):
+            num = 轉數值(m[1])
+            p = m[2]
+            return (num, p)
+
+    def LAW2_FIRST_PARA(self, tok):
+        pat = r"([一二三四五六七八九十]+)、(.*)"
+        if m := re.match(pat, tok.value):
+            num = 轉數值(m[1])
+            p = m[2]
+            return (num, p)
+
+    def LAW3_FIRST_PARA(self, tok):
+        pat = r"([壹貳參肆伍陸柒捌玖拾]+)、(.*)"
+        if m := re.match(pat, tok.value):
+            num = 轉數值(m[1])
+            p = m[2]
+            return (num, p)
+
+    def PARA(self, tok):
+        return tok.value
+
+    def law(self, toks):   
+        f, *paras = toks
+        return (f[0], ''.join([f[1], *paras]))
+
+    def law2(self, toks):   
+        f, *paras = toks
+        return (f[0], ''.join([f[1], *paras]))
+
+    def law3(self, toks):   
+        f, *paras = toks
+        return (f[0], ''.join([f[1], *paras]))
+
+    def law4(self, toks):
+        return (1, toks[0].value)
+
+@cache.memoize(expire=30*24*60*60, tag='法規條文')
+def 法規條文():
+    df = 現行法規()
+    df['法規分條'] = df.法規內容.map(法規分條)
+    df = df.explode('法規分條')
+    def 取條號(t):
+        try:
+            return t[0]
+        except: return ''
+    def 取條文內容(t):
+        try:
+            return t[1]
+        except: return ''
+    df['條號'] = df.法規分條.map(取條號)
+    df['條文內容'] = df.法規分條.map(取條文內容)
+    df.rename(columns={'修正日期':'異動日期'}, inplace=True)
+    return df[['法規名稱', '異動日期', '條號', '條文內容']]
