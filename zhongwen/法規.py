@@ -4,7 +4,9 @@ import re
 def 中央地方法規條文():
     from zhongwen import 中央法規
     from zhongwen import 花蓮縣法規
-    return pd.concat([中央法規.法規條文(), 花蓮縣法規.法規條文()])
+    df = pd.concat([中央法規.法規條文(), 花蓮縣法規.法規條文()])
+    df['條號'] = df.條號.map(lambda n: f'{n}')
+    return df
 
 def 法條查詢(s):
     q = LawQuery(s)
@@ -34,19 +36,19 @@ class LawQuery:
         self.法規名稱=None
         self.條號=None
         self.關鍵字=None
-        pat = r'(.*(法|規則|標準|細則))第([-\d]+)[點條]'
+        pat = r'(.*(法|條例|規則|標準|細則))第([-\d]+)[點條]'
         if m:=re.match(pat, s):
             self.法規名稱=m[1]
             self.條號 = m[3]
             return
 
-        pat = r'(.*(法|規則|標準|細則))([-\d]+)'
+        pat = r'(.*(法|條例|規則|標準|細則))([-\d]+)'
         if m:=re.match(pat, s):
             self.法規名稱=m[1]
             self.條號 = m[3]
             return
 
-        pat = r'(.*(法|規則|標準|細則))\[(.*)\]'
+        pat = r'(.*(法|條例|規則|標準|細則))\[(.*)\]'
         if m:=re.match(pat, s):
             self.法規名稱 = m[1]
             self.關鍵字 = m[3]
