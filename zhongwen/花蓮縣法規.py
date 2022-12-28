@@ -90,7 +90,6 @@ def 法規分條(法規內容):
         return 法規內容 
 
 class 法規分條剖析樹(Transformer):
-
     def LAW_FIRST_PARA(self, tok):
         pat = r"第([\d壹貳參肆伍陸柒捌玖拾一二三四五六七八九十]+)條(.*)"
         if m := re.match(pat, tok.value):

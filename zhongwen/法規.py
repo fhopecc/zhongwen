@@ -8,6 +8,17 @@ def 中央地方法規條文():
     df['條號'] = df.條號.map(lambda n: f'{n}')
     return df
 
+def 顯示關鍵字查詢法規結果(關鍵字):
+    from zhongwen.pandas_tools import 強調關鍵字, show_html
+    df = 中央地方法規條文()
+    pat = '|'.join(關鍵字)
+    df = df.query('法規名稱.str.contains(@pat, na=False) or 條文內容.str.contains(@pat, na=False)')
+    df = 強調關鍵字(df, ['法規名稱', '條文內容'], 關鍵字)
+    df.reset_index(drop=True, inplace=True)
+    df.index = df.index+1
+    df.index.name = '編號'
+    show_html(df, 顯示筆數=300)
+
 def 法條查詢(s):
     q = LawQuery(s)
     if not q.法規名稱 : return ''

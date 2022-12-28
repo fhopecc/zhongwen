@@ -2,9 +2,10 @@ import unittest
 from pathlib import Path
 import pandas as pd
 import os
+from fhopecc.pandas_tools import show_html
 
 class Test(unittest.TestCase):
-    @unittest.skip('不測試')
+    # @unittest.skip('不測試')
     def test(self):
         from zhongwen.花蓮縣法規 import 法規
         # df = cache.get('花蓮縣法規')
@@ -12,13 +13,12 @@ class Test(unittest.TestCase):
         # for k in cache.iterkeys():
             # print(k)
         # print(cache.iterkeys())
-        # df = 法規().query('法規體系=="建設"')
+        df = 法規()
+        show_html(df, 自動格式=False)
         # df = df[['法規名稱', '公發布日']]
         # df.reset_index(inplace=True)
         # df = df.iloc[:100]
-        # html = Path.home() / 'TEMP' / 'output.html'
-        # df.to_html(html)
-        # os.system(f'start {html}')
+
     def test_parser(self):
         from zhongwen.花蓮縣法規 import 法規分條
         c = "第一條花蓮縣政府(以下簡稱本府)為如期推動污水下水道工程，配合水資源回收中心運轉操作，經公告本縣境內污水下水道聯接使用（以下簡稱用戶接管)工程範圍內違章建築認定與拆遷作業，悉依本準則規定辦理。用戶接管工程範圍外之違章建築，依建築法、違章建築處理辦法及花蓮縣違章建築查報及拆除標準作業程序等相關規定辦理。第二條經公告用戶接管工程範圍內違章建築之拆遷作業，不適用有關補償及救濟法規之規定。第三條施工範圍內違章建築之拆除及施工作業，按下列規定辦理：一、施工單位應於施工前三十日內完成說明會之舉行與反映意見之答覆，並應於開工前十五日會同村里長逐戶張貼通告單，且與有爭議之用戶協調。二、施工範圍由用戶自行興闢留設單側七十五公分空間（雙側一點五公尺）以供作業者，依其留設空間施工，自行興闢留設用戶施工範圍之修復工程，由用戶自行負責。三、惟施工前未留設，經催告十五日後仍未留設者，依本準則查報拆除地面層防火間隔一百五十公分有危害防火逃生部分，及二樓以上有危害建物結構安全之違建，拆除後之修復工程，由用戶自行負責，其程序如附表所載。第四條工程竣工後如施工範圍再行增加違章建築，依第一條第二項規定辦理。第五條本準則自發布日實施。"
