@@ -28,7 +28,7 @@ def 月末(年數, 月數):
 def 今日():
     return 取日期(datetime.now())
 
-def 取日期(d, first=True, defaulttoday=True, default=None) -> date:
+def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=None) -> date:
     match d:
         case float():
             return 取日期(f'{d:.0f}')
@@ -65,15 +65,19 @@ def 取日期(d, first=True, defaulttoday=True, default=None) -> date:
                 return datetime.strptime(m[0], f'%Y%m%d').date()
  
             # 民國日期帶增減日數形式，如【111.4.29+150】。
-            pat = r'(\d{3})[-./](\d{1,2})[-./](\d{1,2})([+])(\d+)'
+            pat = r'(\d{2,3})[-./](\d{1,2})[-./](\d{1,2})([+])(\d+)'
             if m:=re.match(pat, d):
                 d = datetime(int(m[1])+1911, int(m[2]), int(m[3]))+timedelta(days=int(m[5]))
                 return d.date()
 
-            # 民國日期形式如1110527。
-            pat = r'(\d{3})(\d{2})(\d{2})'
+            # 民國日期形式如980731, 1110527。
+            pat = r'(\d{2,3})(\d{2})(\d{2})'
             if m:=re.match(pat, d):
-                return datetime(int(m[1])+1911, int(m[2]), int(m[3])).date()
+                try:
+                    return datetime(int(m[1])+1911, int(m[2]), int(m[3])).date()
+                except ValueError as e: 
+                    if 錯誤為空值: return pd.NaT
+                    raise ValueError(f'【{d}】引發例外{e}！')
 
             # 民國日期其形式如 109/05/29 、109.05.29及109-5-29 等。
             pat = r'(\d{2,3})[-./](\d{1,2})[-./](\d{1,2})'
