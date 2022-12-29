@@ -47,6 +47,9 @@ class Test(unittest.TestCase):
         self.assertEqual(法條展開('直轄市縣市消防機關救護車輛裝備人力配置標準5')[:27], 
                 '直轄市縣市消防機關救護車輛裝備人力配置標準第5條規定：'
                 )
+        self.assertEqual(法條展開('花蓮縣政府組織自治條例1')[:27], 
+                '花蓮縣政府組織自治條例第1條規定：「本自治條例依地方行'
+                )
         
     def test_law_completion(self):
         from zhongwen.法規 import 法規名稱字首樹, 法規自動完成建議
