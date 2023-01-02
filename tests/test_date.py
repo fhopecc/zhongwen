@@ -59,5 +59,8 @@ class Test(unittest.TestCase):
         from datetime import date
         self.assertEqual(季末(2022, 2), date(2022, 6, 30))
 
+        from zhongwen.date import 季數
+        self.assertEqual(季數(date(2023, 1, 2)), (2023, 1))
+
 if __name__ == '__main__':
     unittest.main()

@@ -1,32 +1,7 @@
 '日期處理'
 import re
-from datetime import date
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import pandas as pd
-
-def 季初(年數, 季數) -> date:
-    '指定季之最初日'
-    match 季數:
-        case 1: return date(年數,  1, 1)
-        case 2: return date(年數,  4, 1)
-        case 3: return date(年數,  7, 1)
-        case 4: return date(年數, 10, 1)
-
-def 季末(年數, 季數):
-    '指定季之最末日'
-    match 季數:
-        case 1: return date(年數, 3, 31)
-        case 2: return date(年數, 6, 30)
-        case 3: return date(年數, 9, 30)
-        case 4: return date(年數, 12, 31)
-
-def 月末(年數, 月數):
-    import calendar
-    月末日數 = calendar.monthrange(年數, 月數)[1]
-    return date(年數, 月數, 月末日數)
-
-def 今日():
-    return 取日期(datetime.now())
 
 def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=None) -> date:
     match d:
@@ -140,3 +115,37 @@ def 本年度():
 def 上上年度():
     d = date.today()
     return f'{d.year-1911-2}年度'
+
+def 今日():
+    return 取日期(datetime.now())
+
+def 季數(日期=今日()) -> (int, int):
+    d = 日期
+    if 1 <= d.month <= 3: return (d.year, 1)
+    if 4 <= d.month <= 6: return (d.year, 2)
+    if 7 <= d.month <= 9: return (d.year, 3)
+    if 10 <= d.month <= 12: return (d.year, 4)
+
+def 季初(年數, 季數) -> date:
+    '指定季之最初日'
+    match 季數:
+        case 1: return date(年數,  1, 1)
+        case 2: return date(年數,  4, 1)
+        case 3: return date(年數,  7, 1)
+        case 4: return date(年數, 10, 1)
+
+def 季末(年數, 季數):
+    '指定季之最末日'
+    match 季數:
+        case 1: return date(年數, 3, 31)
+        case 2: return date(年數, 6, 30)
+        case 3: return date(年數, 9, 30)
+        case 4: return date(年數, 12, 31)
+
+def 月末(年數, 月數):
+    import calendar
+    月末日數 = calendar.monthrange(年數, 月數)[1]
+    return date(年數, 月數, 月末日數)
+
+
+

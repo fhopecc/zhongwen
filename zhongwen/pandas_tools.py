@@ -28,10 +28,11 @@ def 標準格式(整數欄位=None, 實數欄位=None, 百分比欄位=None, 最
             ,採用民國日期格式=False
             ):
     def formatter(style):
-        # td_align_right = {'selector': 'td', 'props': 'text-align: right'}
-        # td_align_left = [{'selector': 'td', 'props': 'text-align: left;font-weight:bold'}]
+        td_align_right = {'selector': 'td', 'props': 'text-align: right'}
+        td_align_left = [{'selector': 'td', 'props': 'text-align: left;font-weight:bold'}]
         if 整數欄位:
             style.format('{:,.0f}', subset=整數欄位)
+            # style.set_table_styles({"concept":td_align_right}, overwrite=False, axis=0)
         if 百分比欄位:
             style.format('{:,.2%}', subset=百分比欄位)
             style.background_gradient(axis=0, cmap='RdYlGn'
@@ -54,7 +55,6 @@ def 標準格式(整數欄位=None, 實數欄位=None, 百分比欄位=None, 最
             'props':[('background-color', '#ffffb3'), ('border-style', 'dotted')]
         }
         style.set_table_styles([tr_hover], overwrite=False)
-        # style.set_table_styles({"concept":td_align_left}, overwrite=False, axis=0)
         return style
     return formatter
 
