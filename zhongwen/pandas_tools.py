@@ -5,6 +5,7 @@ import re
 import os
 
 def 資料庫快取(資料讀取函數):
+    import sqlite3
     from fhopecc import env # 尚待去除依賴此私人函式庫
     from functools import wraps
     @wraps(資料讀取函數)
@@ -75,7 +76,7 @@ def 標準格式(整數欄位=None, 實數欄位=None, 百分比欄位=None, 最
         return style
     return formatter
 
-def show_html(df:pd.DataFrame, 自動格式=True
+def show_html(df:pd.DataFrame, 自動格式=False
              ,整數欄位=None, 實數欄位=None, 百分比欄位=None
              ,日期欄位=None
              ,最大值顯著欄位=None, 隱藏欄位=None, 顯示筆數=100
