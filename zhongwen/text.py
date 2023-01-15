@@ -113,3 +113,9 @@ def 翻譯(word):
     text = client.translate(word, 'zh-tw')
     # breakpoint()
     return text.translatedText
+
+def 異體字轉正(string:str):
+    a = '車路類例宅金易勒精神行煉練復療溜樓例列量料飯旅冷靈禮福利老六數歷里不拉簾來說度便力錄連年爐讀益' 
+    n = '車路類例宅金易勒精神行煉練復療溜樓例列量料飯旅冷靈禮福利老六數歷里不拉簾來說度便力錄連年爐讀益'
+    t = str.maketrans(a, n)
+    return string.translate(t)
