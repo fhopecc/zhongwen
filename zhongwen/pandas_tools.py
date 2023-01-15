@@ -3,26 +3,6 @@ from pathlib import Path
 import pandas as pd
 import re
 import os
-快取檔 = r'd:\g\快取\building.db'
-
-def 資料庫快取(資料讀取函數):
-    import sqlite3
-    from fhopecc import env # 尚待去除依賴此私人函式庫
-    from functools import wraps
-
-    @wraps(資料讀取函數)
-    def wrapper(*args, **kargs):
-        f = args[0]
-        table = f.stem
-        with sqlite3.connect(快取檔) as conn:
-            try:
-                df = pd.read_sql(f'select * from "{table}"', conn)
-                return df
-            except pd.errors.DatabaseError: 
-                df = 資料讀取函數(*args, **kargs)
-                df.to_sql(f.stem, conn, if_exists='replace')
-                return df
-    return wrapper
 
 def 強調關鍵字(df, 欄位=[], 關鍵字=[]):
     for c in 欄位:
