@@ -46,7 +46,8 @@ def 標準格式(整數欄位=None, 實數欄位=None, 百分比欄位=None, 最
                 style.format(民國日期, subset=日期欄位)
         if 最大值顯著欄位:
             style.highlight_max(最大值顯著欄位)
-            style.background_gradient(axis=0, cmap='RdYlGn'
+            style.background_gradient(axis=0
+                  ,cmap='RdYlGn'
                   ,subset=最大值顯著欄位)
         if 隱藏欄位:
             style.hide(隱藏欄位, axis=1) # hide index
@@ -59,9 +60,12 @@ def 標準格式(整數欄位=None, 實數欄位=None, 百分比欄位=None, 最
     return formatter
 
 def show_html(df:pd.DataFrame, 自動格式=False
-             ,整數欄位=None, 實數欄位=None, 百分比欄位=None
+             ,整數欄位=None
+             ,實數欄位=None
+             ,百分比欄位=None
              ,日期欄位=None
-             ,最大值顯著欄位=None, 隱藏欄位=None, 顯示筆數=100
+             ,隱藏欄位=None
+             ,最大值顯著欄位=None, 顯示筆數=100
              ,採用民國日期格式=False):
     if 顯示筆數:
         df = df[:顯示筆數]
