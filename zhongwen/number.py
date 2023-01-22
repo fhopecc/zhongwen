@@ -184,6 +184,24 @@ def 轉標號(text):
         return 標號(轉數值(m[1]), 5)
     return text 
  
+def 累積正負次數(數列):
+    import numpy as np
+    a = np.sign(數列)
+    s = 0
+    for n in a:
+        if s*n < 0: return s
+        s+=n
+    return s
+
+def 連續正數(數列):
+    import numpy as np
+    n = np.array(數列)
+    n = n > 0
+    s = 0
+    for v in n:
+        s = v*(s+v) 
+    return s
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
@@ -212,3 +230,5 @@ if __name__ == '__main__':
         print(中文標號(n, l-1))
     elif args.test:
         test()
+
+

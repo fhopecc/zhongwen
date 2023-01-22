@@ -26,10 +26,12 @@ def 資料型態標準化(df):
 def 標準格式(整數欄位=None, 實數欄位=None, 百分比欄位=None, 最大值顯著欄位=None, 隱藏欄位=None
             ,日期欄位=None
             ,採用民國日期格式=False
+            ,標題=None
             ):
     def formatter(style):
         td_align_right = {'selector': 'td', 'props': 'text-align: right'}
         td_align_left = [{'selector': 'td', 'props': 'text-align: left;font-weight:bold'}]
+        if 標題: style.set_caption(標題)
         if 整數欄位:
             style.format('{:,.0f}', subset=整數欄位)
             # style.set_table_styles({"concept":td_align_right}, overwrite=False, axis=0)
@@ -66,7 +68,9 @@ def show_html(df:pd.DataFrame, 自動格式=False
              ,日期欄位=None
              ,隱藏欄位=None
              ,最大值顯著欄位=None, 顯示筆數=100
-             ,採用民國日期格式=False):
+             ,採用民國日期格式=False
+             ,標題=None
+             ):
     if 顯示筆數:
         df = df[:顯示筆數]
     html = Path.home() / 'TEMP' / 'output.html'
@@ -85,10 +89,16 @@ def show_html(df:pd.DataFrame, 自動格式=False
                     日期欄位.append(c)
                 except AttributeError:
                     日期欄位 = [c]
-        df.style.pipe(標準格式(整數欄位, 實數欄位, 百分比欄位
-                              ,最大值顯著欄位, 隱藏欄位
-                              ,日期欄位, 採用民國日期格式=採用民國日期格式)).to_html(html)
-    else: df.to_html(html)
+        s = df.style.pipe(標準格式(整數欄位, 實數欄位, 百分比欄位
+                                  ,最大值顯著欄位, 隱藏欄位 ,日期欄位
+                                  ,採用民國日期格式=採用民國日期格式
+                                  ,標題=標題
+                         ))
+        tp = df.copy()
+        for c in df.columns:
+            tp[c] = c
+        s = s.set_tooltips(tp)
+    else: s.to_html(html)
     os.system(f'start {html}')
 
 def read_csv(*args, **kwargs):

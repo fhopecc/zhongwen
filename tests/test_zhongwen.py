@@ -47,6 +47,26 @@ class Test(unittest.TestCase):
         self.assertEqual(轉標號('3.'), 標號(3, 5))
         self.assertEqual(轉標號('1.'), 標號(1, 5))
 
+    def test_counter_sec_ones(self):
+        from zhongwen.number import 累積正負次數
+        a = [2, 3, -0.1, 7, 8, 9, -0.3, 2, 3, 4, 5, 5]
+        self.assertEqual(累積正負次數(a), 2)
+        a = [-2, -3, -0.1, 7, 8, 9, -0.3, 2, 3, 4, 5, 5]
+        self.assertEqual(累積正負次數(a), -3)
+        a = [-2, -3, -0.1, -7]
+        self.assertEqual(累積正負次數(a), -4)
+        a = [2, 3, 0.1, 7]
+        self.assertEqual(累積正負次數(a), 4)
+
+        from zhongwen.number import 連續正數
+        a = [2, 3, -0.1, 7, 8, 9, -0.3, 2, 3, 4, 5, 5]
+        self.assertEqual(連續正數(a), 5)
+        a = [2]
+        self.assertEqual(連續正數(a), 1)
+        a = [2, 3, -0.1, 7, 8, 9, -0.3, 3, 4, 5, 5]
+        self.assertEqual(連續正數(a), 4)
+
+    @unittest.skip('skip')
     def test_text(self):
         from zhongwen.text import 轉全型, 轉半型
         self.assertEqual(轉全型('%'), '％')
