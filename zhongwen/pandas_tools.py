@@ -29,16 +29,12 @@ def 標準格式(整數欄位=None, 實數欄位=None, 百分比欄位=None, 最
             ,標題=None
             ):
     def formatter(style):
-        td_align_right = {'selector': 'td', 'props': 'text-align: right'}
-        td_align_left = [{'selector': 'td', 'props': 'text-align: left;font-weight:bold'}]
         if 標題: style.set_caption(標題)
         if 整數欄位:
             style.format('{:,.0f}', subset=整數欄位)
-            # style.set_table_styles({"concept":td_align_right}, overwrite=False, axis=0)
         if 百分比欄位:
             style.format('{:,.2%}', subset=百分比欄位)
-            style.background_gradient(axis=0, cmap='RdYlGn'
-                  ,subset=百分比欄位, vmin=0, vmax=1)
+            style.background_gradient(axis=0, cmap='RdYlGn', subset=百分比欄位, vmin=0, vmax=1)
         if 實數欄位:
             style.format('{:,.2f}', subset=實數欄位)
         if 日期欄位:
@@ -100,6 +96,49 @@ def show_html(df:pd.DataFrame, 自動格式=False
         s = s.set_tooltips(tp)
     else: s.to_html(html)
     os.system(f'start {html}')
+
+def 自動格式(df:pd.DataFrame
+            ,整數欄位=None
+            ,實數欄位=None
+            ,百分比欄位=None
+            ,日期欄位=None
+            ,隱藏欄位=None
+            ,最大值顯著欄位=None
+            ,顯示筆數=100
+            ,採用民國日期格式=False
+            ,標題=None
+            ):
+    if 顯示筆數:
+        df = df[:顯示筆數]
+    html = Path.home() / 'TEMP' / 'output.html'
+    if 自動格式:
+        columns = df.columns
+        for c in df.columns:
+            pat = '.*金額|支出|存入'
+            if re.match(pat, c):
+                try:
+                    整數欄位.append(c)
+                except AttributeError:
+                    整數欄位 = [c]
+            pat = '.*日期.*'
+            if re.match(pat, c):
+                try:
+                    日期欄位.append(c)
+                except AttributeError:
+                    日期欄位 = [c]
+        s = df.style.pipe(標準格式(整數欄位, 實數欄位, 百分比欄位
+                                  ,最大值顯著欄位, 隱藏欄位 ,日期欄位
+                                  ,採用民國日期格式=採用民國日期格式
+                                  ,標題=標題
+                         ))
+        tp = df.copy()
+        for c in df.columns:
+            tp[c] = c
+        s = s.set_tooltips(tp)
+    else: s.to_html(html)
+    os.system(f'start {html}')
+
+
 
 def read_csv(*args, **kwargs):
     '編碼錯誤預設使用 replace。'
