@@ -26,10 +26,9 @@ def 資料型態標準化(df):
 def 標準格式(整數欄位=None, 實數欄位=None, 百分比欄位=None, 最大值顯著欄位=None, 隱藏欄位=None
             ,日期欄位=None
             ,採用民國日期格式=False
-            ,標題=None
             ):
     def formatter(style):
-        if 標題: style.set_caption(標題)
+        style.applymap(lambda r:'text-align:right')
         if 整數欄位:
             style.format('{:,.0f}', subset=整數欄位)
         if 百分比欄位:
@@ -134,6 +133,7 @@ def 自動格式(df:pd.DataFrame
     # 最大值顯著欄位 += list(chain.from_iterable([l for l in [整數欄位, 實數欄位, 百分比欄位] if isinstance(l, list)]))
     最大值顯著欄位 += 整數欄位
     # 最大值顯著欄位 += 百分比欄位
+    # 最大值顯著欄位 += 實數欄位
     s = df.style.pipe(標準格式(整數欄位, 實數欄位, 百分比欄位
                               ,最大值顯著欄位, 隱藏欄位 ,日期欄位
                               ,採用民國日期格式=採用民國日期格式
