@@ -17,7 +17,7 @@ def 顯示關鍵字查詢法規結果(關鍵字):
     df.reset_index(drop=True, inplace=True)
     df.index = df.index+1
     df.index.name = '編號'
-    show_html(df, 自動格式=True, 顯示筆數=300)
+    show_html(df, 無格式=False, 顯示筆數=300)
 
 def 法條查詢(s):
     q = LawQuery(s)

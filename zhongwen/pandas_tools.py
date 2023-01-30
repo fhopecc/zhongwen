@@ -56,45 +56,35 @@ def 標準格式(整數欄位=None, 實數欄位=None, 百分比欄位=None, 最
         return style
     return formatter
 
-def show_html(df:pd.DataFrame, 自動格式=False
+def show_html(df:pd.DataFrame, 無格式=False
              ,整數欄位=None
              ,實數欄位=None
              ,百分比欄位=None
              ,日期欄位=None
              ,隱藏欄位=None
-             ,最大值顯著欄位=None, 顯示筆數=100
+             ,最大值顯著欄位=[]
+             ,顯示筆數=100
              ,採用民國日期格式=False
              ,標題=None
              ):
-    if 顯示筆數:
-        df = df[:顯示筆數]
-    html = Path.home() / 'TEMP' / 'output.html'
-    if 自動格式:
-        columns = df.columns
-        for c in df.columns:
-            pat = '.*金額|支出|存入'
-            if re.match(pat, c):
-                try:
-                    整數欄位.append(c)
-                except AttributeError:
-                    整數欄位 = [c]
-            pat = '.*日期.*'
-            if re.match(pat, c):
-                try:
-                    日期欄位.append(c)
-                except AttributeError:
-                    日期欄位 = [c]
-        s = df.style.pipe(標準格式(整數欄位, 實數欄位, 百分比欄位
-                                  ,最大值顯著欄位, 隱藏欄位 ,日期欄位
-                                  ,採用民國日期格式=採用民國日期格式
-                                  ,標題=標題
-                         ))
-        tp = df.copy()
-        for c in df.columns:
-            tp[c] = c
-        s = s.set_tooltips(tp)
-    else: s.to_html(html)
-    os.system(f'start {html}')
+    if isinstance(df, pd.Series):
+        df = df.to_frame()
+    if not 無格式:
+        return 自動格式(df
+                       ,整數欄位
+                       ,實數欄位
+                       ,百分比欄位
+                       ,日期欄位
+                       ,隱藏欄位
+                       ,最大值顯著欄位
+                       ,顯示筆數
+                       ,採用民國日期格式
+                       ,顯示=True
+                       )
+    else:
+        html = Path.home() / 'TEMP' / 'output.html'
+        df.to_html(html)
+        os.system(f'start {html}')
 
 def 自動格式(df:pd.DataFrame
             ,整數欄位=None
@@ -111,29 +101,38 @@ def 自動格式(df:pd.DataFrame
         df = df[:顯示筆數]
     columns = df.columns
     for c in df.columns:
-        pat = '.+率'
-        if re.match(pat, c):
-            try:
-                百分比欄位.append(c)
-            except AttributeError:
-                百分比欄位 = [c]
-        pat = '.*(金額|次數|損益|股利)|支出|存入|成本|現值|借券'
+        pat = '^.*(金額|次數|損益|股利)|成本|支出|存入|現值|借券|餘額$'
         if re.match(pat, c):
             try:
                 整數欄位.append(c)
             except AttributeError:
                 整數欄位 = [c]
+        pat = '^現金轉換天數|股價$'
+        if re.match(pat, c):
+            try:
+                實數欄位.append(c)
+            except AttributeError:
+                實數欄位 = [c]
+        pat = '^.+(率|比例)$'
+        if re.match(pat, c):
+            try:
+                百分比欄位.append(c)
+            except AttributeError:
+                百分比欄位 = [c]
         pat = '.*日期.*'
         if re.match(pat, c):
             try:
                 日期欄位.append(c)
             except AttributeError:
                     日期欄位 = [c]
+    if 整數欄位: 整數欄位 = [*set(整數欄位)]
+    if 實數欄位: 實數欄位 = [*set(實數欄位)]
+    if 百分比欄位: 百分比欄位 = [*set(百分比欄位)]
     from itertools import chain
-    # 最大值顯著欄位 += list(chain.from_iterable([l for l in [整數欄位, 實數欄位, 百分比欄位] if isinstance(l, list)]))
-    最大值顯著欄位 += 整數欄位
-    # 最大值顯著欄位 += 百分比欄位
-    # 最大值顯著欄位 += 實數欄位
+    n = list(chain.from_iterable([l for l in [整數欄位, 實數欄位, 百分比欄位] if isinstance(l, list)]))
+    # breakpoint()
+    if n: 最大值顯著欄位 += n
+    最大值顯著欄位 = [*set(最大值顯著欄位)]
     s = df.style.pipe(標準格式(整數欄位, 實數欄位, 百分比欄位
                               ,最大值顯著欄位, 隱藏欄位 ,日期欄位
                               ,採用民國日期格式=採用民國日期格式
