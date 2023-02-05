@@ -70,21 +70,23 @@ def show_html(df:pd.DataFrame, 無格式=False
     if isinstance(df, pd.Series):
         df = df.to_frame()
     if not 無格式:
-        return 自動格式(df
-                       ,整數欄位
-                       ,實數欄位
-                       ,百分比欄位
-                       ,日期欄位
-                       ,隱藏欄位
-                       ,最大值顯著欄位
-                       ,顯示筆數
-                       ,採用民國日期格式
-                       ,顯示=True
-                       )
-    else:
-        html = Path.home() / 'TEMP' / 'output.html'
-        df.to_html(html)
-        os.system(f'start {html}')
+        try:
+            return 自動格式(df
+                           ,整數欄位
+                           ,實數欄位
+                           ,百分比欄位
+                           ,日期欄位
+                           ,隱藏欄位
+                           ,最大值顯著欄位
+                           ,顯示筆數
+                           ,採用民國日期格式
+                           ,顯示=True
+                           )
+        except ValueError: pass
+
+    html = Path.home() / 'TEMP' / 'output.html'
+    df.to_html(html)
+    os.system(f'start {html}')
 
 def 自動格式(df:pd.DataFrame
             ,整數欄位=None
