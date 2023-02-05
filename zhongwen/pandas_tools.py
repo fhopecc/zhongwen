@@ -143,7 +143,6 @@ def 自動格式(df:pd.DataFrame
     for c in df.columns:
         tp[c] = c
     s = s.set_tooltips(tp)
-    s.hide_columns()
     if 顯示:
         html = Path.home() / 'TEMP' / 'output.html'
         s.to_html(html)
