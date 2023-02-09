@@ -1,5 +1,6 @@
 'Pandas 輔助工具'
 from pathlib import Path
+from warnings import warn
 import pandas as pd
 import re
 import os
@@ -69,6 +70,7 @@ def show_html(df:pd.DataFrame, 無格式=False
              ):
     if isinstance(df, pd.Series):
         df = df.to_frame()
+    df = df.head(顯示筆數)
     if not 無格式:
         try:
             return 自動格式(df
@@ -82,8 +84,7 @@ def show_html(df:pd.DataFrame, 無格式=False
                            ,採用民國日期格式
                            ,顯示=True
                            )
-        except ValueError: pass
-
+        except (ValueError, KeyError) as e: warn(f'發生例外：{e}')
     html = Path.home() / 'TEMP' / 'output.html'
     df.to_html(html)
     os.system(f'start {html}')
@@ -103,7 +104,7 @@ def 自動格式(df:pd.DataFrame
         df = df[:顯示筆數]
     columns = df.columns
     for c in df.columns:
-        pat = '^.*(金額|次數|損益|股利)|成本|支出|存入|現值|借券|餘額$'
+        pat = '^.*(數|金額|損益|股利)|成本|支出|存入|現值|借券|餘額$'
         if re.match(pat, c):
             try:
                 整數欄位.append(c)
