@@ -1,9 +1,14 @@
 'Pandas 輔助工具'
-from pathlib import Path
-from warnings import warn
-import pandas as pd
-import re
-import os
+
+def 可顯示(查詢資料函數):
+    '裝飾查詢資料函數，指名參數設為【顯示=True】，即將查詢結果以 html 顯示。'
+    from functools import wraps
+    @wraps(查詢資料函數)
+    def wrapper(*args, 顯示=False, **kargs):
+        df = 查詢資料函數(*args, **kargs)
+        if 顯示: show_html(df)
+        return df
+    return wrapper
 
 def 強調關鍵字(df, 欄位=[], 關鍵字=[]):
     for c in 欄位:
@@ -17,6 +22,7 @@ def 資料型態標準化(df):
     from zhongwen.number import 轉數值
     for c in df.columns:
         p = f'.*日期'
+        import re
         if re.match(p, c):
             df[c] = df[c].map(取日期)
         p = f'.*金額'
@@ -57,7 +63,7 @@ def 標準格式(整數欄位=None, 實數欄位=None, 百分比欄位=None, 最
         return style
     return formatter
 
-def show_html(df:pd.DataFrame, 無格式=False
+def show_html(df, 無格式=False
              ,整數欄位=None
              ,實數欄位=None
              ,百分比欄位=None
@@ -68,10 +74,12 @@ def show_html(df:pd.DataFrame, 無格式=False
              ,採用民國日期格式=False
              ,標題=None
              ):
+    import pandas as pd
     if isinstance(df, pd.Series):
         df = df.to_frame()
     df = df.head(顯示筆數)
     if not 無格式:
+        from warnings import warn
         try:
             return 自動格式(df
                            ,整數欄位
@@ -84,12 +92,14 @@ def show_html(df:pd.DataFrame, 無格式=False
                            ,採用民國日期格式
                            ,顯示=True
                            )
-        except (ValueError, KeyError) as e: warn(f'發生例外：{e}')
+        except (ValueError, KeyError, TypeError) as e: warn(f'發生例外：{e}')
+    from pathlib import Path
     html = Path.home() / 'TEMP' / 'output.html'
     df.to_html(html)
+    import os
     os.system(f'start {html}')
 
-def 自動格式(df:pd.DataFrame
+def 自動格式(df
             ,整數欄位=None
             ,實數欄位=None
             ,百分比欄位=None
@@ -105,6 +115,7 @@ def 自動格式(df:pd.DataFrame
     columns = df.columns
     for c in df.columns:
         pat = '^.*(數|金額|損益|股利)|成本|支出|存入|現值|借券|餘額$'
+        import re
         if re.match(pat, c):
             try:
                 整數欄位.append(c)
@@ -145,8 +156,10 @@ def 自動格式(df:pd.DataFrame
         tp[c] = c
     s = s.set_tooltips(tp)
     if 顯示:
+        from pathlib import Path
         html = Path.home() / 'TEMP' / 'output.html'
         s.to_html(html)
+        import os
         os.system(f'start {html}')
     return s
 
@@ -157,6 +170,7 @@ def read_csv(*args, **kwargs):
     if isinstance(fn, Path):
         fn = str(fn)
     with open(fn, encoding=kwargs['encoding'], errors='replace') as f:
+        import pandas as pd
         df = pd.read_csv(f, *args[1:], **kwargs)
         return df
 
