@@ -5,8 +5,10 @@ def 可顯示(查詢資料函數):
     from functools import wraps
     @wraps(查詢資料函數)
     def wrapper(*args, 顯示=False, **kargs):
+        display_rows = kargs['顯示筆數']
+        del kargs['顯示筆數']
         df = 查詢資料函數(*args, **kargs)
-        if 顯示: show_html(df)
+        if 顯示: show_html(df, 顯示筆數=display_rows)
         return df
     return wrapper
 
