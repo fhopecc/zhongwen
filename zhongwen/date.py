@@ -78,9 +78,21 @@ def 上月():
     d = date.today()
     return f'{d.year-1911:03}{d.month-1:02}'
 
-def 民國日期(d, fmt='%Y%m%d'):
+def 民國日期(d, fmt='%Y%m%d', 昨今明表達=False):
     '%Y表年數、%m表月數前置0、%d表日數前置0、%M表月數不前置0'
+
+    from datetime import timedelta
     d = 取日期(d)
+    if 昨今明表達:
+        if d == 今日()-timedelta(days=1):
+            return '昨'
+        if d == 今日():
+            return '今'
+        if d == 今日()+timedelta(days=1):
+            return '明'
+        if d == 今日()+timedelta(days=2):
+            return '後天'
+
     fmt = fmt.replace(
             '%Y', '%(year)03d'
             ).replace(
@@ -146,6 +158,5 @@ def 月末(年數, 月數):
     import calendar
     月末日數 = calendar.monthrange(年數, 月數)[1]
     return date(年數, 月數, 月末日數)
-
 
 
