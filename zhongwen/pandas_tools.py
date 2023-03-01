@@ -119,14 +119,14 @@ def 自動格式(df
         df = df[:顯示筆數]
     columns = df.columns
     for c in df.columns:
-        pat = '^.*(數|金額|損益|股利)|成本|支出|存入|現值|借券|餘額$'
+        pat = '^.*(數|金額|損益|股利)|成本|支出|存入|現值|借券|餘額|借|貸$'
         import re
         if re.match(pat, c):
             try:
                 整數欄位.append(c)
             except AttributeError:
                 整數欄位 = [c]
-        pat = '^現金轉換天數|股價$'
+        pat = '^現金轉換天數|股價|配息$'
         if re.match(pat, c):
             try:
                 實數欄位.append(c)

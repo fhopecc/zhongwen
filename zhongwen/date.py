@@ -74,7 +74,6 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
             raise TypeError(f'不支援類型[{type(d)}]、值[{d}]！')
 
 def 上月():
-    '上月'
     d = date.today()
     return f'{d.year-1911:03}{d.month-1:02}'
 
@@ -128,8 +127,12 @@ def 上上年度():
     d = date.today()
     return f'{d.year-1911-2}年度'
 
-def 今日():
-    return 取日期(datetime.now())
+def 今日() -> date:
+    return date.today()
+
+def 上年() -> date:
+    d = 今日()
+    return d.replace(year=d.year-1)
 
 def 季數(日期=今日()) -> (int, int):
     d = 日期
