@@ -159,6 +159,10 @@ def 自動格式(df
     tp = df.copy()
     for c in df.columns:
         tp[c] = c
+        if c == '營收增減率':
+            tp[c] = tp.營收消長原因.map(lambda r: f'{c}:{r}')
+        if c == '配息':
+            tp[c] = tp.除息日.map(lambda d: f'除息日{d}')
     s = s.set_tooltips(tp)
     if 顯示:
         from pathlib import Path
