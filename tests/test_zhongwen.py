@@ -33,6 +33,8 @@ class Test(unittest.TestCase):
         self.assertEqual(轉數值('一萬三千二百五十九'), 13259)
         self.assertEqual(轉數值('參佰玖拾柒萬肆仟壹拾伍'), 3974015)
         self.assertEqual(轉數值('5,000'), 5000)
+        self.assertEqual(轉數值('8.1%'), 0.081)
+        self.assertEqual(轉數值('-8.1%'), -0.081)
         self.assertEqual(約數('55,302'), '5萬餘')
         self.assertEqual(約數('5,302'), '5,302')
         self.assertEqual(百分比('0.8911'), '89.11％')

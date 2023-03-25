@@ -32,6 +32,12 @@ def 中文數字轉數值(n):
     
 def 轉數值(n, 傳回格式=False) -> int|float:  
     if isinstance(n, str):
+        # 百分比
+        pat = r'(-?[\d](\.\d+)?)%'
+        if m:=re.match(pat, n):
+            import pandas as pd
+            return pd.to_numeric(m[1]) /100
+
         # 不具位名之中文數
         中文數字='○0０零壹貳參肆伍陸柒捌玖一二三四五六七八九'
         pat = f'^[{中文數字}]+$'
