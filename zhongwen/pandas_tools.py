@@ -114,13 +114,19 @@ def 自動格式(df
             ,顯示筆數=100
             ,採用民國日期格式=False
             ,顯示=None
+            ,除錯提示=False
             ):
     if 顯示筆數:
         df = df[:顯示筆數]
     columns = df.columns
+    from zhongwen.number import 轉數值
     for c in df.columns:
-        pat = '^.*(數|金額|損益|股利)|成本|支出|存入|現值|借券|餘額|借|貸$'
+        pat = '^.*述$'
         import re
+        if re.match(pat, c):
+            continue
+
+        pat = '^.*(數|金額|損益|股利)|成本|支出|存入|現值|借券|餘額|借|貸$'
         if re.match(pat, c):
             try:
                 整數欄位.append(c)
@@ -135,6 +141,7 @@ def 自動格式(df
         pat = '^.+(率|比例)$'
         if re.match(pat, c):
             try:
+                df[c] = df[c].map(轉數值)
                 百分比欄位.append(c)
             except AttributeError:
                 百分比欄位 = [c]
@@ -157,12 +164,15 @@ def 自動格式(df
                               ,採用民國日期格式=採用民國日期格式
                               ))
     tp = df.copy()
-    for c in df.columns:
-        tp[c] = c
-        if c == '營收增減率':
-            tp[c] = tp.營收消長原因.map(lambda r: f'{c}:{r}')
-        if c == '配息':
-            tp[c] = tp.除息日.map(lambda d: f'除息日{d}')
+    for c in df.columns: tp[c] = c
+    
+    if 除錯提示:
+        from pathlib import Path
+        html = Path.home() / 'TEMP' / 'output.html'
+        tp.to_html(html)
+        import os
+        os.system(f'start {html}')
+
     s = s.set_tooltips(tp)
     if 顯示:
         from pathlib import Path
