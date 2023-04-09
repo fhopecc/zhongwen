@@ -54,6 +54,9 @@ class Test(unittest.TestCase):
         from datetime import date
         self.assertEqual(月末(2022, 10), date(2022, 10, 31))
 
+        from zhongwen.date import 月起迄
+        self.assertEqual(月起迄(2022, 4), [date(2022, 4, 1), date(2022, 4, 30)])
+
     def test_quarter(self):
         from zhongwen.date import 季末
         from datetime import date

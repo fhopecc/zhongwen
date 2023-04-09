@@ -3,6 +3,7 @@ import re
 from datetime import date, datetime, timedelta
 import pandas as pd
 
+
 def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=None) -> date:
     match d:
         case float():
@@ -161,5 +162,10 @@ def 月末(年數, 月數):
     import calendar
     月末日數 = calendar.monthrange(年數, 月數)[1]
     return date(年數, 月數, 月末日數)
+
+def 月起迄(year, mon):
+    月初 = date(year, mon, 1)
+    return [月初, 月末(year, mon)]
+
 
 
