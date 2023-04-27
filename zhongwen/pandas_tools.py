@@ -121,12 +121,12 @@ def 自動格式(df
     columns = df.columns
     from zhongwen.number import 轉數值
     for c in df.columns:
-        pat = '^.*述$'
+        pat = '^.*述|借貸$'
         import re
         if re.match(pat, c):
             continue
 
-        pat = '^.*(數|金額|損益|股利)|成本|支出|存入|現值|借券|餘額|借|貸$'
+        pat = '^.*(數|金額|損益|股利|累計|差異|期末)|成本|支出|存入|現值|借券|餘額|借|貸$'
         if re.match(pat, c):
             try:
                 整數欄位.append(c)
@@ -138,7 +138,7 @@ def 自動格式(df
                 實數欄位.append(c)
             except AttributeError:
                 實數欄位 = [c]
-        pat = '^.+(率|比例)$'
+        pat = '^.+(率|比例|比)$'
         if re.match(pat, c):
             try:
                 df[c] = df[c].map(轉數值)
