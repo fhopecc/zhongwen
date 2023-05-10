@@ -59,7 +59,7 @@ def 抓取(url, use_requests=None) -> str:
     c.get(url)
     return c.page_source
 
-def 下載(url, p=None, downloads=None, 重載=False):
+def 下載(url, p=None, downloads=None, 重載=False, selenium=False, 下載時間=20):
     '''
     下載 URL 的檔案至指定目錄，
     並且回傳本地檔案的路徑。
@@ -67,17 +67,30 @@ def 下載(url, p=None, downloads=None, 重載=False):
 '''
     if not downloads:
         downloads = Path.home() / 'Downloads'
+        downloads.mkdir(exist_ok=True)
     fn = urlparse(url).path.split('/')[-1]
     if not p:
         p  = downloads / fn
+
     if not 重載 and p.exists(): 
         print(f'警告：已下載[{url}]至[{p}]！')
         return p
-    downloads.mkdir(exist_ok=True)
-    with request.urlopen(url) as r, p.open('wb') as f:
-        f.write(r.read())
+
+    if p.exists():
+        p.unlink()
+
+    if selenium:
+        c = chrome()
+        c.get(url)
+        from time import sleep
+        sleep(下載時間) # 等待 chrome 下載完成
         print(f'下載[{url}]至[{p}]成功！')
-        return p
+    else:
+        from urllib.request import urlopen
+        with urlopen(url) as r, p.open('wb') as f:
+            f.write(r.read())
+            print(f'下載[{url}]至[{p}]成功！')
+    return p
 
 def 解壓(壓縮檔, 目錄):
     if 壓縮檔.suffix == '.7z':
