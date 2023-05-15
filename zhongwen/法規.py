@@ -30,7 +30,8 @@ def 法條查詢(s):
     qstr = [屬性條件(a) for a in dir(q) if not a.startswith("__") and getattr(q, a)!=None]
 
     qstr = ' and '.join(qstr)
-    return 中央地方法規條文().query(qstr)
+    s = 中央地方法規條文().query(qstr)
+    return s
 
 def 法條展開(s):
     return '\n'.join([f'{l[0]}第{l[2]}條規定：「{l[3]}」' for l in 法條查詢(s).values])
@@ -47,19 +48,19 @@ class LawQuery:
         self.法規名稱=None
         self.條號=None
         self.關鍵字=None
-        pat = r'(.*(法|條例|規則|標準|細則))第([-\d]+)[點條]'
+        pat = r'(.*(法|條例|規則|標準|細則|措施))第([-\d]+)[點條]'
         if m:=re.match(pat, s):
             self.法規名稱=m[1]
             self.條號 = m[3]
             return
 
-        pat = r'(.*(法|條例|規則|標準|細則))([-\d]+)'
+        pat = r'(.*(法|條例|規則|標準|細則|措施))([-\d]+)'
         if m:=re.match(pat, s):
             self.法規名稱=m[1]
             self.條號 = m[3]
             return
 
-        pat = r'(.*(法|條例|規則|標準|細則))\[(.*)\]'
+        pat = r'(.*(法|條例|規則|標準|細則|措施))\[(.*)\]'
         if m:=re.match(pat, s):
             self.法規名稱 = m[1]
             self.關鍵字 = m[3]
