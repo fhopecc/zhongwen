@@ -135,6 +135,10 @@ def 上年() -> date:
     d = 今日()
     return d.replace(year=d.year-1)
 
+def 上年底() -> date:
+    d = 今日()
+    return d.replace(year=d.year-1, month=12, day=31)
+
 def 季數(日期=今日()) -> (int, int):
     d = 日期
     if 1 <= d.month <= 3: return (d.year, 1)

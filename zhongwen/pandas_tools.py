@@ -125,8 +125,7 @@ def 自動格式(df
         import re
         if re.match(pat, c):
             continue
-
-        pat = '^.*(數|金額|損益|股利|累計|差異|期末)|成本|支出|存入|現值|借券|餘額|借|貸$'
+        pat = '^.*(數|金額|損益|股利|累計|差異|期末|負債|營收)|本益比|成本|支出|存入|現值|借券|餘額|借|貸$'
         if re.match(pat, c):
             try:
                 整數欄位.append(c)
@@ -139,7 +138,7 @@ def 自動格式(df
             except AttributeError:
                 實數欄位 = [c]
         pat = '^.+(率|比例|比)$'
-        if re.match(pat, c):
+        if re.match(pat, c) and c not in ['本益比']:
             try:
                 df[c] = df[c].map(轉數值)
                 百分比欄位.append(c)
@@ -254,3 +253,10 @@ def read_docx(filename, tab_id=None, **kwargs):
         except IndexError:
             print('Error: specified [tab_id]: {}  does not exist.'.format(tab_id))
             raise
+
+def 分割鏈(鏈, 長度):
+    from itertools import islice
+    it = iter(鏈)
+    size = 長度
+    chunk = list(iter(lambda: list(islice(it, size)), []))
+    return chunk
