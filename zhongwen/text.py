@@ -119,3 +119,8 @@ def 校正異體字(字串:str):
     n = '車路類例宅金易勒精神行煉練復療溜樓例列量料飯旅冷靈禮福利老六數歷里不拉簾來說度便力錄連年爐讀益'
     t = str.maketrans(a, n)
     return 字串.translate(t)
+
+def 刪空格(n):
+    import re
+    try: return re.sub(r'\s+', '', n)
+    except TypeError: return n
