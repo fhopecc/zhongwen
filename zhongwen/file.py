@@ -59,12 +59,14 @@ def 抓取(url, use_requests=None) -> str:
     c.get(url)
     return c.page_source
 
-def 下載(url, p=None, downloads=None, 重載=False, selenium=False, 下載時間=20):
-    '''
-    下載 URL 的檔案至指定目錄，
-    並且回傳本地檔案的路徑。
-    重載：指定是否要重載。
+def 下載(url, 儲存檔名=None, 儲存目錄=None, 覆蓋本地檔=False, selenium=False, 等待下載時間=20):
+    '''下載 URL 的檔案至指定目錄，並且回傳本地檔案的路徑。
+如運用併發 selenium 子程序下載，且於子程序下載完成前提早結束返回，
+則會中斷下載，須指定等待下載時間。
 '''
+    p = 儲存檔名
+    downloads = 儲存目錄
+    重載 = 覆蓋本地檔
     if not downloads:
         downloads = Path.home() / 'Downloads'
         downloads.mkdir(exist_ok=True)
@@ -83,7 +85,7 @@ def 下載(url, p=None, downloads=None, 重載=False, selenium=False, 下載時�
         c = chrome()
         c.get(url)
         from time import sleep
-        sleep(下載時間) # 等待 chrome 下載完成
+        sleep(等待下載時間) # 等待 chrome 下載完成
         print(f'下載[{url}]至[{p}]成功！')
     else:
         from urllib.request import urlopen
