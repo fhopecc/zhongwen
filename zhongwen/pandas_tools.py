@@ -1,4 +1,4 @@
-'Pandas 輔助工具'
+'輔助PANDAS工具'
 
 def 可顯示(查詢資料函數):
     '裝飾查詢資料函數，指名參數設為【顯示=True】，即將查詢結果以 html 顯示。'
@@ -115,6 +115,7 @@ def 自動格式(df
             ,採用民國日期格式=False
             ,顯示=None
             ,除錯提示=False
+            ,顯示提示=False
             ):
     if 顯示筆數:
         df = df[:顯示筆數]
@@ -172,7 +173,8 @@ def 自動格式(df
         import os
         os.system(f'start {html}')
 
-    s = s.set_tooltips(tp)
+    if 顯示提示:
+        s = s.set_tooltips(tp)
     if 顯示:
         from pathlib import Path
         html = Path.home() / 'TEMP' / 'output.html'
@@ -242,6 +244,7 @@ def read_docx(filename, tab_id=None, **kwargs):
         for row in tab.rows:
             writer.writerow(cell.text for cell in row.cells)
         vf.seek(0)
+        import pandas as pd
         return pd.read_csv(vf, **kwargs)
 
     doc = Document(filename)
