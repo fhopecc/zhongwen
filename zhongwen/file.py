@@ -59,23 +59,24 @@ def 抓取(url, use_requests=None) -> str:
     c.get(url)
     return c.page_source
 
-def 下載(url, 儲存檔名=None, 儲存目錄=None, 覆蓋本地檔=False, selenium=False, 等待下載時間=20):
-    '''下載 URL 的檔案至指定目錄，並且回傳本地檔案的路徑。
+def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False, selenium=False, 等待下載時間=20):
+    '''下載 URL 內容至指定檔案，並且回傳檔案路徑。
 如運用併發 selenium 子程序下載，且於子程序下載完成前提早結束返回，
 則會中斷下載，須指定等待下載時間。
 '''
-    p = 儲存檔名
+    p = 儲存路徑
     downloads = 儲存目錄
-    重載 = 覆蓋本地檔
+    重載 = 覆寫
+
     if not downloads:
         downloads = Path.home() / 'Downloads'
         downloads.mkdir(exist_ok=True)
     fn = urlparse(url).path.split('/')[-1]
     if not p:
-        p  = downloads / fn
+        p = downloads / fn
 
-    if not 重載 and p.exists(): 
-        print(f'警告：已下載[{url}]至[{p}]！')
+    if not 覆寫 and p.exists(): 
+        print(f'警告：[{url}]已下載至[{p}]！')
         return p
 
     if p.exists():
