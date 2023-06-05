@@ -4,7 +4,6 @@ from urllib import request
 from urllib.parse import urlparse
 from diskcache import Cache
 from functools import lru_cache
-import requests
 cache = Cache(Path.home() / 'cache' / 'zhongwen.file')
 
 class FileLocation:
@@ -49,15 +48,30 @@ def chrome():
                              ,options=options)
     return chrome
 
-@cache.memoize(expire=100, tag='抓取')
-def 抓取(url, use_requests=None) -> str:
-    '抓取網頁回傳原始碼。'
-    if use_requests:
-        user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36 Edg/106.0.1370.52'
-        return requests.get(url, headers={ 'user-agent': user_agent }).text
-    c = chrome()
-    c.get(url)
-    return c.page_source
+# @cache.memoize(expire=100, tag='抓取')
+def 抓取(url, 抓取方式='requests', 除錯=False, headers=None, use_requests=None) -> str:
+    '''抓取網頁回傳原始碼。
+    抓取方式: 'requests' 係指定使用 requests 模組；'selenium' 係 selenium 模組。
+'''
+    if use_requests: 
+        warn(f'參數【use_request】將廢棄且已無作用，已預設使用 requests 模組。', DeprecationWarning, stacklevel=2)
+    import requests
+    import logging
+    if 抓取方式 == 'selenium':
+        c = chrome()
+        c.get(url)
+        return c.page_source
+    if not headers:
+        from faker import Faker
+        fake = Faker()
+        headers = {'user-agent': fake.user_agent()
+                  ,"accept-language": "zh-TW,zh;q=0.9,en;q=0.8,zh-CN;q=0.7"
+                  }
+    r = requests.get(url, headers=headers)
+    logging.debug(f'回復為{r!r}')
+    logging.debug(f'{r.cookies.keys()!r}')
+    logging.debug(f'{r.text}')
+    return r.text
 
 def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False, selenium=False, 等待下載時間=20):
     '''下載 URL 內容至指定檔案，並且回傳檔案路徑。
