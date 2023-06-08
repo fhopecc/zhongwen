@@ -6,7 +6,8 @@ import pandas as pd
 def 是日期嗎(v):
     return isinstance(v, date) or isinstance(v, datetime)
 
-def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=None) -> date:
+def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=None
+          ,日期大於今日省略年推論為去年=False) -> date:
     match d:
         case float():
             return 取日期(f'{d:.0f}')
@@ -25,7 +26,8 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
                     od = d
                     sep = m[2]
                     d = 取日期(f'{year}{sep}{d}')
-                    if d > datetime.now().date(): # 省略年推論為今年大於今日，則推論為去年
+                    if 日期大於今日省略年推論為去年 and d > datetime.now().date(): 
+                        # 省略年推論為今年大於今日，則推論為去年
                         return 取日期(f'{year-1}{sep}{od}')
                     return d
          
