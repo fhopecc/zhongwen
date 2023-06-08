@@ -3,6 +3,8 @@ import re
 from datetime import date, datetime, timedelta
 import pandas as pd
 
+def 是日期嗎(v):
+    return isinstance(v, date) or isinstance(v, datetime)
 
 def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=None) -> date:
     match d:
@@ -170,6 +172,3 @@ def 月末(年數, 月數):
 def 月起迄(year, mon):
     月初 = date(year, mon, 1)
     return [月初, 月末(year, mon)]
-
-
-
