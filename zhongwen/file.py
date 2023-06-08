@@ -49,11 +49,12 @@ def chrome():
     return chrome
 
 # @cache.memoize(expire=100, tag='抓取')
-def 抓取(url, 抓取方式='requests', 除錯=False, headers=None, use_requests=None) -> str:
+def 抓取(url, 抓取方式='requests', 除錯=False, headers=None, use_requests=None, 參數={}) -> str:
     '''抓取網頁回傳原始碼。
-    抓取方式: 'requests' 係指定使用 requests 模組；'selenium' 係 selenium 模組。
+    抓取方式: 'requests' 係指定使用 requests.get；'post' 係 requests.post；'selenium' 係 selenium 模組。
 '''
     if use_requests: 
+        from warnings import warn
         warn(f'參數【use_request】將廢棄且已無作用，已預設使用 requests 模組。', DeprecationWarning, stacklevel=2)
     import requests
     import logging
@@ -67,7 +68,13 @@ def 抓取(url, 抓取方式='requests', 除錯=False, headers=None, use_request
         headers = {'user-agent': fake.user_agent()
                   ,"accept-language": "zh-TW,zh;q=0.9,en;q=0.8,zh-CN;q=0.7"
                   }
-    r = requests.get(url, headers=headers)
+        if 抓取方式=='post':
+            headers["content-type"] = "application/x-www-form-urlencoded"
+    if 抓取方式=='post':
+        logging.debug(參數)
+        r = requests.post(url, 參數)
+    else:
+        r = requests.get(url, headers=headers)
     logging.debug(f'回復為{r!r}')
     logging.debug(f'{r.cookies.keys()!r}')
     logging.debug(f'{r.text}')
