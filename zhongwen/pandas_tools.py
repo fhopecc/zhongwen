@@ -1,5 +1,43 @@
 '輔助PANDAS工具'
 
+class 使用者要求覆寫(Exception):
+    pass
+
+class 批號存在錯誤(Exception):
+    def __init__(self, 批號, 批號欄名, 表格):
+        self.批號 = 批號
+        self.批號欄名 = 批號欄名
+        self.表格 = 表格
+
+    def __str__(self):
+        return f'批號【{self.批號}】已存在，請指定覆寫=True！'
+
+def 批次讀取(批號, 批號欄名, 表格, 資料庫, parse_dates=None):
+    import pandas as pd
+    sql = f'select * from {表格} where {批號欄名}=="{批號}"'
+    return pd.read_sql_query(sql, 資料庫, index_col='index', parse_dates=parse_dates)
+
+def 批次刪除(批號, 批號欄名, 表格, 資料庫):
+    c = 資料庫.cursor()
+    sql = f'delete from {表格} where {批號欄名}=="{批號}"'
+    c.execute(sql)
+    資料庫.commit()
+
+def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 覆寫=False):
+    import logging
+    logging.debug(f'開始批次寫入{批號}、{表格}')
+    import pandas as pd
+    try:
+        df = 批次讀取(批號, 批號欄名, 表格, 資料庫) 
+        if not 覆寫 and df.shape[0]>0: raise 批號存在錯誤(批號, 批號欄名, 表格)
+        if df.shape[0] > 0: 
+            批次刪除(批號, 批號欄名, 表格, 資料庫)
+        raise 使用者要求覆寫()
+    except (pd.errors.DatabaseError, 使用者要求覆寫) as e:
+        logging.debug(e)
+        logging.debug(f'批次寫入{批號}、{表格}')
+        資料.to_sql(表格, 資料庫, if_exists='append')
+
 def 可顯示(查詢資料函數):
     '裝飾查詢資料函數，指名參數設為【顯示=True】，即將查詢結果以 html 顯示。'
     from functools import wraps

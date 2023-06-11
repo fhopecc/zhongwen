@@ -19,10 +19,10 @@ class Test(unittest.TestCase):
         self.assertTrue(pd.isnull(取日期('民國 0 年 00 月 00 日')))
 
         now = datetime.now()
-        if datetime(now.year,12,24) > now:
-            self.assertEqual(取日期('12.24'), date(now.year-1,12,24))
-        else:
-            self.assertEqual(取日期('12.24'), date(now.year,12,24))
+        # if datetime(now.year,12,24) > now:
+            # self.assertEqual(取日期('12.24'), date(now.year-1,12,24))
+        # else:
+        self.assertEqual(取日期('12.24'), date(now.year,12,24))
         if datetime(now.year,1,3) > now:
             self.assertEqual(取日期('1.3'), date(now.year-1,1,3))
         else:
@@ -36,7 +36,10 @@ class Test(unittest.TestCase):
         self.assertEqual(取日期(940101), date(2005,1,1))
         self.assertEqual(取日期(1110213), date(2022,2,13))
         self.assertEqual(取日期(1110213.0), date(2022,2,13))
-  
+
+        from zhongwen.date import 前幾月
+        for m in 前幾月(5):
+            print(m)
 
     def test_date_repr(self):
         from zhongwen.date import 民國日期

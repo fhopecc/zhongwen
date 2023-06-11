@@ -174,3 +174,10 @@ def 月末(年數, 月數):
 def 月起迄(year, mon):
     月初 = date(year, mon, 1)
     return [月初, 月末(year, mon)]
+
+def 前幾月(月數):
+    import datetime
+    d = 今日() 
+    for i in range(月數):
+        yield d
+        d = d.replace(day=1) - datetime.timedelta(days=1)
