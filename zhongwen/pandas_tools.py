@@ -22,21 +22,23 @@ def 批次刪除(批號, 批號欄名, 表格, 資料庫):
     sql = f'delete from {表格} where {批號欄名}=="{批號}"'
     c.execute(sql)
     資料庫.commit()
+    import logging
+    logging.debug(f'批次刪除{批號}、{表格}……')
 
 def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 覆寫=False):
     import logging
-    logging.debug(f'開始批次寫入{批號}、{表格}')
     import pandas as pd
     try:
         df = 批次讀取(批號, 批號欄名, 表格, 資料庫) 
-        if not 覆寫 and df.shape[0]>0: raise 批號存在錯誤(批號, 批號欄名, 表格)
-        if df.shape[0] > 0: 
-            批次刪除(批號, 批號欄名, 表格, 資料庫)
-        raise 使用者要求覆寫()
+        if not df.empty: 
+            if 覆寫: 
+                批次刪除(批號, 批號欄名, 表格, 資料庫)
+                raise 使用者要求覆寫()
+            else: raise 批號存在錯誤(批號, 批號欄名, 表格)
     except (pd.errors.DatabaseError, 使用者要求覆寫) as e:
-        logging.debug(e)
-        logging.debug(f'批次寫入{批號}、{表格}')
+        logging.debug(f'批次寫入{批號}、{表格}……')
         資料.to_sql(表格, 資料庫, if_exists='append')
+        logging.debug(f'寫入成功！')
 
 def 可顯示(查詢資料函數):
     '裝飾查詢資料函數，指名參數設為【顯示=True】，即將查詢結果以 html 顯示。'
