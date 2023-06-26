@@ -9,6 +9,7 @@ def 是日期嗎(v):
 def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=None
           ,日期大於今日省略年推論為去年=False) -> date:
     match d:
+        case d if 101 <= 99912
         case float():
             return 取日期(f'{d:.0f}')
         case int():
@@ -165,6 +166,9 @@ def 季末(年數, 季數):
         case 2: return date(年數, 6, 30)
         case 3: return date(年數, 9, 30)
         case 4: return date(年數, 12, 31)
+
+def 本季初():
+    return 季初(*季數()) 
 
 def 月末(年數, 月數):
     import calendar
