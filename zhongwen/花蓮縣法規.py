@@ -10,7 +10,7 @@ import os
 import re
 cache = Cache(Path.home() / 'cache' / 'hllaw')
 
-網址 = 'https://glrs.hl.gov.tw'
+網址 = 'https://glrs.hl.gov.tw/glrsout/'
 
 def 開啟網頁():
     os.system(f'start {網址}')
@@ -77,6 +77,23 @@ async def 爬取法規連結():
     df = pd.DataFrame(links)
     dfs = await asyncio.gather(*[取連結(page_no) for page_no in range(2, page_num+1)])
     df = pd.concat([df, *dfs])
+    return df
+
+def 取法規目錄頁數(html):
+    pat = r'(\d+)<div class="pageno hidden-xs"'
+    text = html
+    if m:=re.search(pat, text):
+        return int(m[1])
+    else:
+        raise RuntimeError('法規主頁無頁數資訊。')
+
+def 取法規頁連結(html) -> pd.DataFrame:
+    text = html
+    t = bs(text, 'lxml')
+    trs = t.select('#all > table > tbody > tr')
+    links = [tr.select('a')[0] for tr in trs]
+    links = [{'名稱':link.text, '網址':link['href']} for link in links]
+    df = pd.DataFrame(links)
     return df
 
 from lark import Lark, Transformer
@@ -146,3 +163,9 @@ def 法規條文():
     df['條文內容'] = df.法規分條.map(取條文內容)
     df.rename(columns={'修正日期':'異動日期'}, inplace=True)
     return df[['法規名稱', '異動日期', '條號', '條文內容']]
+
+if __name__ == '__main__':
+    c = 抓取(網址)
+    print(取法規目錄頁數(c))
+    print(取法規頁連結(c))
+    # print(c)

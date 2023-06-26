@@ -1,4 +1,5 @@
 from zhongwen.file import 下載, 解壓
+from zhongwen.pandas_tools import 可顯示
 from pathlib import Path
 from diskcache import Cache
 import re
@@ -22,7 +23,7 @@ def 中央命令():
     from xml.etree.cElementTree import parse
     return parse(minling)
 
-
+@可顯示
 @cache.memoize(expire=30*24*60*60)
 def 法規條文():
     '法規條文係以法規名稱、異動日期及條號為索引來查詢條文內容'
@@ -47,4 +48,5 @@ def 法規條文():
     df['異動日期'] = df.異動日期.map(取日期)
     return df
 
-
+if __name__ == '__main__':
+    法規條文(顯示=True)

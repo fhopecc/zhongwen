@@ -178,7 +178,7 @@ def 自動格式(df
                 實數欄位.append(c)
             except AttributeError:
                 實數欄位 = [c]
-        pat = '^.+(率|比例|比)$'
+        pat = '^.+(率|比例|比|\(%\))$'
         if re.match(pat, c) and c not in ['本益比']:
             try:
                 df[c] = df[c].map(轉數值)
