@@ -12,16 +12,25 @@ def 取過去日期(d):
 def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=None
           ,日期大於今日省略年推論為去年=False) -> date:
     match d:
-        case d if 101 <= 99912
         case float():
             return 取日期(f'{d:.0f}')
         case int():
-            return 取日期(f'{d:07}')
+            if d > 2_01_01:
+                return 取日期(f'{d:07}')
+            return 取日期(f'{d:05}')
         case datetime():
             return date(d.year, d.month, d.day)
         case date():
             return date(d.year, d.month, d.day)
         case str(d):
+            # 省略日自動推論為月底
+            pat = r'^(\d\d\d)(\d\d)$'
+            if m:=re.match(pat, d):
+                year = int(m[1]) + 1911
+                mon = int(m[2])
+                import calendar
+                _, last_day = calendar.monthrange(year, mon)
+                return date(year, mon, last_day)
             # 省略年自動推論為今年
             pat = r'(\d{1,2})([./])\d{1,2}'
             if m:=re.match(pat, d):
