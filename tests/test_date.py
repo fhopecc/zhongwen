@@ -14,8 +14,8 @@ class Test(unittest.TestCase):
         self.assertEqual(取日期('110.11.10'), date(2021,11,10))
         self.assertEqual(取日期('111.9.23'), date(2022,9,23))
         self.assertEqual(取日期('920526'), date(2003,5,26))
-        self.assertEqual(取日期('民國 99 年 09 月 10 日'), date(2010,9,10))
         self.assertEqual(取日期(11204), date(2023,4,30))
+        self.assertEqual(取日期('民國 99 年 09 月 10 日'), date(2010,9,10))
         self.assertEqual(取日期('111.4.29+150'), date(2022,9,26))
         self.assertTrue(pd.isnull(取日期('民國 0 年 00 月 00 日')))
 
