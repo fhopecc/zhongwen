@@ -66,7 +66,7 @@ def 抓取(url, 抓取方式='requests', 除錯=False, headers=None, use_request
             headers["content-type"] = "application/x-www-form-urlencoded"
     if 抓取方式=='post':
         logging.debug(參數)
-        r = requests.post(url, 參數)
+        r = requests.post(url, headers=headers, data=參數)
     else:
         r = requests.get(url, headers=headers)
     logging.debug(f'回復為{r!r}')
