@@ -37,16 +37,10 @@ def 最新檔(目錄, 檔案樣式="*"):
 
 @lru_cache
 def chrome():
+    from webdriver_manager.chrome import ChromeDriverManager
+    path = ChromeDriverManager().install()
     from selenium import webdriver
-    from selenium.webdriver.chrome.options import Options
-    options = Options()
-    options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    options.add_argument("--disable-notifications")
-    from os import environ
-    driverpath = Path(environ['TEMP']) / 'chromedriver.exe'
-    chrome = webdriver.Chrome(executable_path=str(driverpath)
-                             ,options=options)
-    return chrome
+    return webdriver.Chrome()
 
 # @cache.memoize(expire=100, tag='抓取')
 def 抓取(url, 抓取方式='requests', 除錯=False, headers=None, use_requests=None, 參數={}) -> str:
