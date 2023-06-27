@@ -1,7 +1,5 @@
 '日期處理'
-import re
 from datetime import date, datetime, timedelta
-import pandas as pd
 
 def 是日期嗎(v):
     return isinstance(v, date) or isinstance(v, datetime)
@@ -9,8 +7,10 @@ def 是日期嗎(v):
 def 取過去日期(d):
     return 取日期(d, 日期大於今日省略年推論為去年=True)
 
-def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=None
-          ,日期大於今日省略年推論為去年=False) -> date:
+def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=None,
+           日期大於今日省略年推論為去年=False) -> date:
+    import re
+    import pandas as pd
     match d:
         case float():
             return 取日期(f'{d:.0f}')
@@ -91,9 +91,9 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
                 return datetime(d.year, d.month, d.day)
             raise TypeError(f'不支援類型[{type(d)}]、值[{d}]！')
 
-def 上月():
-    d = date.today()
-    return f'{d.year-1911:03}{d.month-1:02}'
+def 上月() -> date:
+    '上月底'
+    return 今日().replace(day=1) - timedelta(days=1)
 
 def 民國日期(d, fmt='%Y%m%d', 昨今明表達=False):
     '%Y表年數、%m表月數前置0、%d表日數前置0、%M表月數不前置0'
