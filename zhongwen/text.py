@@ -1,7 +1,13 @@
+'中文文字處理'
 from diskcache import Cache
 from pathlib import Path
-from .file import 下載
 cache = Cache(Path.home() / 'cache' / 'text')
+
+def 去標籤(字串):
+    import re
+    字串 = 字串.replace('\u200b', '')
+    字串 = 字串.replace('\xff', '')
+    return re.sub(r'<.*?>', '', 字串)
 
 def 中文詞界(curpos, line):
     import hanlp
@@ -68,6 +74,7 @@ def 字元切換(string:str):
     return ''.join(map(switch_case, string))
 
 def 下載倉頡碼對照表():
+    from zhongwen.file import 下載
     f = 下載('https://github.com/Jackchows/Cangjie5/raw/master/Cangjie5_TC.txt')
     return f
 
@@ -111,7 +118,6 @@ def 翻譯(word):
     client = Translate()
     # 翻译句子
     text = client.translate(word, 'zh-tw')
-    # breakpoint()
     return text.translatedText
 
 def 校正異體字(字串:str):
@@ -124,3 +130,24 @@ def 刪空格(n):
     import re
     try: return re.sub(r'\s+', '', n)
     except TypeError: return n
+
+class 萌典尚無定義之字詞(Exception):pass
+
+def 查萌典(字詞):
+    from .file import 抓取
+    url = f'https://www.moedict.tw/{字詞}.json'
+    j = 抓取(url)
+    import json
+    try:
+        d = json.loads(j)
+        hs = d['heteronyms']
+        def 取定義(異名):
+            h = 異名
+            m = h['bopomofo']
+            m += '：'
+            ds = h['definitions']
+            m += ''.join([去標籤(d["def"]) for d in ds])
+            return m
+        return '\n'.join([取定義(h) for h in hs])
+    except json.JSONDecodeError:
+        raise 萌典尚無定義之字詞(字詞) 
