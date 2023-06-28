@@ -148,6 +148,6 @@ def 查萌典(字詞):
             ds = h['definitions']
             m += ''.join([去標籤(d["def"]) for d in ds])
             return m
-        return '\n'.join([取定義(h) for h in hs])
+        return [取定義(h) for h in hs]
     except json.JSONDecodeError:
         raise 萌典尚無定義之字詞(字詞) 

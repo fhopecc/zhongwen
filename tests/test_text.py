@@ -8,7 +8,8 @@ class Test(unittest.TestCase):
         # import logging
         # logging.getLogger().setLevel(logging.DEBUG)
 
-        self.assertEqual(查萌典('查'), 'ㄔㄚˊ：考察、檢查。翻閱、檢尋。大筏，水中的浮木。\nㄓㄚ：姓。如五代時南唐有查文徽。我。同「咱」(一)。')
+        self.assertEqual(查萌典('查'), ['ㄔㄚˊ：考察、檢查。翻閱、檢尋。大筏，水中的浮木。', 
+                                        'ㄓㄚ：姓。如五代時南唐有查文徽。我。同「咱」(一)。'])
 
         with self.assertRaises(萌典尚無定義之字詞):
             查萌典('word')
