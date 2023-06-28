@@ -157,11 +157,13 @@ def 上年底() -> date:
     return d.replace(year=d.year-1, month=12, day=31)
 
 def 季數(日期=今日()) -> (int, int):
+    '指定日期之季數，以(年數, 季數)表達。'
     d = 日期
     if 1 <= d.month <= 3: return (d.year, 1)
     if 4 <= d.month <= 6: return (d.year, 2)
     if 7 <= d.month <= 9: return (d.year, 3)
     if 10 <= d.month <= 12: return (d.year, 4)
+
 
 def 季初(年數, 季數) -> date:
     '指定季之最初日'
@@ -181,6 +183,10 @@ def 季末(年數, 季數):
 
 def 本季初():
     return 季初(*季數()) 
+
+def 上季數() -> (int, int):
+    '上季數之(年數, 季數)。'
+    return 季數(本季初()-timedelta(days=1))
 
 def 月末(年數, 月數):
     import calendar
