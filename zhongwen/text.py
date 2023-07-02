@@ -151,3 +151,7 @@ def 查萌典(字詞):
         return [取定義(h) for h in hs]
     except json.JSONDecodeError:
         raise 萌典尚無定義之字詞(字詞) 
+
+def 去除字串末句號(字串):
+    import re
+    return re.sub('。$', '', 字串)

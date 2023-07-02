@@ -173,9 +173,16 @@ def 季初(年數, 季數) -> date:
         case 3: return date(年數,  7, 1)
         case 4: return date(年數, 10, 1)
 
-def 季末(年數, 季數):
-    '指定季之最末日'
-    match 季數:
+def 季末(年數或日數=None, _季數=None):
+    '指定季之最末日，未指定為本季'
+    if 是日期嗎(年數或日數):
+        年數, _季數 = 季數(年數或日數)
+    else:
+        if not 年數或日數 or not _季數:
+            年數, _季數 = 季數()
+        else:
+            年數=年數或日數 
+    match _季數:
         case 1: return date(年數, 3, 31)
         case 2: return date(年數, 6, 30)
         case 3: return date(年數, 9, 30)
@@ -188,18 +195,26 @@ def 上季數() -> (int, int):
     '上季數之(年數, 季數)。'
     return 季數(本季初()-timedelta(days=1))
 
+def 上季初():
+    return 季初(*上季數())
+
 def 月末(年數, 月數):
     import calendar
     月末日數 = calendar.monthrange(年數, 月數)[1]
     return date(年數, 月數, 月末日數)
+
+def 與季末相距月數(日期):
+    from dateutil.relativedelta import relativedelta
+    return relativedelta(季末(日期), 日期).months
 
 def 月起迄(year, mon):
     月初 = date(year, mon, 1)
     return [月初, 月末(year, mon)]
 
 def 前幾月(月數):
-    import datetime
-    d = 今日() 
-    for i in range(月數):
-        yield d
-        d = d.replace(day=1) - datetime.timedelta(days=1)
+    from dateutil.relativedelta import relativedelta
+    return 今日() - relativedelta(months=月數)
+
+if __name__ == '__main__':
+    print(前幾月(1))
+    print(前幾月(2))

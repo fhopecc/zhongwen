@@ -25,17 +25,20 @@ def 批次刪除(批號, 批號欄名, 表格, 資料庫):
     import logging
     logging.debug(f'批次刪除{批號}、{表格}……')
 
+class 該批資料為空(Exception):pass
+    
+
 def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 覆寫=False):
     import logging
     import pandas as pd
     try:
         df = 批次讀取(批號, 批號欄名, 表格, 資料庫) 
-        if not df.empty: 
-            if 覆寫: 
-                批次刪除(批號, 批號欄名, 表格, 資料庫)
-                raise 使用者要求覆寫()
-            else: raise 批號存在錯誤(批號, 批號欄名, 表格)
-    except (pd.errors.DatabaseError, 使用者要求覆寫) as e:
+        if df.empty: raise 該批資料為空(f'表格：{表格}、批號：{批號}')
+        if 覆寫: 
+            批次刪除(批號, 批號欄名, 表格, 資料庫)
+            raise 使用者要求覆寫()
+        else: raise 批號存在錯誤(批號, 批號欄名, 表格)
+    except (pd.errors.DatabaseError, 使用者要求覆寫, 該批資料為空) as e:
         logging.debug(f'批次寫入{批號}、{表格}……')
         資料.to_sql(表格, 資料庫, if_exists='append')
         logging.debug(f'寫入成功！')
@@ -169,26 +172,26 @@ def 自動格式(df
         pat = '^.*(數|金額|損益|股利|累計|差異|期末|負債|營收|\(元\))|本益比|成本|支出|存入|現值|借券|餘額|借|貸$'
         if re.match(pat, c):
             try:
-                整數欄位.append(c)
+                if not c in 隱藏欄位: 整數欄位.append(c)
             except AttributeError:
                 整數欄位 = [c]
         pat = '^現金轉換天數|股價|配息$'
         if re.match(pat, c):
             try:
-                實數欄位.append(c)
+                if not c in 隱藏欄位: 實數欄位.append(c)
             except AttributeError:
                 實數欄位 = [c]
         pat = '^.+(率|比例|比|\(%\))$'
         if re.match(pat, c) and c not in ['本益比']:
             try:
-                df[c] = df[c].map(轉數值)
-                百分比欄位.append(c)
+                # df[c] = df[c].map(轉數值)
+                if not c in 隱藏欄位: 百分比欄位.append(c)
             except AttributeError:
                 百分比欄位 = [c]
         pat = '.*日期.*'
         if re.match(pat, c):
             try:
-                日期欄位.append(c)
+                if not c in 隱藏欄位: 日期欄位.append(c)
             except AttributeError:
                     日期欄位 = [c]
     if 整數欄位: 整數欄位 = [*set(整數欄位)]
@@ -196,9 +199,14 @@ def 自動格式(df
     if 百分比欄位: 百分比欄位 = [*set(百分比欄位)]
     from itertools import chain
     n = list(chain.from_iterable([l for l in [整數欄位, 實數欄位, 百分比欄位] if isinstance(l, list)]))
-    # breakpoint()
     if n: 最大值顯著欄位 += n
     最大值顯著欄位 = [*set(最大值顯著欄位)]
+    import logging
+    logging.debug(f'整數欄位：{整數欄位!r}')
+    logging.debug(f'實數欄位：{實數欄位!r}')
+    logging.debug(f'百分比欄位：{百分比欄位!r}')
+    logging.debug(f'日期欄位：{日期欄位!r}')
+    logging.debug(f'隱藏欄位：{隱藏欄位!r}')
     s = df.style.pipe(標準格式(整數欄位, 實數欄位, 百分比欄位
                               ,最大值顯著欄位, 隱藏欄位 ,日期欄位
                               ,採用民國日期格式=採用民國日期格式

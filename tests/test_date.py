@@ -38,10 +38,6 @@ class Test(unittest.TestCase):
         self.assertEqual(取日期(1110213), date(2022,2,13))
         self.assertEqual(取日期(1110213.0), date(2022,2,13))
 
-        from zhongwen.date import 前幾月
-        for m in 前幾月(5):
-            print(m)
-
     def test_date_repr(self):
         from zhongwen.date import 民國日期
         self.assertEqual(民國日期(取日期('110/12/27')), '1101227')
@@ -68,6 +64,9 @@ class Test(unittest.TestCase):
 
         from zhongwen.date import 季數
         self.assertEqual(季數(date(2023, 1, 2)), (2023, 1))
+
+        from zhongwen.date import 與季末相距月數
+        self.assertEqual(與季末相距月數(date(2023, 5, 3)), 1)
 
 if __name__ == '__main__':
     unittest.main()

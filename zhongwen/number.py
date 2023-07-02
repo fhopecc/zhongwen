@@ -36,7 +36,7 @@ def 轉數值(n, 傳回格式=False) -> int|float:
         pat = r'(-?[\d](\.\d+)?)%'
         if m:=re.match(pat, n):
             import pandas as pd
-            return pd.to_numeric(m[1]) /100
+            return pd.to_numeric(m[1])/100
 
         # 不具位名之中文數
         中文數字='○0０零壹貳參肆伍陸柒捌玖一二三四五六七八九'
@@ -139,10 +139,10 @@ def 百分比(n):
   '表達至2位小數百分比'
   return f'{abs(float(n))*100:,.2f}％'
 
-def 增減百分比(r):
+def 增減百分比(r, 增減文字=["增加", "減少"]):
     n = abs(r)
-    增減文字 = "增加" if r>0 else "減少" 
-    return f'{增減文字}約{n:.2%}'
+    _增減文字 = 增減文字[0] if r>0 else  增減文字[1] 
+    return f'{_增減文字}約{n:.2%}'
 
 class 標號:
     def __init__(self, 號碼, 階層):
