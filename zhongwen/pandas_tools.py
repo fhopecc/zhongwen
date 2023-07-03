@@ -78,8 +78,9 @@ def 資料型態標準化(df):
             df[c] = df[c].map(轉數值)
     return df            
 
-def 標準格式(整數欄位=[], 實數欄位=[], 百分比欄位=[], 
-             最大值顯著欄位=[], 隱藏欄位=[], 日期欄位=[], 
+def 標準格式(整數欄位=[], 實數欄位=[], 百分比欄位=[], 日期欄位=[], 
+             最大值顯著欄位=[], 隱藏欄位=[], 
+             百分比漸層欄位=[], 
              採用民國日期格式=False
             ):
     def formatter(style):
@@ -96,6 +97,10 @@ def 標準格式(整數欄位=[], 實數欄位=[], 百分比欄位=[],
             if 採用民國日期格式:
                 from zhongwen.date import 民國日期
                 style.format(民國日期, subset=日期欄位)
+        if 百分比漸層欄位:
+            style.background_gradient(axis=0, cmap='RdYlGn', vmax=1, vmin=-1,
+                                      subset=百分比漸層欄位
+                                      )
         if 最大值顯著欄位:
             style.highlight_max(最大值顯著欄位)
             style.background_gradient(axis=0
@@ -111,9 +116,11 @@ def 標準格式(整數欄位=[], 實數欄位=[], 百分比欄位=[],
         return style
     return formatter
 
-def show_html(df, 無格式=False, 整數欄位=[], 實數欄位=[],
-              百分比欄位=[] ,日期欄位=[] ,隱藏欄位=[], 最大值顯著欄位=[],
-              顯示筆數=100, 採用民國日期格式=False, 標題=None
+def show_html(df, 無格式=False, 整數欄位=[], 實數欄位=[]
+             ,百分比欄位=[] ,日期欄位=[] ,隱藏欄位=[]
+             ,百分比漸層欄位=[]
+             ,最大值顯著欄位=[]
+             ,顯示筆數=100, 採用民國日期格式=False, 標題=None
              ):
     import pandas as pd
     if isinstance(df, pd.Series):
@@ -128,6 +135,7 @@ def show_html(df, 無格式=False, 整數欄位=[], 實數欄位=[],
                            ,百分比欄位
                            ,日期欄位
                            ,隱藏欄位
+                           ,百分比漸層欄位
                            ,最大值顯著欄位
                            ,顯示筆數
                            ,採用民國日期格式
@@ -143,18 +151,10 @@ def show_html(df, 無格式=False, 整數欄位=[], 實數欄位=[],
     import os
     os.system(f'start {html}')
 
-def 自動格式(df
-            ,整數欄位=[]
-            ,實數欄位=[]
-            ,百分比欄位=[]
-            ,日期欄位=[]
-            ,隱藏欄位=[]
-            ,最大值顯著欄位=[]
-            ,顯示筆數=100
-            ,採用民國日期格式=False
-            ,顯示=None
-            ,除錯提示=False
-            ,顯示提示=False
+def 自動格式(df,
+            整數欄位=[] ,實數欄位=[] ,百分比欄位=[] ,日期欄位=[] ,隱藏欄位=[],
+            百分比漸層欄位=[], 最大值顯著欄位=[] ,顯示筆數=100,
+            採用民國日期格式=False ,顯示=None ,除錯提示=False ,顯示提示=False
             ):
     if 顯示筆數:
         df = df[:顯示筆數]
@@ -194,16 +194,20 @@ def 自動格式(df
     if 實數欄位: 實數欄位 = [*set(實數欄位)]
     if 百分比欄位: 百分比欄位 = [*set(百分比欄位)]
     from itertools import chain
-    n = list(chain.from_iterable([l for l in [整數欄位, 實數欄位, 百分比欄位] if isinstance(l, list)]))
-    if n: 最大值顯著欄位 += n
+    n = list(chain.from_iterable([l for l in [整數欄位, 實數欄位] if isinstance(l, list)]))
+    if n: 最大值顯著欄位.extend(n)
     最大值顯著欄位 = [*set(最大值顯著欄位)]
+    百分比漸層欄位.extend(百分比欄位)
     import logging
     logging.debug(f'整數欄位：{整數欄位!r}')
     logging.debug(f'實數欄位：{實數欄位!r}')
     logging.debug(f'百分比欄位：{百分比欄位!r}')
+    logging.debug(f'百分比漸層欄位：{百分比漸層欄位!r}')
+    logging.debug(f'最大值顯著欄位：{最大值顯著欄位!r}')
     logging.debug(f'日期欄位：{日期欄位!r}')
     logging.debug(f'隱藏欄位：{隱藏欄位!r}')
     s = df.style.pipe(標準格式(整數欄位, 實數欄位, 百分比欄位
+                              ,百分比漸層欄位
                               ,最大值顯著欄位, 隱藏欄位 ,日期欄位
                               ,採用民國日期格式=採用民國日期格式
                               ))
