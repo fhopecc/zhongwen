@@ -208,6 +208,9 @@ def 連續正數(數列):
         s = v*(s+v) 
     return s
 
+def 增減約數(變動數):
+    return ('增加' if 變動數 > 0 else '減少') + 約數(abs(變動數))
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()

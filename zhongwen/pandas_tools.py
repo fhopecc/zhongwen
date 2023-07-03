@@ -78,9 +78,9 @@ def 資料型態標準化(df):
             df[c] = df[c].map(轉數值)
     return df            
 
-def 標準格式(整數欄位=None, 實數欄位=None, 百分比欄位=None, 最大值顯著欄位=None, 隱藏欄位=None
-            ,日期欄位=None
-            ,採用民國日期格式=False
+def 標準格式(整數欄位=[], 實數欄位=[], 百分比欄位=[], 
+             最大值顯著欄位=[], 隱藏欄位=[], 日期欄位=[], 
+             採用民國日期格式=False
             ):
     def formatter(style):
         style.applymap(lambda r:'text-align:right')
@@ -111,16 +111,9 @@ def 標準格式(整數欄位=None, 實數欄位=None, 百分比欄位=None, 最
         return style
     return formatter
 
-def show_html(df, 無格式=False
-             ,整數欄位=None
-             ,實數欄位=None
-             ,百分比欄位=None
-             ,日期欄位=None
-             ,隱藏欄位=None
-             ,最大值顯著欄位=[]
-             ,顯示筆數=100
-             ,採用民國日期格式=False
-             ,標題=None
+def show_html(df, 無格式=False, 整數欄位=[], 實數欄位=[],
+              百分比欄位=[] ,日期欄位=[] ,隱藏欄位=[], 最大值顯著欄位=[],
+              顯示筆數=100, 採用民國日期格式=False, 標題=None
              ):
     import pandas as pd
     if isinstance(df, pd.Series):
@@ -140,7 +133,10 @@ def show_html(df, 無格式=False
                            ,採用民國日期格式
                            ,顯示=True
                            )
-        except (ValueError, KeyError, TypeError) as e: warn(f'發生例外：{e}')
+        except (ValueError, KeyError, TypeError) as e: 
+            import traceback
+            trace = traceback.format_exc()
+            warn(f'發生例外：{trace}')
     from pathlib import Path
     html = Path.home() / 'TEMP' / 'output.html'
     df.to_html(html)
@@ -148,11 +144,11 @@ def show_html(df, 無格式=False
     os.system(f'start {html}')
 
 def 自動格式(df
-            ,整數欄位=None
-            ,實數欄位=None
-            ,百分比欄位=None
-            ,日期欄位=None
-            ,隱藏欄位=None
+            ,整數欄位=[]
+            ,實數欄位=[]
+            ,百分比欄位=[]
+            ,日期欄位=[]
+            ,隱藏欄位=[]
             ,最大值顯著欄位=[]
             ,顯示筆數=100
             ,採用民國日期格式=False
