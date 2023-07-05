@@ -89,7 +89,6 @@ def 標準格式(整數欄位=[], 實數欄位=[], 百分比欄位=[], 日期欄
             style.format('{:,.0f}', subset=整數欄位)
         if 百分比欄位:
             style.format('{:,.2%}', subset=百分比欄位)
-            style.background_gradient(axis=0, cmap='RdYlGn', subset=百分比欄位, vmin=0, vmax=1)
         if 實數欄位:
             style.format('{:,.2f}', subset=實數欄位)
         if 日期欄位:
@@ -97,15 +96,14 @@ def 標準格式(整數欄位=[], 實數欄位=[], 百分比欄位=[], 日期欄
             if 採用民國日期格式:
                 from zhongwen.date import 民國日期
                 style.format(民國日期, subset=日期欄位)
-        if 百分比漸層欄位:
-            style.background_gradient(axis=0, cmap='RdYlGn', vmax=1, vmin=-1,
-                                      subset=百分比漸層欄位
-                                      )
         if 最大值顯著欄位:
-            style.highlight_max(最大值顯著欄位)
-            style.background_gradient(axis=0
-                  ,cmap='RdYlGn'
-                  ,subset=最大值顯著欄位)
+            # style.highlight_max(最大值顯著欄位)
+            style.background_gradient(axis=0, cmap='RdYlGn'
+                                     ,subset=最大值顯著欄位)
+        if 百分比漸層欄位:
+            style.background_gradient(axis=0, cmap='RdYlGn', vmax=1, vmin=-1
+                                      ,subset=百分比漸層欄位
+                                      )
         if 隱藏欄位:
             style.hide(隱藏欄位, axis=1) # hide index
         tr_hover = {
@@ -116,7 +114,8 @@ def 標準格式(整數欄位=[], 實數欄位=[], 百分比欄位=[], 日期欄
         return style
     return formatter
 
-def show_html(df, 無格式=False, 整數欄位=[], 實數欄位=[]
+def show_html(df, 無格式=False
+             ,整數欄位=[], 實數欄位=[]
              ,百分比欄位=[] ,日期欄位=[] ,隱藏欄位=[]
              ,百分比漸層欄位=[]
              ,最大值顯著欄位=[]
@@ -160,35 +159,41 @@ def 自動格式(df,
         df = df[:顯示筆數]
     columns = df.columns
     from zhongwen.number import 轉數值
+    import pandas as pd
+    import numpy as np
     for c in df.columns:
         pat = '^.*述|借貸$'
         import re
         if re.match(pat, c):
             continue
+
         pat = '^.*(數|金額|損益|股利|累計|差異|期末|負債|營收|\(元\))|本益比|成本|支出|存入|現值|借券|餘額|借|貸$'
         if re.match(pat, c):
-            try:
-                if not c in 隱藏欄位: 整數欄位.append(c)
-            except AttributeError:
-                整數欄位 = [c]
+            if np.issubclass_(df[c].dtype.type, np.integer) and not c in 隱藏欄位:
+                try:
+                    整數欄位.append(c)
+                except AttributeError:
+                    整數欄位 = [c]
         pat = '^現金轉換天數|股價|配息$'
         if re.match(pat, c):
-            try:
-                if not c in 隱藏欄位: 實數欄位.append(c)
-            except AttributeError:
-                實數欄位 = [c]
+            if df[c].dtype == float and not c in 隱藏欄位: 
+                try:
+                    實數欄位.append(c)
+                except AttributeError:
+                    實數欄位 = [c]
         pat = '^.+(率|比例|比|\(%\))$'
         if re.match(pat, c) and c not in ['本益比']:
-            try:
-                # df[c] = df[c].map(轉數值)
-                if not c in 隱藏欄位: 百分比欄位.append(c)
-            except AttributeError:
-                百分比欄位 = [c]
+            if df[c].dtype == float and not c in 隱藏欄位: 
+                try:
+                    百分比欄位.append(c)
+                except AttributeError:
+                    百分比欄位 = [c]
         pat = '.*日期.*'
         if re.match(pat, c):
-            try:
-                if not c in 隱藏欄位: 日期欄位.append(c)
-            except AttributeError:
+            if df[c].dtype == "datetime64[ns]" and not c in 隱藏欄位:
+                try:
+                    日期欄位.append(c)
+                except AttributeError:
                     日期欄位 = [c]
     if 整數欄位: 整數欄位 = [*set(整數欄位)]
     if 實數欄位: 實數欄位 = [*set(實數欄位)]
@@ -207,8 +212,10 @@ def 自動格式(df,
     logging.debug(f'日期欄位：{日期欄位!r}')
     logging.debug(f'隱藏欄位：{隱藏欄位!r}')
     s = df.style.pipe(標準格式(整數欄位, 實數欄位, 百分比欄位
+                              ,日期欄位
                               ,百分比漸層欄位
-                              ,最大值顯著欄位, 隱藏欄位 ,日期欄位
+                              ,隱藏欄位
+                              ,最大值顯著欄位
                               ,採用民國日期格式=採用民國日期格式
                               ))
     tp = df.copy()

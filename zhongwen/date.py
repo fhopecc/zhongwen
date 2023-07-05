@@ -215,6 +215,9 @@ def 前幾月(月數):
     from dateutil.relativedelta import relativedelta
     return 今日() - relativedelta(months=月數)
 
+def 民國年月(日期):
+    return [日期.year-1911, 日期.month]
+
 if __name__ == '__main__':
     print(前幾月(1))
     print(前幾月(2))
