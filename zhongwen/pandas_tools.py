@@ -150,10 +150,11 @@ def show_html(df, 無格式=False
     import os
     os.system(f'start {html}')
 
-def 自動格式(df,
-            整數欄位=[] ,實數欄位=[] ,百分比欄位=[] ,日期欄位=[] ,隱藏欄位=[],
-            百分比漸層欄位=[], 最大值顯著欄位=[] ,顯示筆數=100,
-            採用民國日期格式=False ,顯示=None ,除錯提示=False ,顯示提示=False
+def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
+            ,日期欄位=[] ,隱藏欄位=[]
+            ,百分比漸層欄位=[], 最大值顯著欄位=[]
+            ,顯示筆數=100, 採用民國日期格式=False, 顯示=None
+            ,除錯提示=False, 顯示提示=False
             ):
     if 顯示筆數:
         df = df[:顯示筆數]
@@ -166,7 +167,6 @@ def 自動格式(df,
         import re
         if re.match(pat, c):
             continue
-
         pat = '^.*(數|金額|損益|股利|累計|差異|期末|負債|營收|\(元\))|本益比|成本|支出|存入|現值|借券|餘額|借|貸$'
         if re.match(pat, c):
             if np.issubclass_(df[c].dtype.type, np.integer) and not c in 隱藏欄位:
@@ -230,10 +230,12 @@ def 自動格式(df,
 
     if 顯示提示:
         s = s.set_tooltips(tp)
+
     if 顯示:
         from pathlib import Path
-        html = Path.home() / 'TEMP' / 'output.html'
-        s.to_html(html)
+        html = Path.home() / 'TEMP' / 'showdf.html'
+        s.to_html(html, encoding='utf8', doctype_html=True)
+        # s.to_html(html)
         import os
         os.system(f'start {html}')
     return s
