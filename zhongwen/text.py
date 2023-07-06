@@ -135,6 +135,7 @@ class 萌典尚無定義之字詞(Exception):pass
 
 def 查萌典(字詞):
     from .file import 抓取
+    import logging
     url = f'https://www.moedict.tw/{字詞}.json'
     j = 抓取(url)
     import json
@@ -143,8 +144,11 @@ def 查萌典(字詞):
         hs = d['heteronyms']
         def 取定義(異名):
             h = 異名
-            m = h['bopomofo']
-            m += '：'
+            try:
+                m = h['bopomofo']
+                m += '：'
+            except KeyError:
+                m = ''
             ds = h['definitions']
             m += ''.join([去標籤(d["def"]) for d in ds])
             return m

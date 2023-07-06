@@ -13,6 +13,9 @@ class Test(unittest.TestCase):
 
         with self.assertRaises(萌典尚無定義之字詞):
             查萌典('word')
+        import logging
+        logging.getLogger().setLevel(logging.DEBUG)
+        self.assertEqual(查萌典('彊')[0], '「強」的異體字。')
 
     # @unittest.skip('隔離測試')
     def test_text(self):
