@@ -107,10 +107,9 @@ def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False, selenium=Fal
         sleep(等待下載時間) # 等待 chrome 下載完成
         print(f'下載[{url}]至[{p}]成功！')
     else:
-        from urllib.request import urlopen
-        with urlopen(url) as r, p.open('wb') as f:
-            f.write(r.read())
-            print(f'下載[{url}]至[{p}]成功！')
+        import urllib.request
+        urllib.request.urlretrieve(url, str(p))
+        print(f'下載[{url}]至[{p}]成功！')
     return p
 
 def 解壓(壓縮檔, 目錄):
@@ -122,6 +121,6 @@ def 解壓(壓縮檔, 目錄):
         try:
             壓縮檔 = zipfile.ZipFile(壓縮檔)
         except zipfile.BadZipFile:
-            raise IOError(r'{壓縮檔}非ZipFile格式')
+            raise IOError(f'{壓縮檔}非ZipFile格式')
     壓縮檔.extractall(目錄)
     print(f'解壓[{壓縮檔}]成功！')
