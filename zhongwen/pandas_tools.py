@@ -83,6 +83,14 @@ def 標準格式(整數欄位=[], 實數欄位=[], 百分比欄位=[], 日期欄
              百分比漸層欄位=[], 
              採用民國日期格式=False
             ):
+    import logging
+    logging.debug(f'整數欄位：{整數欄位!r}')
+    logging.debug(f'實數欄位：{實數欄位!r}')
+    logging.debug(f'百分比欄位：{百分比欄位!r}')
+    logging.debug(f'百分比漸層欄位：{百分比漸層欄位!r}')
+    logging.debug(f'最大值顯著欄位：{最大值顯著欄位!r}')
+    logging.debug(f'日期欄位：{日期欄位!r}')
+    logging.debug(f'隱藏欄位：{隱藏欄位!r}')
     def formatter(style):
         style.applymap(lambda r:'text-align:right')
         if 整數欄位:
@@ -102,8 +110,8 @@ def 標準格式(整數欄位=[], 實數欄位=[], 百分比欄位=[], 日期欄
                                      ,subset=最大值顯著欄位)
         if 百分比漸層欄位:
             style.background_gradient(axis=0, cmap='RdYlGn', vmax=1, vmin=-1
-                                      ,subset=百分比漸層欄位
-                                      )
+                                     ,subset=百分比漸層欄位
+                                     )
         if 隱藏欄位:
             style.hide(隱藏欄位, axis=1) # hide index
         tr_hover = {
@@ -152,7 +160,7 @@ def show_html(df, 無格式=False
 
 def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
             ,日期欄位=[] ,隱藏欄位=[]
-            ,百分比漸層欄位=[], 最大值顯著欄位=[]
+            ,百分比漸層欄位=[], 最大值顯著欄位=[], 不排序欄位=[]
             ,顯示筆數=100, 採用民國日期格式=False, 顯示=None
             ,除錯提示=False, 顯示提示=True
             ):
@@ -169,7 +177,9 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
             continue
         pat = '^.*(數|金額|損益|股利|累計|差異|期末|負債|營收|\(元\))|本益比|成本|支出|存入|現值|借券|餘額|借|貸$'
         if re.match(pat, c):
-            if np.issubclass_(df[c].dtype.type, np.integer) and not c in 隱藏欄位:
+            if (np.issubclass_(df[c].dtype.type, np.integer)  
+                or df[c].dtype == float
+            ) and not c in 隱藏欄位:
                 try:
                     整數欄位.append(c)
                 except AttributeError:
@@ -199,28 +209,23 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
     if 實數欄位: 實數欄位 = [*set(實數欄位)]
     if 百分比欄位: 百分比欄位 = [*set(百分比欄位)]
     from itertools import chain
-    n = list(chain.from_iterable([l for l in [整數欄位, 實數欄位] if isinstance(l, list)]))
-    if n: 最大值顯著欄位.extend(n)
+    最大值顯著欄位.extend(整數欄位)
+    最大值顯著欄位.extend(實數欄位)
+    最大值顯著欄位.extend(百分比欄位)
     最大值顯著欄位 = [*set(最大值顯著欄位)]
-    百分比漸層欄位.extend(百分比欄位)
-    import logging
-    logging.debug(f'整數欄位：{整數欄位!r}')
-    logging.debug(f'實數欄位：{實數欄位!r}')
-    logging.debug(f'百分比欄位：{百分比欄位!r}')
-    logging.debug(f'百分比漸層欄位：{百分比漸層欄位!r}')
-    logging.debug(f'最大值顯著欄位：{最大值顯著欄位!r}')
-    logging.debug(f'日期欄位：{日期欄位!r}')
-    logging.debug(f'隱藏欄位：{隱藏欄位!r}')
+    最大值顯著欄位 = [x for x in 最大值顯著欄位 
+                         if x not in 百分比漸層欄位 
+                         or x not in 不排序欄位]
     s = df.style.pipe(標準格式(整數欄位, 實數欄位, 百分比欄位
                               ,日期欄位
-                              ,百分比漸層欄位
-                              ,隱藏欄位
                               ,最大值顯著欄位
+                              ,隱藏欄位
+                              ,百分比漸層欄位
                               ,採用民國日期格式=採用民國日期格式
                               ))
     tp = df.copy()
     for c in df.columns: tp[c] = c
-    
+
     if 除錯提示:
         from pathlib import Path
         html = Path.home() / 'TEMP' / 'output.html'

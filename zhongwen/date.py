@@ -118,7 +118,10 @@ def 民國日期(d, fmt='%Y%m%d', 昨今明表達=False):
             '%M', '%(month)d'
             ).replace(
             '%d', '%(date)02d'
+            ).replace(
+            '%D', '%(date)d'
             )
+
     year = d.year-1911
     return fmt % {"year":year, "month":d.month, "date":d.day}
 

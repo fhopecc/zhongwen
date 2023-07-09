@@ -159,3 +159,11 @@ def 查萌典(字詞):
 def 去除字串末句號(字串):
     import re
     return re.sub('。$', '', 字串)
+
+def 公司正名(公司名稱):
+    import re
+    n = 公司名稱
+    n = n.replace("(股)", "股份有限")
+    n = re.sub('\(下稱.+\)$', '', n)
+    return n
+

@@ -2,6 +2,12 @@ import unittest
 from pathlib import Path
 
 class Test(unittest.TestCase):
+    def test_company_name(self):
+        from zhongwen.text import 公司正名
+        n0 = '中國信託商業銀行(股)公司(下稱中信銀行)'
+        n1 = '中國信託商業銀行股份有限公司'
+        self.assertEqual(公司正名(n0), n1)
+
     def test_moedict(self):
         from zhongwen.text import 查萌典, 萌典尚無定義之字詞
         
