@@ -191,7 +191,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
                     實數欄位.append(c)
                 except AttributeError:
                     實數欄位 = [c]
-        pat = '^.+(率|比例|比|\(%\))$'
+        pat = '^.*(漲跌幅|率|比例|比|\(%\))$'
         if re.match(pat, c) and c not in ['本益比']:
             if df[c].dtype == float and not c in 隱藏欄位: 
                 try:
@@ -325,3 +325,17 @@ def 分割鏈(鏈, 長度):
     size = 長度
     chunk = list(iter(lambda: list(islice(it, size)), []))
     return chunk
+
+def 排行榜(排行個數, 排行鍵):
+    def _排行榜(取資料函數):
+        from functools import wraps
+        @wraps(取資料函數)
+        def 取資料排行結果(*args, **kargs):
+            df = 取資料函數(*args, **kargs)
+            df.sort_values(排行鍵, ascending=False, inplace=True)
+            df.reset_index(drop=True, inplace=True)
+            df.index = df.index+1
+            df.index.name = '名次'
+            return df
+        return 取資料排行結果
+    return _排行榜
