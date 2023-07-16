@@ -43,7 +43,12 @@ def chrome():
     return webdriver.Chrome()
 
 # @cache.memoize(expire=100, tag='抓取')
-def 抓取(url, 抓取方式='requests', 除錯=False, headers=None, use_requests=None, 參數={}) -> str:
+def 抓取(url
+        ,抓取方式='requests'
+        ,headers=None
+        ,參數={}, return_json=False
+        ,除錯=False
+        ,use_requests=None):
     '''抓取網頁回傳原始碼。
 抓取方式：'requests' 係指定使用 requests.get；'post' 係 requests.post；'selenium' 係 selenium 模組。
 '''
@@ -70,11 +75,14 @@ def 抓取(url, 抓取方式='requests', 除錯=False, headers=None, use_request
     else:
         r = requests.get(url, headers=headers)
 
+    r.raise_for_status()  # 確保請求成功
+
     除錯訊息 = (f'回復內容為「{r!r}」：\n'
                 f'{r.text!r}'
                )
     logging.debug(除錯訊息)
-
+    if return_json:
+        return r.json()
     return r.text
 
 def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False, selenium=False, 等待下載時間=20):

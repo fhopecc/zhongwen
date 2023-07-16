@@ -211,6 +211,12 @@ def 連續正數(數列):
 def 增減約數(變動數):
     return ('增加' if 變動數 > 0 else '減少') + 約數(abs(變動數))
 
+def 貸方科目收支金額轉借方金額(金額):
+    return abs(min(0, 金額))
+
+def 貸方科目收支金額轉貸方金額(金額):
+    return abs(max(0, 金額))
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
