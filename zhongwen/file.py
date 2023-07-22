@@ -44,17 +44,30 @@ def chrome():
 
 # @cache.memoize(expire=100, tag='抓取')
 def 抓取(url
-        ,抓取方式='requests'
+        ,抓取方式='get'
         ,headers=None
-        ,參數={}, return_json=False
+        ,參數={}
+        ,return_json=False
         ,除錯=False
-        ,use_requests=None):
-    '''抓取網頁回傳原始碼。
-抓取方式：'requests' 係指定使用 requests.get；'post' 係 requests.post；'selenium' 係 selenium 模組。
+        ,use_requests=None
+        ,資料={}
+        ):
+    '''抓取網頁回傳原始碼，就已抓取網頁內容鏈結再抓取則稱為「爬取」。
+抓取方式：'get' 指定使用 requests.get；'post' 係 requests.post；'selenium' 係 selenium 模組。
 '''
+    from warnings import warn
+    if 抓取方式=='request':
+        warn(f'為命名正確，參數選項「requests」將廢棄並由「get」取代。'
+            ,DeprecationWarning, stacklevel=2)
+        抓取方式='get'
     if use_requests: 
-        from warnings import warn
-        warn(f'參數【use_request】將廢棄且已無作用，已預設使用 requests 模組。', DeprecationWarning, stacklevel=2)
+        warn(f'參數【use_request】將廢棄且已無作用，已預設使用 requests 模組。'
+            ,DeprecationWarning, stacklevel=2)
+    if 參數:
+        warn(f'為命名正確，參數「參數」將廢棄並由「資料」取代。'
+            ,DeprecationWarning, stacklevel=2)
+        資料=參數
+
     import requests
     import logging
     if 抓取方式 == 'selenium':
@@ -70,8 +83,8 @@ def 抓取(url
         if 抓取方式=='post':
             headers["content-type"] = "application/x-www-form-urlencoded"
     if 抓取方式=='post':
-        logging.debug(參數)
-        r = requests.post(url, headers=headers, data=參數)
+        logging.debug(f'「資料」內容：{資料!r}')
+        r = requests.post(url, headers=headers, data=資料)
     else:
         r = requests.get(url, headers=headers)
 

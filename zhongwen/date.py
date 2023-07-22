@@ -11,6 +11,8 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
            日期大於今日省略年推論為去年=False) -> date:
     import re
     import pandas as pd
+    if not default: 
+        default=pd.NaT
     match d:
         case float():
             return 取日期(f'{d:.0f}')

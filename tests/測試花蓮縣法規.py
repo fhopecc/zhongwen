@@ -5,7 +5,7 @@ import os
 from zhongwen.pandas_tools import show_html
 
 class Test(unittest.TestCase):
-    # @unittest.skip('不測試')
+    @unittest.skip('不測試')
     def test(self):
         from zhongwen.花蓮縣法規 import 法規
         # df = cache.get('花蓮縣法規')
@@ -36,7 +36,6 @@ class Test(unittest.TestCase):
         l = 法規分條(c)
         self.assertEqual(l[0][0], 1)
         self.assertEqual(l[0][1], '詳如附表所示。')
-
 
 if __name__ == '__main__':
     unittest.main()

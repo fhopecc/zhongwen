@@ -81,3 +81,7 @@ def 法規自動完成建議(line):
             ls = sorted(ls, key=len)
             return [prefix, *ls]
     return []
+
+if __name__ == '__main__':
+    pass
+    顯示關鍵字查詢法規結果(['政府會計年度']) 
