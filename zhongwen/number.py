@@ -220,6 +220,16 @@ def 貸方科目收支金額轉借方金額(金額):
 def 貸方科目收支金額轉貸方金額(金額):
     return abs(max(0, 金額))
 
+def 除零例外則回覆非數常數(含除法函數):
+    '非數常數即NaN，亦即IEEE754 之 Not a Number 浮點數值。'
+    from functools import wraps
+    @wraps(含除法函數)
+    def 除零回覆非數常數(*args, **kargs):
+        try:
+            return 含除法函數(*args, **kargs)
+        except ZeroDivisionError:
+            return float('nan')
+    return 除零回覆非數常數
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
@@ -248,5 +258,3 @@ if __name__ == '__main__':
         print(中文標號(n, l-1))
     elif args.test:
         test()
-
-

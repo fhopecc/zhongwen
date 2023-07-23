@@ -175,7 +175,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
         import re
         if re.match(pat, c):
             continue
-        pat = '^.*(金額|損益|股利|累計|差異|期末|負債|營收|\(元\))|本益比|成本|支出|存入|現值|借券|餘額|借|貸$'
+        pat = '^.*(金額|損益|股利|累計|差異|期末|負債|營收|\(元\))|成本|支出|存入|現值|借券|餘額|借|貸$'
         if re.match(pat, c):
             if (np.issubclass_(df[c].dtype.type, np.integer)  
                 or df[c].dtype == float
@@ -184,15 +184,15 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
                     整數欄位.append(c)
                 except AttributeError:
                     整數欄位 = [c]
-        pat = '^現金轉換天數|股價|配息|.*指數$'
+        pat = '^現金轉換天數|股價|配息|.*比|.*指數$'
         if re.match(pat, c):
             if df[c].dtype == float and not c in 隱藏欄位: 
                 try:
                     實數欄位.append(c)
                 except AttributeError:
                     實數欄位 = [c]
-        pat = '^.*(漲跌幅|率|比例|比|\(%\))$'
-        if re.match(pat, c) and c not in ['本益比']:
+        pat = '^.*(漲跌幅|率|比例|\(%\))$'
+        if re.match(pat, c):
             if df[c].dtype == float and not c in 隱藏欄位: 
                 try:
                     百分比欄位.append(c)
@@ -326,16 +326,17 @@ def 分割鏈(鏈, 長度):
     chunk = list(iter(lambda: list(islice(it, size)), []))
     return chunk
 
-def 排行榜(排行個數, 排行鍵):
-    def _排行榜(取資料函數):
+def 製作排行榜(排行個數, 排行鍵):
+    def _製作排行榜(資料函數):
         from functools import wraps
-        @wraps(取資料函數)
-        def 取資料排行結果(*args, **kargs):
-            df = 取資料函數(*args, **kargs)
+        @wraps(資料函數)
+        def 排行榜(*args, **kargs):
+            df = 資料函數(*args, **kargs)
             df.sort_values(排行鍵, ascending=False, inplace=True)
+            df = df.iloc[:排行個數]
             df.reset_index(drop=True, inplace=True)
             df.index = df.index+1
             df.index.name = '名次'
             return df
-        return 取資料排行結果
-    return _排行榜
+        return 排行榜
+    return _製作排行榜
