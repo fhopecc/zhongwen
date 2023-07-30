@@ -132,6 +132,14 @@ def 民國日期(d, fmt='%Y%m%d', 昨今明表達=False):
     year = d.year-1911
     return fmt % {"year":year, "month":d.month, "date":d.day}
 
+def 公文日期(d):
+    '格式如：112年7月29日'
+    return 民國日期(d, "%Y年%M月%d日")
+
+def 民國月份(d):
+    '格式如：112年7月'
+    return 民國日期(d, "%Y年%M月")
+
 def 經過日數(起, 迄):
     起=取日期(起)
     迄=取日期(迄)

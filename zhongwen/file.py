@@ -51,6 +51,7 @@ def 抓取(url
         ,除錯=False
         ,use_requests=None
         ,資料={}
+        ,encoding="utf-8"
         ):
     '''抓取網頁回傳原始碼，就已抓取網頁內容鏈結再抓取則稱為「爬取」。
 抓取方式：'get' 指定使用 requests.get；'post' 係 requests.post；'selenium' 係 selenium 模組。
@@ -87,7 +88,7 @@ def 抓取(url
         r = requests.post(url, headers=headers, data=資料)
     else:
         r = requests.get(url, headers=headers)
-
+    r.encoding = encoding
     r.raise_for_status()  # 確保請求成功
 
     除錯訊息 = (f'回復內容為「{r!r}」：\n'

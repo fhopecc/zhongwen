@@ -135,14 +135,47 @@ def 約數(n) -> str:
     if r: s+= "餘" 
     return s
 
+
+def 最簡約數(n) -> str:
+    '僅表達最高位數字，舉如：17億500萬餘元表達為17億餘元。'
+    n = 轉數值(n)
+    n = abs(n)
+    if(n<10**4): return f'{n:,.0f}'
+    s=""
+    #億位數字
+    h=n//10**8
+    r=n%10**8
+    if h:
+        s+=f"{h:,.0f}億"
+        if r: s+= "餘" 
+        return s
+    #萬位數字
+    h=r//10**4
+    r=n%10**4
+    if h:s+=f"{h:,.0f}萬"
+    if r: s+= "餘" 
+    return s
+
 def 百分比(n):
-  '表達至2位小數百分比'
+  '表達至2位小數百分比，另以--表達缺失值'
+  import pandas as pd
+  if pd.isnull(n): return '--'
   return f'{abs(float(n))*100:,.2f}％'
 
 def 增減百分比(r, 增減文字=["增加", "減少"]):
+    import pandas as pd
+    if pd.isnull(r): return ''
     n = abs(r)
     _增減文字 = 增減文字[0] if r>0 else  增減文字[1] 
     return f'{_增減文字}約{n:.2%}'
+
+def 消長百分比(r):
+    return 增減百分比(r, ['成長', '衰退'])
+
+def 二位實數(f):
+    import pandas as pd
+    if pd.isnull(f): return '--'
+    return f'{abs(float(f)):,.2f}'
 
 class 標號:
     def __init__(self, 號碼, 階層):

@@ -1,5 +1,24 @@
 '輔助PANDAS工具'
 
+def 增加批次緩存功能(資料庫檔, 資料名稱, 批號欄名):
+    def _增加批次緩存功能(資料存取函數):
+        from functools import wraps
+        @wraps(資料存取函數)
+        def 批次緩存資料存取(批號, *args, 更新=False,**kargs):
+            from sqlite3 import connect, DataError
+            import pandas as pd
+            try:
+                with connect(資料庫檔) as db: 
+                    return 批次讀取(批號, 批號欄名, 資料名稱, db) 
+            except (pd.errors.DatabaseError, 批號查無資料錯誤):
+                df = 資料存取函數(批號, *args, **kargs)
+                批次寫入(df, 批號, 批號欄名, 資料名稱, db)
+                return df
+        return 批次緩存資料存取
+    return _增加批次緩存功能
+    
+    
+
 class 使用者要求覆寫(Exception):
     pass
 
@@ -12,10 +31,15 @@ class 批號存在錯誤(Exception):
     def __str__(self):
         return f'批號【{self.批號}】已存在，請指定覆寫=True！'
 
+class 批號查無資料錯誤(Exception): pass
+
 def 批次讀取(批號, 批號欄名, 表格, 資料庫, parse_dates=None):
     import pandas as pd
     sql = f'select * from {表格} where {批號欄名}=="{批號}"'
-    return pd.read_sql_query(sql, 資料庫, index_col='index', parse_dates=parse_dates)
+    df = pd.read_sql_query(sql, 資料庫, index_col='index', parse_dates=parse_dates)
+    if df.empty: 
+        raise 批號查無資料錯誤(f'查無批號為【{批號}】資料！')
+    return df
 
 def 批次刪除(批號, 批號欄名, 表格, 資料庫):
     c = 資料庫.cursor()
@@ -33,12 +57,11 @@ def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 覆寫=False):
     import pandas as pd
     try:
         df = 批次讀取(批號, 批號欄名, 表格, 資料庫) 
-        if df.empty: raise 該批資料為空(f'表格：{表格}、批號：{批號}')
         if 覆寫: 
             批次刪除(批號, 批號欄名, 表格, 資料庫)
             raise 使用者要求覆寫()
         else: raise 批號存在錯誤(批號, 批號欄名, 表格)
-    except (pd.errors.DatabaseError, 使用者要求覆寫, 該批資料為空) as e:
+    except (pd.errors.DatabaseError, 使用者要求覆寫, 批號查無資料錯誤) as e:
         logging.debug(f'批次寫入{批號}、{表格}……')
         資料.to_sql(表格, 資料庫, if_exists='append')
         logging.debug(f'寫入成功！')
@@ -128,6 +151,7 @@ def show_html(df, 無格式=False
              ,百分比漸層欄位=[]
              ,最大值顯著欄位=[]
              ,顯示筆數=100, 採用民國日期格式=False, 標題=None
+             ,傳回超文件內容=False
              ):
     import pandas as pd
     if isinstance(df, pd.Series):
@@ -158,6 +182,7 @@ def show_html(df, 無格式=False
     import os
     os.system(f'start {html}')
 
+
 def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
             ,日期欄位=[] ,隱藏欄位=[]
             ,百分比漸層欄位=[], 最大值顯著欄位=[], 不排序欄位=[]
@@ -184,7 +209,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
                     整數欄位.append(c)
                 except AttributeError:
                     整數欄位 = [c]
-        pat = '^現金轉換天數|股價|配息|.*比|.*指數$'
+        pat = '^現金轉換天數|估計每股配發現金|股價|配息|.*比|.*指數$'
         if re.match(pat, c):
             if df[c].dtype == float and not c in 隱藏欄位: 
                 try:
