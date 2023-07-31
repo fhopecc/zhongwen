@@ -215,7 +215,7 @@ def 法規條文(排除廢止者=True):
 
 if __name__ == '__main__':
     pass
-    # import logging
-    # logging.getLogger().setLevel(logging.INFO)
+    import logging
+    logging.getLogger().setLevel(logging.DEBUG)
     # cache.evict('法規條文')
     法規條文(顯示=True)
