@@ -216,7 +216,12 @@ def 上季數() -> (int, int):
 def 上季初():
     return 季初(*上季數())
 
-def 月末(年數, 月數):
+def 月末(年數=None, 月數=None):
+    '預設為本月末'
+    if not 年數:
+        年數=今日().year
+    if not 月數:
+        月數=今日().month
     import calendar
     月末日數 = calendar.monthrange(年數, 月數)[1]
     return date(年數, 月數, 月末日數)
@@ -233,9 +238,19 @@ def 前幾月(月數):
     from dateutil.relativedelta import relativedelta
     return 今日() - relativedelta(months=月數)
 
+def 近幾個月底(月數):
+    import pandas as pd
+    start = 前幾月(月數)
+    end = 今日()
+    curdate = 月末(start.year, start.month)
+    while curdate <= end:
+        yield curdate
+        curdate += timedelta(days=1)
+        curdate = 月末(curdate.year, curdate.month)
+
 def 民國年月(日期):
     return [日期.year-1911, 日期.month]
 
 if __name__ == '__main__':
-    print(前幾月(1))
-    print(前幾月(2))
+    for 月 in 近幾個月底(112):
+        print(月)

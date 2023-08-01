@@ -1,5 +1,7 @@
 '輔助PANDAS工具'
 
+class 使用者要求覆寫(Exception): pass
+
 def 增加批次緩存功能(資料庫檔, 資料名稱, 批號欄名):
     def _增加批次緩存功能(資料存取函數):
         from functools import wraps
@@ -9,16 +11,15 @@ def 增加批次緩存功能(資料庫檔, 資料名稱, 批號欄名):
             import pandas as pd
             try:
                 with connect(資料庫檔) as db: 
+                    if 更新: raise 使用者要求覆寫()
                     return 批次讀取(批號, 批號欄名, 資料名稱, db) 
-            except (pd.errors.DatabaseError, 批號查無資料錯誤):
+            except (pd.errors.DatabaseError, 批號查無資料錯誤, 使用者要求覆寫) as e:
                 df = 資料存取函數(批號, *args, **kargs)
-                批次寫入(df, 批號, 批號欄名, 資料名稱, db)
+                批次寫入(df, 批號, 批號欄名, 資料名稱, db, 更新)
                 return df
         return 批次緩存資料存取
     return _增加批次緩存功能
 
-class 使用者要求覆寫(Exception):
-    pass
 
 class 批號存在錯誤(Exception):
     def __init__(self, 批號, 批號欄名, 表格):
@@ -221,7 +222,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
                     百分比欄位.append(c)
                 except AttributeError:
                     百分比欄位 = [c]
-        pat = '.*日期.*'
+        pat = '.*(日期|時期).*'
         if re.match(pat, c):
             if df[c].dtype == "datetime64[ns]" and not c in 隱藏欄位:
                 try:
