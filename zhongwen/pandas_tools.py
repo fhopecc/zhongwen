@@ -16,8 +16,6 @@ def 增加批次緩存功能(資料庫檔, 資料名稱, 批號欄名):
                 return df
         return 批次緩存資料存取
     return _增加批次緩存功能
-    
-    
 
 class 使用者要求覆寫(Exception):
     pass
