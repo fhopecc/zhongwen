@@ -1,5 +1,6 @@
 '日期處理'
 from datetime import date, datetime, timedelta
+from functools import lru_cache
 
 def 是日期嗎(v):
     import pandas as pd
@@ -95,7 +96,7 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
                 d = datetime.now()    
                 return datetime(d.year, d.month, d.day)
             raise TypeError(f'不支援類型[{type(d)}]、值[{d}]！')
-
+@lru_cache()
 def 上月() -> date:
     '上月底'
     return 今日().replace(day=1) - timedelta(days=1)
@@ -216,12 +217,15 @@ def 上季數() -> (int, int):
 def 上季初():
     return 季初(*上季數())
 
-def 月末(年數=None, 月數=None):
+def 月末(日期或年數=None, 月數=None):
     '預設為本月末'
-    if not 年數:
+    if not 日期或年數:
         年數=今日().year
     if not 月數:
         月數=今日().month
+    if 是日期嗎(日期或年數):
+        年數=日期或年數.year
+        月數=日期或年數.month
     import calendar
     月末日數 = calendar.monthrange(年數, 月數)[1]
     return date(年數, 月數, 月末日數)
@@ -249,7 +253,8 @@ def 近幾個月底(月數):
         curdate = 月末(curdate.year, curdate.month)
 
 def 民國年月(日期):
-    return [日期.year-1911, 日期.month]
+    '日期格式如112年8月'
+    return 民國日期(日期, '%Y年%M月')
 
 if __name__ == '__main__':
     for 月 in 近幾個月底(112):

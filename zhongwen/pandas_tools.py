@@ -1,22 +1,37 @@
 '輔助PANDAS工具'
 
+class 使用者要求更新且線上資料較線下多(Exception): pass
 class 使用者要求覆寫(Exception): pass
 
 def 增加批次緩存功能(資料庫檔, 資料名稱, 批號欄名):
+    '如將參數「更新」設為True，則強制更新該批資料'
+    import logging
     def _增加批次緩存功能(資料存取函數):
         from functools import wraps
         @wraps(資料存取函數)
         def 批次緩存資料存取(批號, *args, 更新=False,**kargs):
-            from sqlite3 import connect, DataError
+            from sqlite3 import connect
             import pandas as pd
-            try:
-                with connect(資料庫檔) as db: 
-                    if 更新: raise 使用者要求覆寫()
-                    return 批次讀取(批號, 批號欄名, 資料名稱, db) 
-            except (pd.errors.DatabaseError, 批號查無資料錯誤, 使用者要求覆寫) as e:
-                df = 資料存取函數(批號, *args, **kargs)
-                批次寫入(df, 批號, 批號欄名, 資料名稱, db, 更新)
-                return df
+            with connect(資料庫檔) as db: 
+                try:
+                    df0 = 批次讀取(批號, 批號欄名, 資料名稱, db) 
+                    if 更新:
+                        df1 = 資料存取函數(批號, *args, **kargs)
+                        if df1.shape[0] > df0.shape[0]:
+                            logging.info(
+                                f'目前線上公布{民國年月(上月())}營收彙總表計{df.shape[0]}筆，'
+                                f'較資料庫存放計{df.shape[0]}筆還多，爰更新資料庫！')    
+                            raise 使用者要求更新且線上資料較線下多()
+                    return df0 
+                except (pd.errors.DatabaseError, 批號查無資料錯誤) as e:
+                    logging.info(e)
+                    df1 = 資料存取函數(批號, *args, **kargs)
+                    批次寫入(df1, 批號, 批號欄名, 資料名稱, db, 更新)
+                    return df1
+                except 使用者要求更新且線上資料較線下多 as e:
+                    logging.info(e)
+                    批次寫入(df1, 批號, 批號欄名, 資料名稱, db, 覆寫=True)
+                    return df1
         return 批次緩存資料存取
     return _增加批次緩存功能
 
@@ -34,8 +49,12 @@ class 批號查無資料錯誤(Exception): pass
 
 def 批次讀取(批號, 批號欄名, 表格, 資料庫, parse_dates=None):
     import pandas as pd
-    sql = f'select * from {表格} where {批號欄名}=="{批號}"'
-    df = pd.read_sql_query(sql, 資料庫, index_col='index', parse_dates=parse_dates)
+    from zhongwen.date import 是日期嗎
+    # sql 的相等係單等號表示，而python為雙等號，易誤植
+    sql = f'select * from {表格} where {批號欄名}={批號}' 
+    if 是日期嗎(批號) or isinstance(批號, str):
+        sql = f'select * from {表格} where {批號欄名}="{批號}"' 
+    df = pd.read_sql_query(sql, 資料庫, parse_dates=parse_dates)
     if df.empty: 
         raise 批號查無資料錯誤(f'查無批號為【{批號}】資料！')
     return df
