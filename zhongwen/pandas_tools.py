@@ -67,22 +67,15 @@ def 批次刪除(批號, 批號欄名, 表格, 資料庫):
     import logging
     logging.debug(f'批次刪除{批號}、{表格}……')
 
-class 該批資料為空(Exception):pass
-    
 
 def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 覆寫=False):
+    warn(f'參數【覆寫】將廢棄。', DeprecationWarning, stacklevel=2)
     import logging
     import pandas as pd
-    try:
-        df = 批次讀取(批號, 批號欄名, 表格, 資料庫) 
-        if 覆寫: 
-            批次刪除(批號, 批號欄名, 表格, 資料庫)
-            raise 使用者要求覆寫()
-        else: raise 批號存在錯誤(批號, 批號欄名, 表格)
-    except (pd.errors.DatabaseError, 使用者要求覆寫, 批號查無資料錯誤) as e:
-        logging.debug(f'批次寫入{批號}、{表格}……')
-        資料.to_sql(表格, 資料庫, if_exists='append')
-        logging.debug(f'寫入成功！')
+    批次刪除(批號, 批號欄名, 表格, 資料庫)
+    logging.debug(f'批次寫入{批號}、{表格}……')
+    資料.to_sql(表格, 資料庫, if_exists='append')
+    logging.debug(f'寫入成功！')
 
 def 可顯示(查詢資料函數):
     '裝飾查詢資料函數，指名參數設為【顯示=True】，即將查詢結果以 html 顯示。'
