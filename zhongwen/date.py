@@ -96,10 +96,16 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
                 d = datetime.now()    
                 return datetime(d.year, d.month, d.day)
             raise TypeError(f'不支援類型[{type(d)}]、值[{d}]！')
+
 @lru_cache()
 def 上月() -> date:
     '上月底'
     return 今日().replace(day=1) - timedelta(days=1)
+
+@lru_cache()
+def 上上月() -> date:
+    '上月底'
+    return 上月().replace(day=1) - timedelta(days=1)
 
 def 民國日期(d, fmt='%Y%m%d', 昨今明表達=False):
     '%Y表年數、%m表月數前置0、%d表日數前置0、%M表月數不前置0'

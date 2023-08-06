@@ -19,8 +19,8 @@ def 增加批次緩存功能(資料庫檔, 資料名稱, 批號欄名):
                         df1 = 資料存取函數(批號, *args, **kargs)
                         if df1.shape[0] > df0.shape[0]:
                             logging.info(
-                                f'目前線上公布{民國年月(上月())}營收彙總表計{df.shape[0]}筆，'
-                                f'較資料庫存放計{df.shape[0]}筆還多，爰更新資料庫！')    
+                                f'目前線上公布{批號}之{資料名稱}計{df1.shape[0]}筆，'
+                                f'較資料庫存放計{df0.shape[0]}筆還多，爰更新資料庫！')    
                             raise 使用者要求更新且線上資料較線下多()
                     return df0 
                 except (pd.errors.DatabaseError, 批號查無資料錯誤) as e:
