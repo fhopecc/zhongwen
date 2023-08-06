@@ -167,3 +167,12 @@ def 公司正名(公司名稱):
     n = re.sub('\(下稱.+\)$', '', n)
     return n
 
+def 符號轉半型(s):
+    try:
+        return s.translate(str.maketrans('，；：％。'
+                                        ,',;:%.')
+                )
+    except AttributeError as e:
+        import logging
+        logging.error(f'符號轉半型錯誤{e}')
+        return s
