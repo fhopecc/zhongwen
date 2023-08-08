@@ -69,6 +69,7 @@ def 批次刪除(批號, 批號欄名, 表格, 資料庫):
 
 
 def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 覆寫=False):
+    from warnings import warn
     warn(f'參數【覆寫】將廢棄。', DeprecationWarning, stacklevel=2)
     import logging
     import pandas as pd
