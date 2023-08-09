@@ -2,6 +2,25 @@
 
 class 使用者要求更新且線上資料較線下多(Exception): pass
 class 使用者要求覆寫(Exception): pass
+def 增加按期更新查詢結果功能(更新頻率='每月十日之前'):
+    '如將參數「更新」設為True，則強制更新該批資料'
+    import logging
+    from pathlib import Path
+    from diskcache import Cache
+    cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
+    def _增加按期更新查詢結果功能(查詢資料):
+        from functools import wraps
+        @wraps(查詢資料)
+        def 查詢按期更新資料(*args, 更新=False,**kargs):
+            if 更新頻率=='每月十日之前':
+                from zhongwen.date import 今日 
+                if 今日().day <= 10:
+                    df = 查詢資料(*args, **kargs)
+                    cache.set(查詢資料.__name__, df)
+                    return df
+            return cache.read(查詢資料.__name__)
+        return 查詢按期更新資料
+    return _增加按期更新查詢結果功能
 
 def 增加批次緩存功能(資料庫檔, 資料名稱, 批號欄名):
     '如將參數「更新」設為True，則強制更新該批資料'
@@ -34,7 +53,6 @@ def 增加批次緩存功能(資料庫檔, 資料名稱, 批號欄名):
                     return df1
         return 批次緩存資料存取
     return _增加批次緩存功能
-
 
 class 批號存在錯誤(Exception):
     def __init__(self, 批號, 批號欄名, 表格):
