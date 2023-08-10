@@ -173,6 +173,10 @@ def 消長百分比(r):
     '比較前時序之數值用消長'
     return 增減百分比(r, ['成長', '衰退'])
 
+def 同比百分比(r):
+    '數據較去年同期增減'
+    return 增減百分比(r, ['年增', '年減'])
+
 def 二位實數(f):
     import pandas as pd
     if pd.isnull(f): return '--'
