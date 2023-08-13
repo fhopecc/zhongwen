@@ -20,10 +20,16 @@ class Test(unittest.TestCase):
         self.assertEqual(q.條號, "33") 
         self.assertEqual(q.關鍵字, None) 
 
+        q = LawQuery('通訊交易解除權合理例外情事適用準則第2條')
+        self.assertEqual(q.法規名稱, '通訊交易解除權合理例外情事適用準則')
+        self.assertEqual(q.條號, "2") 
+        self.assertEqual(q.關鍵字, None) 
+
         q = LawQuery('職業安全衛生法[合格]')
         self.assertEqual(q.法規名稱, '職業安全衛生法')
         self.assertEqual(q.條號, None) 
         self.assertEqual(q.關鍵字, '合格') 
+
 
     def test(self):
         from zhongwen.法規 import 法條查詢, 法條展開, 法條說明

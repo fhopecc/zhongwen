@@ -91,9 +91,26 @@ def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 覆寫=False):
     warn(f'參數【覆寫】將廢棄。', DeprecationWarning, stacklevel=2)
     import logging
     import pandas as pd
-    批次刪除(批號, 批號欄名, 表格, 資料庫)
+    import sqlite3
+    import re
+    try:
+        批次刪除(批號, 批號欄名, 表格, 資料庫)
+    except sqlite3.OperationalError as e:
+        logging.debug(f'批次刪除發生錯誤{e}')
     logging.debug(f'批次寫入{批號}、{表格}……')
-    資料.to_sql(表格, 資料庫, if_exists='append')
+    try:
+        資料.to_sql(表格, 資料庫, if_exists='append')
+    except sqlite3.OperationalError as e:
+        msg = str(e)
+        pat = r'table \w+ has no column named ([\w（）]+)'
+        if m:=re.match(pat, msg):
+            c =  m[1]
+            db = 資料庫
+            cursor = db.cursor()
+            alter_query = f"ALTER TABLE {表格} ADD COLUMN {c} INT"
+            cursor.execute(alter_query)
+            db.commit()
+        raise e
     logging.debug(f'寫入成功！')
 
 def 可顯示(查詢資料函數):

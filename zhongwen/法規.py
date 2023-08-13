@@ -43,24 +43,26 @@ def 法條說明(s):
     doc = ''.join([條文內容(l.tolist()) for l in ls.values])
     return doc
 
+法規類別 = r'(法|條例|規則|標準|細則|措施|準則)'
+
 class LawQuery:
     def __init__(self, s):
         self.法規名稱=None
         self.條號=None
         self.關鍵字=None
-        pat = r'(.*(法|條例|規則|標準|細則|措施))第([-\d]+)[點條]'
+        pat = rf'(.*{法規類別})第([-\d]+)[點條]'
         if m:=re.match(pat, s):
             self.法規名稱=m[1]
             self.條號 = m[3]
             return
 
-        pat = r'(.*(法|條例|規則|標準|細則|措施))([-\d]+)'
+        pat = rf'(.*{法規類別})([-\d]+)'
         if m:=re.match(pat, s):
             self.法規名稱=m[1]
             self.條號 = m[3]
             return
 
-        pat = r'(.*(法|條例|規則|標準|細則|措施))\[(.*)\]'
+        pat = rf'(.*{法規類別})\[(.*)\]'
         if m:=re.match(pat, s):
             self.法規名稱 = m[1]
             self.關鍵字 = m[3]
@@ -84,4 +86,6 @@ def 法規自動完成建議(line):
 
 if __name__ == '__main__':
     pass
-    顯示關鍵字查詢法規結果(['政府會計年度']) 
+    l = 法條展開('消費者保護法19')
+    print(l)
+    # 顯示關鍵字查詢法規結果(['政府會計年度']) 

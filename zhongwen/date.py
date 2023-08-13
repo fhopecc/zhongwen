@@ -181,13 +181,18 @@ def 上年底() -> date:
     d = 今日()
     return d.replace(year=d.year-1, month=12, day=31)
 
-def 季數(日期=今日()) -> (int, int):
+def 季別(日期=今日()) -> (int, int):
     '指定日期之季數，以(年數, 季數)表達。'
     d = 日期
     if 1 <= d.month <= 3: return (d.year, 1)
     if 4 <= d.month <= 6: return (d.year, 2)
     if 7 <= d.month <= 9: return (d.year, 3)
     if 10 <= d.month <= 12: return (d.year, 4)
+
+def 季數(日期=今日()):
+    from warnings import warn
+    warn(f'配合證交所資料項目名稱，【季數】將廢棄，請使用【季別】', DeprecationWarning, stacklevel=2)
+    return 季別(日期)
 
 
 def 季初(年數, 季數) -> date:
@@ -198,8 +203,9 @@ def 季初(年數, 季數) -> date:
         case 3: return date(年數,  7, 1)
         case 4: return date(年數, 10, 1)
 
-def 季末(年數或日數=None, _季數=None):
+def 季末(年數或日數=None, 季別=None):
     '指定季之最末日，未指定為本季'
+    _季數 = 季別
     if 是日期嗎(年數或日數):
         年數, _季數 = 季數(年數或日數)
     else:
@@ -225,6 +231,7 @@ def 上季初():
 
 def 月末(日期或年數=None, 月數=None):
     '預設為本月末'
+    年數 = 日期或年數
     if not 日期或年數:
         年數=今日().year
     if not 月數:
@@ -252,11 +259,25 @@ def 近幾個月底(月數):
     import pandas as pd
     start = 前幾月(月數)
     end = 今日()
-    curdate = 月末(start.year, start.month)
+    curdate = 月末(start)
     while curdate <= end:
         yield curdate
         curdate += timedelta(days=1)
-        curdate = 月末(curdate.year, curdate.month)
+        curdate = 月末(curdate)
+
+def 前幾季(季數):
+    from dateutil.relativedelta import relativedelta
+    return 今日() - relativedelta(months=季數*3)
+
+def 近幾季(季數):
+    import pandas as pd
+    start = 前幾季(季數)
+    end = 今日()
+    curdate = 季末(start)
+    while curdate <= end:
+        yield curdate
+        curdate += timedelta(days=1)
+        curdate = 季末(curdate)
 
 def 民國年月(日期):
     '日期格式如112年8月'

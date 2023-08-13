@@ -62,8 +62,6 @@ class Test(unittest.TestCase):
         from zhongwen.date import 月起迄
         self.assertEqual(月起迄(2022, 4), [date(2022, 4, 1), date(2022, 4, 30)])
 
-
-
     def test_quarter(self):
         from zhongwen.date import 季末
         from datetime import date
@@ -74,6 +72,11 @@ class Test(unittest.TestCase):
 
         from zhongwen.date import 與季末相距月數
         self.assertEqual(與季末相距月數(date(2023, 5, 3)), 1)
+
+        from zhongwen.date import 近幾季
+        qs = list(近幾季(3))
+        print(qs)
+        # self.assertEqual(qs[0], 取日期('1120813'))
 
 
 if __name__ == '__main__':
