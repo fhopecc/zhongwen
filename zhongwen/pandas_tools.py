@@ -14,7 +14,7 @@ def 增加按期更新查詢結果功能(更新頻率='每月十日之前'):
         def 查詢按期更新資料(*args, 更新=False,**kargs):
             if 更新頻率=='每月十日之前':
                 from zhongwen.date import 今日 
-                if 今日().day <= 10:
+                if 今日().day <= 10 or 更新:
                     df = 查詢資料(*args, **kargs)
                     cache.set(查詢資料.__name__, df)
                     return df

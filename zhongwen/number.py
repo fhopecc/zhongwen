@@ -138,21 +138,22 @@ def 約數(n) -> str:
 
 def 最簡約數(n) -> str:
     '僅表達最高位數字，舉如：17億500萬餘元表達為17億餘元。'
-    n = 轉數值(n)
-    n = abs(n)
+    on = 轉數值(n)
+    n = abs(on)
+    sign = on / n if n > 0 else 1
     if(n<10**4): return f'{n:,.0f}'
     s=""
     #億位數字
     h=n//10**8
     r=n%10**8
     if h:
-        s+=f"{h:,.0f}億"
+        s+=f"{h*sign:,.0f}億"
         if r: s+= "餘" 
         return s
     #萬位數字
     h=r//10**4
     r=n%10**4
-    if h:s+=f"{h:,.0f}萬"
+    if h:s+=f"{h*sign:,.0f}萬"
     if r: s+= "餘" 
     return s
 
@@ -265,7 +266,7 @@ def 除零例外則回覆非數常數(含除法函數):
     def 除零回覆非數常數(*args, **kargs):
         try:
             return 含除法函數(*args, **kargs)
-        except ZeroDivisionError:
+        except (ZeroDivisionError, TypeError):
             return float('nan')
     return 除零回覆非數常數
 if __name__ == '__main__':

@@ -267,7 +267,7 @@ def 近幾個月底(月數):
 
 def 前幾季(季數):
     from dateutil.relativedelta import relativedelta
-    return 今日() - relativedelta(months=季數*3)
+    return 季末(今日() - relativedelta(months=季數*3))
 
 def 近幾季(季數):
     import pandas as pd
