@@ -269,6 +269,18 @@ def 除零例外則回覆非數常數(含除法函數):
         except (ZeroDivisionError, TypeError):
             return float('nan')
     return 除零回覆非數常數
+
+def 發生例外則回覆非數常數(函數):
+    '非數常數即NaN，亦即IEEE754 之 Not a Number 浮點數值。'
+    from functools import wraps
+    @wraps(函數)
+    def 發生例外回覆非數常數(*args, **kargs):
+        try:
+            return 函數(*args, **kargs)
+        except:
+            return float('nan')
+    return 發生例外回覆非數常數
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()

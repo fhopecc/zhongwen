@@ -20,14 +20,8 @@ class Test(unittest.TestCase):
         self.assertTrue(pd.isnull(取日期('民國 0 年 00 月 00 日')))
 
         now = datetime.now()
-        # if datetime(now.year,12,24) > now:
-            # self.assertEqual(取日期('12.24'), date(now.year-1,12,24))
-        # else:
         self.assertEqual(取日期('12.24'), date(now.year,12,24))
-        if datetime(now.year,1,3) > now:
-            self.assertEqual(取日期('1.3'), date(now.year-1,1,3))
-        else:
-            self.assertEqual(取日期('1.3'), date(now.year,1,3))
+        self.assertEqual(取日期('0831'), date(now.year, 8, 31))
 
         self.assertEqual(取日期(datetime(2022,2,1,23,11)), date(2022,2,1))
         # self.assertEqual(取日期(None).date(), datetime.now().date())
@@ -67,15 +61,14 @@ class Test(unittest.TestCase):
         from datetime import date
         self.assertEqual(季末(2022, 2), date(2022, 6, 30))
 
-        from zhongwen.date import 季數
-        self.assertEqual(季數(date(2023, 1, 2)), (2023, 1))
+        from zhongwen.date import 季別
+        self.assertEqual(季別(date(2023, 1, 2)), (2023, 1))
 
         from zhongwen.date import 與季末相距月數
         self.assertEqual(與季末相距月數(date(2023, 5, 3)), 1)
 
-        from zhongwen.date import 近幾季
-        qs = list(近幾季(3))
-        print(qs)
+        from zhongwen.date import 季別, 季初
+        self.assertIsNotNone(季初()) 
         # self.assertEqual(qs[0], 取日期('1120813'))
 
 

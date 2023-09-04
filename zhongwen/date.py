@@ -38,8 +38,9 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
                 _, last_day = calendar.monthrange(year, mon)
                 return date(year, mon, last_day)
             # 省略年自動推論為今年
-            pat = r'(\d{1,2})([./])\d{1,2}'
-            if m:=re.match(pat, d):
+            pat1 = r'(\d{1,2})([./])\d{1,2}'
+            pat2 = r'^(\d\d)()(\d\d)$' # 中間空白括號是表達日期分隔為空字元
+            if m:=(re.match(pat1, d) or re.match(pat2, d)):
                 if int(m[1]) <= 12: 
                     year = datetime.now().year  
                     od = d
@@ -77,6 +78,9 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
                 except ValueError as e: 
                     if 錯誤為空值: return pd.NaT
                     raise ValueError(f'【{d}】引發例外{e}！')
+
+            # 民國日期形式如980731, 1110527。
+            pat = r'(\d{2,3})(\d{2})(\d{2})'
 
             # 民國日期其形式如 109/05/29 、109.05.29及109-5-29 等。
             pat = r'(\d{2,3})[-./](\d{1,2})[-./](\d{1,2})'
@@ -194,37 +198,45 @@ def 季數(日期=今日()):
     warn(f'配合證交所資料項目名稱，【季數】將廢棄，請使用【季別】', DeprecationWarning, stacklevel=2)
     return 季別(日期)
 
+def 季初(年數或日期=None, 季別參數=None) -> date:
+    '指定季之最初日，未指定為本季'
+    y, q = 季別()
+    if 是日期嗎(年數或日期):
+        d = 年數或日期
+        y, q = 季別(d)
+    if 年數或日期 and 季別參數:
+        y = 年數或日期 
+        q = 季別參數
+    match q:
+        case 1: return date(y,  1, 1)
+        case 2: return date(y,  4, 1)
+        case 3: return date(y,  7, 1)
+        case 4: return date(y, 10, 1)
+    raise ValueError(f'年數或日期值「{年數或日期}」及季別參數值「{季別參數}」係錯誤值！')
 
-def 季初(年數, 季數) -> date:
-    '指定季之最初日'
-    match 季數:
-        case 1: return date(年數,  1, 1)
-        case 2: return date(年數,  4, 1)
-        case 3: return date(年數,  7, 1)
-        case 4: return date(年數, 10, 1)
-
-def 季末(年數或日數=None, 季別=None):
-    '指定季之最末日，未指定為本季'
-    _季數 = 季別
-    if 是日期嗎(年數或日數):
-        年數, _季數 = 季數(年數或日數)
-    else:
-        if not 年數或日數 or not _季數:
-            年數, _季數 = 季數()
-        else:
-            年數=年數或日數 
-    match _季數:
-        case 1: return date(年數, 3, 31)
-        case 2: return date(年數, 6, 30)
-        case 3: return date(年數, 9, 30)
-        case 4: return date(年數, 12, 31)
+def 季末(年數或日期=None, 季別參數=None):
+    '指定季之最末日，未指定為本季末'
+    y, q = 季別()
+    if 是日期嗎(年數或日期):
+        d = 年數或日期
+        y, q = 季別(d)
+    if 年數或日期 and 季別參數:
+        y = 年數或日期 
+        q = 季別參數
+    match q:
+        case 1: return date(y, 3, 31)
+        case 2: return date(y, 6, 30)
+        case 3: return date(y, 9, 30)
+        case 4: return date(y, 12, 31)
 
 def 本季初():
-    return 季初(*季數()) 
+    from warnings import warn
+    warn(f'【季初】無參數即為本季初，原【本季初】函數將廢棄！', DeprecationWarning, stacklevel=2)
+    return 季初() 
 
 def 上季數() -> (int, int):
     '上季數之(年數, 季數)。'
-    return 季數(本季初()-timedelta(days=1))
+    return 季別(本季初()-timedelta(days=1))
 
 def 上季初():
     return 季初(*上季數())

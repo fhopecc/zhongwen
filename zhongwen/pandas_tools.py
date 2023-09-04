@@ -247,7 +247,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
         import re
         if re.match(pat, c):
             continue
-        pat = '^.*(金額|損益|股利|累計|差異|期末|負債|營收|\(元\))|成本|支出|存入|現值|借券|餘額|借|貸$'
+        pat = '^.*(金額|損益|淨利|股利|累計|差異|期末|負債|營收|\(元\))|成本|支出|存入|現值|借券|年數|餘額|借|貸$'
         if re.match(pat, c):
             if (np.issubclass_(df[c].dtype.type, np.integer)  
                 or df[c].dtype == float
@@ -256,7 +256,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
                     整數欄位.append(c)
                 except AttributeError:
                     整數欄位 = [c]
-        pat = '^現金轉換天數|估計每股配發現金|股價|配息|.*比|.*指數$'
+        pat = '^現金轉換天數|估計每股配發現金|股價|配息|每股盈餘|.*比|.*指數$'
         if re.match(pat, c):
             if df[c].dtype == float and not c in 隱藏欄位: 
                 try:
@@ -412,3 +412,5 @@ def 製作排行榜(排行個數, 排行鍵):
             return df
         return 排行榜
     return _製作排行榜
+
+
