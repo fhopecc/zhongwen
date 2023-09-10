@@ -6,6 +6,19 @@ from diskcache import Cache
 from functools import lru_cache
 cache = Cache(Path.home() / 'cache' / 'zhongwen.file')
 
+def 轉換(來源:Path, 目的格式):
+    '格式以副檔名推論'
+    from pydub import AudioSegment
+    s = 來源
+    來源格式 = s.suffix
+    t = s.with_suffix(目的格式)
+    if s.suffix == '.aac':
+        i = AudioSegment.from_file(s, format=s.suffix.replace('.', ''))
+        if 目的格式 == '.mp3':
+            o = i.export(t, format=目的格式.replace('.', ''))
+            return t 
+    raise NotImplementedError(f'尚未實作將{來源}轉換成{目的格式}格式功能')
+
 class FileLocation:
     '萃取文字內之路徑資訊'
     模式集 ={"python":r'File "(?P<path>.+.py)", line (?P<line>\d+).*'
