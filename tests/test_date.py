@@ -1,10 +1,11 @@
 import unittest
-from datetime import datetime, date
 from zhongwen.date import 取日期
 import pandas as pd
 
 class Test(unittest.TestCase):
     def test_parse_date(self):
+        from zhongwen.date import 是日期嗎
+        from datetime import datetime, date, timedelta
         self.assertEqual(取日期('2022/6/3 上午 12:00:00'), date(2022,6,3) )
         self.assertEqual(取日期('2020.01.05'), date(2020,1,5))
         self.assertEqual(取日期('20200105'), date(2020,1,5))
@@ -31,13 +32,16 @@ class Test(unittest.TestCase):
         self.assertEqual(取日期(940101), date(2005,1,1))
         self.assertEqual(取日期(1110213), date(2022,2,13))
         self.assertEqual(取日期(1110213.0), date(2022,2,13))
+        
+        self.assertEqual(取日期('昨日'), datetime.now().date() - timedelta(days=1))
 
-        from zhongwen.date import 是日期嗎
         self.assertFalse(是日期嗎(pd.NaT))
 
     def test_date_repr(self):
         from zhongwen.date import 民國日期
+        from datetime import datetime
         import pandas as pd
+
         self.assertEqual(民國日期(取日期('110/12/27')), '1101227')
         self.assertEqual(民國日期(取日期('110/1/27'), '%Y年%M月%d日'), '110年1月27日')
         self.assertEqual(民國日期(pd.NaT), '')

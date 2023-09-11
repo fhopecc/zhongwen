@@ -1,18 +1,26 @@
 '日期處理'
-from datetime import date, datetime, timedelta
+from datetime import date
 from functools import lru_cache
 
 def 是日期嗎(v):
+    from datetime import datetime
     import pandas as pd
     return not pd.isnull(v) and (isinstance(v, date) or isinstance(v, datetime))
 
 def 取過去日期(d):
     return 取日期(d, 日期大於今日省略年推論為去年=True)
 
+def 昨日():
+    from datetime import datetime, timedelta
+    today = datetime.now()
+    yesterday = today - timedelta(days=1)
+    return yesterday.date()
+
 def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=None,
            日期大於今日省略年推論為去年=False) -> date:
     import re
     import pandas as pd
+    from datetime import datetime, timedelta
     if not default: 
         default=pd.NaT
     if pd.isnull(d):
@@ -29,6 +37,9 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
         case date():
             return date(d.year, d.month, d.day)
         case str(d):
+            pat = r'^昨日?$'
+            if m:=re.match(pat, d):
+                return 昨日()
             # 省略日自動推論為月底
             pat = r'^(\d\d\d)(\d\d)$'
             if m:=re.match(pat, d):
@@ -186,7 +197,7 @@ def 上年底() -> date:
     return d.replace(year=d.year-1, month=12, day=31)
 
 def 季別(日期=今日()) -> (int, int):
-    '指定日期之季數，以(年數, 季數)表達。'
+    '指定日期之季數，以(年數, 季數)表達，未指定為今日歸屬季別'
     d = 日期
     if 1 <= d.month <= 3: return (d.year, 1)
     if 4 <= d.month <= 6: return (d.year, 2)
@@ -268,6 +279,7 @@ def 前幾月(月數):
     return 今日() - relativedelta(months=月數)
 
 def 近幾個月底(月數):
+    from datetime import timedelta
     import pandas as pd
     start = 前幾月(月數)
     end = 今日()
