@@ -115,11 +115,13 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
 @lru_cache()
 def 上月() -> date:
     '上月底'
+    from datetime import timedelta
     return 今日().replace(day=1) - timedelta(days=1)
 
 @lru_cache()
 def 上上月() -> date:
     '上月底'
+    from datetime import timedelta
     return 上月().replace(day=1) - timedelta(days=1)
 
 def 民國日期(d, fmt='%Y%m%d', 昨今明表達=False):
@@ -247,6 +249,7 @@ def 本季初():
 
 def 上季數() -> (int, int):
     '上季數之(年數, 季數)。'
+    from datetime import timedelta
     return 季別(本季初()-timedelta(days=1))
 
 def 上季初():
