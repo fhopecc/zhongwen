@@ -1,7 +1,22 @@
 '中文文字處理'
 from diskcache import Cache
 from pathlib import Path
+from functools import lru_cache
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
+warnings.filterwarnings("ignore", category=ResourceWarning) 
+
 cache = Cache(Path.home() / 'cache' / 'text')
+
+@lru_cache
+@cache.memoize()
+def hantok():
+    import hanlp
+    return hanlp.load(hanlp.pretrained.tok.COARSE_ELECTRA_SMALL_ZH)
+
+@lru_cache
+def 分詞(字串):
+    return {w for w in hantok()(字串) if len(w) > 1}
 
 def 去標籤(字串):
     import re
@@ -27,11 +42,23 @@ def 臚列(項目):
 def 是否為中文字元(char:str):
     return '\u4e00' <= char <= '\u9fa5'
 
+def 是否為中文符號(char:str):
+    import re
+    chinese_punctuation_pattern = re.compile(r'[\u3000-\u303F\uFF00-\uFFEF\u2000-\u206F]')
+    return bool(re.match(chinese_punctuation_pattern, char))
+
 def 是否為平假名(c:str):
     return "\u3041" <= c <= "\u3096"
 
 def 是否為片假名(c:str):
     return "\u30A1" <= c <= "\u30F6"
+
+def 是否為字元(c:str):
+    import string
+    # 檢查字元是否為符號
+    if c in string.punctuation or 是否為中文符號(c) or c.isspace():
+        return False
+    return True
 
 全型表 = {i: i + 0xFEE0 for i in range(0x21, 0x7F)}
 全型表[0x20] = 0x3000
@@ -142,11 +169,12 @@ class 萌典尚無定義之字詞(Exception):pass
 
 def 查萌典(字詞):
     from .file import 抓取
+    import requests
     import logging
-    url = f'https://www.moedict.tw/{字詞}.json'
-    j = 抓取(url)
     import json
+    url = f'https://www.moedict.tw/{字詞}.json'
     try:
+        j = 抓取(url)
         d = json.loads(j)
         hs = d['heteronyms']
         def 取定義(異名):
@@ -160,7 +188,7 @@ def 查萌典(字詞):
             m += ''.join([去標籤(d["def"]) for d in ds])
             return m
         return [取定義(h) for h in hs]
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, requests.exceptions.HTTPError):
         raise 萌典尚無定義之字詞(字詞) 
 
 def 去除字串末句號(字串):
@@ -171,15 +199,16 @@ def 公司正名(公司名稱):
     import re
     n = 公司名稱
     n = n.replace("(股)", "股份有限")
-    n = re.sub('\(下稱.+\)$', '', n)
+    n = re.sub(r'\(下稱.+\)$', '', n)
     return n
 
-def 符號轉半型(s):
+def 符號轉半型(s, 輸出錯誤訊息=False):
+    import logging
     try:
         return s.translate(str.maketrans('，；：％。'
                                         ,',;:%.')
                 )
     except AttributeError as e:
-        import logging
-        logging.error(f'符號轉半型錯誤{e}')
+        if 輸出錯誤訊息:
+            logging.error(f'符號轉半型錯誤{e}')
         return s

@@ -2,12 +2,14 @@ import unittest
 from pathlib import Path
 
 class Test(unittest.TestCase):
+    # @unittest.skip('skip')
     def test_company_name(self):
         from zhongwen.text import 公司正名
         n0 = '中國信託商業銀行(股)公司(下稱中信銀行)'
         n1 = '中國信託商業銀行股份有限公司'
         self.assertEqual(公司正名(n0), n1)
 
+    # @unittest.skip('skip')
     def test_moedict(self):
         from zhongwen.text import 查萌典, 萌典尚無定義之字詞
         
@@ -28,6 +30,14 @@ class Test(unittest.TestCase):
         from zhongwen.text import 轉全型, 轉半型
         self.assertEqual(轉全型('%'), '％')
         self.assertEqual(轉半型('％'), '%')
+
+
+        from zhongwen.text import 是否為字元
+        self.assertTrue(是否為字元('簡'))
+        self.assertTrue(是否為字元('a'))
+        self.assertTrue(是否為字元('μ'))
+        self.assertFalse(是否為字元('.'))
+        self.assertFalse(是否為字元('，'))
 
         from zhongwen.text import 是否為中文字元, 字元切換
         self.assertTrue(是否為中文字元('簡'))
@@ -81,9 +91,17 @@ class Test(unittest.TestCase):
         from zhongwen.text import 翻譯
         self.assertEqual(翻譯('test'), '測試')
         self.assertEqual(翻譯('取り'), '拿')
-        from zhongwen.text import 中文詞界
 
-        line = '''該局為處理廚餘並轉化土壤改良劑再利用，建置花蓮縣環保科技園區廚餘高效能處理廠，分別於花蓮縣環保科技園區研究廠房10(下稱A廠)及研究廠房20(下稱B廠)各設置一套廚餘高效能處理系統，每套處理系統均設置二組醱酵槽，並辦理「花蓮縣環保科技園區廚餘高效能處理廠代操作管理廠商專業服務計畫」勞務採購，將該廠委外操作管理。該計畫110年採購預算金額為282萬元，於110年9月9日以公開評選方式決標予循創有限公司(下稱循創)，決標金額為275萬元，履約期間為110年11月1日至110年12月31日止；111年採購預算金額為1,691萬5,000元，亦決標予循創，決標金額同預算金額，履約期間為111年1月1日至111年12月31日止。嗣該局為避免機具設備零件損壞故障及後續定期及不定期歲修等問題，影響廚餘處理去化，於111年6月27日變更本案契約，於招標規範(四)其他應配合事項新增設備維護及維修作業，規定廠區發現設備有故障、異常或其他問題應於五日內派技術人員處理並完成維修，如無法短時間修復完成，請公司函報該局修復期程，並提替代因應措施，修復完成請公司函報該局備查。次查循創於同年8月2日函報該局111年4月B廠一槽軸心斷裂，估計同年8月31日前維修完成。嗣該局因該公司至同年7月19日始於Line群組告知上開故障情形，，(111年6月28日至111年7月18日)，未依約立即函報上述故障情形，日數為21日。'''
+    def test_text_segmentation(self):
+        from zhongwen.text import 分詞
+
+        字串 = '''美國十年期公債殖利率即你現在買進且持有至到期日每年的年化報酬率，
+其係依據債券現價、持有至到期日期間之利息及到期還本現金流所計算之內部報酬率，
+由於美國係目前世界上經濟最發達的國家，
+其所發行公債倒債風險極低，該公債被大部分投資人視為無風險投資，
+是以，美國十年期公債殖利率通常視作無風險利率。
+'''
+        self.assertTrue('債券' in 分詞(字串))
 
         # self.assertEqual(中文詞界(10, line), (9,10))
 

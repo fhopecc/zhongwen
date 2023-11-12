@@ -103,6 +103,11 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
                 try:
                     return date(int(m[1])+1911, int(m[2]), int(m[3]))
                 except ValueError: return pd.NaT
+            pat = r'(\d+)年\D*(\d+)月'
+            if m:=re.match(pat, d):
+                try:
+                    return 月末(date(int(m[1])+1911, int(m[2]), 1))
+                except ValueError: return pd.NaT
 
             if default: return default 
             return d
@@ -198,6 +203,10 @@ def 上年底() -> date:
     d = 今日()
     return d.replace(year=d.year-1, month=12, day=31)
 
+def 年底() -> date:
+    d = 今日()
+    return d.replace(month=12, day=31)
+
 def 季別(日期=今日()) -> (int, int):
     '指定日期之季數，以(年數, 季數)表達，未指定為今日歸屬季別'
     d = 日期
@@ -273,6 +282,10 @@ def 與季末相距月數(日期):
     from dateutil.relativedelta import relativedelta
     return relativedelta(季末(日期), 日期).months
 
+def 與年底相距月數(日期):
+    from dateutil.relativedelta import relativedelta
+    return relativedelta(年底(), 日期).months
+
 def 月起迄(year, mon):
     月初 = date(year, mon, 1)
     return [月初, 月末(year, mon)]
@@ -297,10 +310,20 @@ def 前幾季(季數):
     return 季末(今日() - relativedelta(months=季數*3))
 
 def 近幾季(季數):
-    import pandas as pd
+    from datetime import timedelta
     start = 前幾季(季數)
     end = 今日()
     curdate = 季末(start)
+    while curdate <= end:
+        yield curdate
+        curdate += timedelta(days=1)
+        curdate = 季末(curdate)
+
+def 迄每季(起季):
+    '自起季迄每季'
+    from datetime import timedelta
+    end = 今日()
+    curdate = 季末(起季)
     while curdate <= end:
         yield curdate
         curdate += timedelta(days=1)

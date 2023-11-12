@@ -1,5 +1,4 @@
 '輔助PANDAS工具'
-
 class 使用者要求更新且線上資料較線下多(Exception): pass
 class 使用者要求覆寫(Exception): pass
 def 增加按期更新查詢結果功能(更新頻率='每月十日之前'):
@@ -88,11 +87,11 @@ def 批次刪除(批號, 批號欄名, 表格, 資料庫):
 
 def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 覆寫=False):
     from warnings import warn
-    warn(f'參數【覆寫】將廢棄。', DeprecationWarning, stacklevel=2)
     import logging
     import pandas as pd
     import sqlite3
     import re
+    warn(f'參數【覆寫】將廢棄。', DeprecationWarning, stacklevel=2)
     try:
         批次刪除(批號, 批號欄名, 表格, 資料庫)
     except sqlite3.OperationalError as e:
@@ -101,23 +100,27 @@ def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 覆寫=False):
     try:
         資料.to_sql(表格, 資料庫, if_exists='append')
     except sqlite3.OperationalError as e:
-        msg = str(e)
-        pat = r'table \w+ has no column named ([\w（）]+)'
-        if m:=re.match(pat, msg):
-            c =  m[1]
-            db = 資料庫
-            cursor = db.cursor()
-            alter_query = f"ALTER TABLE {表格} ADD COLUMN {c} INT"
+        df = pd.read_sql_query(f'select * from {表格} limit 1', 資料庫)
+        寫入資料欄位 = 資料.columns.to_list()
+        資料庫欄位 = df.columns.to_list()
+        差異欄位 = set(寫入資料欄位) - set(資料庫欄位)
+        print(差異欄位)
+        cursor = 資料庫.cursor()
+        for c in 差異欄位:
+            alter_query = f'ALTER TABLE {表格} ADD COLUMN "{c}" INT'
             cursor.execute(alter_query)
-            db.commit()
-        raise e
+        資料庫.commit()
+        print('已新增差異欄位')
+        資料.to_sql(表格, 資料庫, if_exists='append')
+        # raise e
     logging.debug(f'寫入成功！')
 
 def 可顯示(查詢資料函數):
     '裝飾查詢資料函數，指名參數設為【顯示=True】，即將查詢結果以 html 顯示。'
     from functools import wraps
+    import matplotlib.pyplot as plt
     @wraps(查詢資料函數)
-    def wrapper(*args, 顯示=False, **kargs):
+    def wrapper(*args, 顯示=False, 圖示=False, **kargs):
         try:
             display_rows = kargs['顯示筆數']
             del kargs['顯示筆數']
@@ -125,6 +128,10 @@ def 可顯示(查詢資料函數):
             display_rows = 100
         df = 查詢資料函數(*args, **kargs)
         if 顯示: show_html(df, 顯示筆數=display_rows)
+        if 圖示: 
+            plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']
+            df.plot()
+            plt.show()
         return df
     return wrapper
 
@@ -258,7 +265,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
                     整數欄位 = [c]
         pat = '^現金轉換天數|估計每股配發現金|股價|配息|每股盈餘|.*比|.*指數$'
         if re.match(pat, c):
-            if df[c].dtype == float and not c in 隱藏欄位: 
+            if df[c].dtype == float and not c in 隱藏欄位 and not c in 百分比欄位: 
                 try:
                     實數欄位.append(c)
                 except AttributeError:
@@ -413,4 +420,17 @@ def 製作排行榜(排行個數, 排行鍵):
         return 排行榜
     return _製作排行榜
 
+def 連續增減次數(時序資料):
+    資料名 = 時序資料.name
+    df = 時序資料.to_frame()
+    df['index']= df.index
+    當期值 = df[資料名] 
+    前期值 = 當期值.shift()
+    環比 = 當期值 - 前期值
+    消長 = 環比/環比.abs()
+    變化 = 消長 != 消長.shift()
+    df['分組']= 變化.cumsum()
+    連續次數 = df.groupby('分組')['index'].rank(method='first')
+    連續次數 = 連續次數 * 消長
+    return 連續次數 
 

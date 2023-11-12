@@ -5,7 +5,7 @@ import os
 from zhongwen.pandas_tools import show_html
 
 class Test(unittest.TestCase):
-    @unittest.skip('不測試')
+    # @unittest.skip('不測試')
     def test(self):
         from zhongwen.花蓮縣法規 import 法規
         # df = cache.get('花蓮縣法規')
@@ -14,7 +14,7 @@ class Test(unittest.TestCase):
             # print(k)
         # print(cache.iterkeys())
         df = 法規()
-        show_html(df, 自動格式=False)
+        show_html(df)
         # df = df[['法規名稱', '公發布日']]
         # df.reset_index(inplace=True)
         # df = df.iloc[:100]

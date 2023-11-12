@@ -6,6 +6,19 @@ import re
 大寫位名表 = "拾佰仟"
 組名表 = "萬億兆京垓秭穰溝澗正載"
 组名表 = "万亿兆京垓秭穰沟涧正载"
+半型數字表 = "0123456789"
+全型數字表 = "０１２３４５６７８９"
+
+def 全型數字(number):
+    if isinstance(number, int) or (isinstance(number, str) and number.isdigit()):
+        translation_table = str.maketrans(半型數字表, 全型數字表)
+        if isinstance(number, int):
+            number_str = str(number)
+        else:
+            number_str = number
+        return number_str.translate(translation_table)
+    else:
+        raise ValueError("Input must be a non-negative integer or a string of digits.")
 
 def 中文數字轉數值(n):
     數字:str=小寫數字表+大寫數字表+大写数字表
@@ -37,6 +50,11 @@ def 轉數值(n, 傳回格式=False) -> int|float:
         if m:=re.match(pat, n):
             import pandas as pd
             return pd.to_numeric(m[1])/100
+
+        pat = f'^[{全型數字表}]+$'
+        if re.match(pat, n):
+            d = str.maketrans(全型數字表, 半型數字表)
+            return int(n.translate(d))
 
         # 不具位名之中文數
         中文數字='○0０零壹貳參肆伍陸柒捌玖一二三四五六七八九'

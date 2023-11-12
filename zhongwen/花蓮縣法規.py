@@ -5,7 +5,6 @@ from diskcache import Cache
 cache = Cache(Path.home() / 'cache' / 'hllaw')
 網址 = 'https://glrs.hl.gov.tw/glrsout/'
 
-
 def 開啟網頁():
     os.system(f'start {網址}')
 

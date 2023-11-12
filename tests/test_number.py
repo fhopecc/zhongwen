@@ -36,6 +36,7 @@ class Test(unittest.TestCase):
         self.assertEqual(轉數值('5,000'), 5000)
         self.assertEqual(轉數值('8.1%'), 0.081)
         self.assertEqual(轉數值('-8.1%'), -0.081)
+        self.assertEqual(轉數值('１２３'), 123)
         self.assertEqual(約數('55,302'), '5萬餘')
         self.assertEqual(約數('5,302'), '5,302')
         self.assertEqual(百分比('0.8911'), '89.11％')
@@ -49,6 +50,9 @@ class Test(unittest.TestCase):
         self.assertEqual(轉標號('一、'), 標號(1, 3))
         self.assertEqual(轉標號('3.'), 標號(3, 5))
         self.assertEqual(轉標號('1.'), 標號(1, 5))
+
+        from zhongwen.number import 全型數字
+        self.assertEqual(全型數字('123'), '１２３')
 
     def test_counter_sec_ones(self):
         from zhongwen.number import 累積正負次數
