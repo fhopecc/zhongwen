@@ -2,6 +2,12 @@
 from datetime import date
 from functools import lru_cache
 
+def 取日數(期間):
+    try:
+        return 期間.days
+    except:
+        return float('nan')
+
 def 是日期嗎(v):
     from datetime import datetime
     import pandas as pd
