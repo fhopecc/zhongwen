@@ -247,7 +247,7 @@ def 轉標號(text):
         return 標號(轉數值(m[1]), 5)
     return text 
  
-def 累積正負次數(數列):
+def 連續正負次數(數列):
     import numpy as np
     a = np.sign(數列)
     s = 0

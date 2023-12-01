@@ -1,6 +1,27 @@
 '輔助PANDAS工具'
 class 使用者要求更新且線上資料較線下多(Exception): pass
 class 使用者要求覆寫(Exception): pass
+
+def 增加自動更新資料功能(更新頻率='每月十日之前'):
+    '如將參數「更新」設為True，則強制更新該批資料'
+    import logging
+    from pathlib import Path
+    from diskcache import Cache
+    cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
+    def _增加按期更新查詢結果功能(查詢資料):
+        from functools import wraps
+        @wraps(查詢資料)
+        def 查詢按期更新資料(*args, 更新=False,**kargs):
+            if 更新頻率=='每月十日之前':
+                from zhongwen.date import 今日 
+                if 今日().day <= 10 or 更新:
+                    df = 查詢資料(*args, **kargs)
+                    cache.set(查詢資料.__name__, df)
+                    return df
+            return cache.read(查詢資料.__name__)
+        return 查詢按期更新資料
+    return _增加按期更新查詢結果功能
+
 def 增加按期更新查詢結果功能(更新頻率='每月十日之前'):
     '如將參數「更新」設為True，則強制更新該批資料'
     import logging
@@ -23,18 +44,21 @@ def 增加按期更新查詢結果功能(更新頻率='每月十日之前'):
 
 def 增加批次緩存功能(資料庫檔, 資料名稱, 批號欄名):
     '如將參數「更新」設為True，則強制更新該批資料'
+    from functools import wraps
+    from sqlite3 import connect
+    import pandas as pd
     import logging
+
     def _增加批次緩存功能(資料存取函數):
-        from functools import wraps
         @wraps(資料存取函數)
-        def 批次緩存資料存取(批號, *args, 更新=False,**kargs):
-            from sqlite3 import connect
-            import pandas as pd
+        def 批次緩存資料存取(批號, *args, 更新=False, 覆寫=False,**kargs):
             with connect(資料庫檔) as db: 
                 try:
                     df0 = 批次讀取(批號, 批號欄名, 資料名稱, db) 
                     if 更新:
                         df1 = 資料存取函數(批號, *args, **kargs)
+                        breakpoint()
+                        if 覆寫: raise 使用者要求覆寫()
                         if df1.shape[0] > df0.shape[0]:
                             logging.info(
                                 f'目前線上公布{批號}之{資料名稱}計{df1.shape[0]}筆，'
@@ -46,7 +70,7 @@ def 增加批次緩存功能(資料庫檔, 資料名稱, 批號欄名):
                     df1 = 資料存取函數(批號, *args, **kargs)
                     批次寫入(df1, 批號, 批號欄名, 資料名稱, db, 更新)
                     return df1
-                except 使用者要求更新且線上資料較線下多 as e:
+                except (使用者要求覆寫, 使用者要求更新且線上資料較線下多) as e:
                     logging.info(e)
                     批次寫入(df1, 批號, 批號欄名, 資料名稱, db, 覆寫=True)
                     return df1
@@ -84,7 +108,6 @@ def 批次刪除(批號, 批號欄名, 表格, 資料庫):
     import logging
     logging.debug(f'批次刪除{批號}、{表格}……')
 
-
 def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 覆寫=False):
     from warnings import warn
     import logging
@@ -114,6 +137,15 @@ def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 覆寫=False):
         資料.to_sql(表格, 資料庫, if_exists='append')
         # raise e
     logging.debug(f'寫入成功！')
+
+def 載入時間序列(資料庫檔, 表格, 時間欄名, 最早時間=None):
+    import pandas as pd
+    import sqlite3
+    with sqlite3.connect(資料庫檔) as c:
+        sql = f"select * from {表格}"
+        if 最早時間:
+            sql += f" where {時間欄名} >= '{最早時間:%Y-%m-%d}' order by {時間欄名}"
+        return pd.read_sql_query(sql, c, index_col='index', parse_dates=時間欄名) 
 
 def 可顯示(查詢資料函數):
     '裝飾查詢資料函數，指名參數設為【顯示=True】，即將查詢結果以 html 顯示。'
@@ -243,18 +275,19 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
             ,顯示筆數=100, 採用民國日期格式=False, 顯示=None
             ,除錯提示=False, 顯示提示=True
             ):
-    if 顯示筆數:
-        df = df[:顯示筆數]
-    columns = df.columns
     from zhongwen.number import 轉數值
     import pandas as pd
     import numpy as np
+    import re
+
+    if 顯示筆數:
+        df = df[:顯示筆數]
+    columns = df.columns
     for c in df.columns:
         pat = '^.*述|借貸$'
-        import re
         if re.match(pat, c):
             continue
-        pat = '^.*(金額|損益|淨利|股利|累計|差異|期末|負債|營收|\(元\))|成本|支出|存入|現值|借券|年數|餘額|借|貸$'
+        pat = '^.*(金額|次數|損益|淨利|股利|累計|差異|期末|負債|營收|\(元\))|成本|支出|存入|現值|借券|年數|餘額|借|貸$'
         if re.match(pat, c):
             if (np.issubclass_(df[c].dtype.type, np.integer)  
                 or df[c].dtype == float
@@ -263,7 +296,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
                     整數欄位.append(c)
                 except AttributeError:
                     整數欄位 = [c]
-        pat = '^現金轉換天數|估計每股配發現金|股價|配息|每股盈餘|.*比|.*指數$'
+        pat = '^現金轉換天數|估計每股配發現金|股價|配息|每股盈餘|.*比|.*指數|每股.*$'
         if re.match(pat, c):
             if df[c].dtype == float and not c in 隱藏欄位 and not c in 百分比欄位: 
                 try:
