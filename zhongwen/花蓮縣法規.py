@@ -1,5 +1,6 @@
 '花蓮縣政府主管法規資料'
 from zhongwen.pandas_tools import 可顯示
+from lark import Lark, Transformer
 from pathlib import Path
 from diskcache import Cache
 cache = Cache(Path.home() / 'cache' / 'hllaw')
@@ -11,13 +12,13 @@ def 開啟網頁():
 async def 抓取(url):
     import logging
     import aiohttp
+    import asyncio
     async with aiohttp.ClientSession() as session:
         try:
             async with session.get(url) as response:
                 return await response.text()
         except aiohttp.client_exceptions.ClientConnectorError:
-            logging.info(f'抓取{url}逾時，停止10秒重試')
-            import asyncio
+            logging.error(f'抓取{url}逾時，停止10秒重試')
             asyncio.sleep(10)
             return await 抓取(url)
  
@@ -40,7 +41,7 @@ def 解析法規(內容):
     return fs
 
 @可顯示
-@cache.memoize(expire=30*24*60*60, tag='爬取法規')
+@cache.memoize(name='爬取花蓮縣法規', expire=30*24*60*60, tag='爬取法規')
 def 爬取法規():
     from zhongwen.file import 抓取
     df = 法規連結()
@@ -82,13 +83,13 @@ async def 取連結(page_no):
 async def 爬取法規連結():
     from bs4 import BeautifulSoup as bs
     from io import StringIO
+    import pandas as pd
     import asyncio
     import logging
     import re
-    import pandas as pd
     url = 'https://glrs.hl.gov.tw/glrsout/'
     text = await 抓取(url)
-    logging.debug(f'爬取法規連結：{text}')
+    logging.info(f'爬取法規連結：{text}')
     pat = r'(\d+)<div class="pageno hidden-xs"'
     if m:=re.search(pat, text):
         page_num = int(m[1])
@@ -126,7 +127,6 @@ def 取法規頁連結(html):
     df = pd.DataFrame(links)
     return df
 
-from lark import Lark, Transformer
 def 法規分條(法規內容):
     p = Lark.open(Path(__file__).with_suffix('.lark'))
     t = p.parse(法規內容)
@@ -135,18 +135,18 @@ def 法規分條(法規內容):
 
 class 法規分條剖析樹(Transformer):
     def LAW_FIRST_PARA(self, tok):
-        pat = r"第([\d壹貳參肆伍陸柒捌玖拾一二三四五六七八九十]+)條(.*)"
         import re
         from zhongwen.number import 轉數值
+        pat = r"第([\d壹貳參肆伍陸柒捌玖拾一二三四五六七八九十]+)條(.*)"
         if m := re.match(pat, tok.value):
             num = 轉數值(m[1])
             p = m[2]
             return (num, p)
 
     def LAW2_FIRST_PARA(self, tok):
-        pat = r"([一二三四五六七八九十]+)、(.*)"
-        import re
         from zhongwen.number import 轉數值
+        import re
+        pat = r"([一二三四五六七八九十]+)、(.*)"
         if m := re.match(pat, tok.value):
             num = 轉數值(m[1])
             p = m[2]
@@ -180,11 +180,11 @@ class 法規分條剖析樹(Transformer):
         return (1, toks[0].value)
 
 @可顯示
-@cache.memoize(expire=30*24*60*60, tag='法規條文')
+@cache.memoize(name='花蓮縣法規條文', expire=30*24*60*60, tag='法規條文')
 def 法規條文(排除廢止者=True):
+    from zhongwen.date import 取日期
     import logging
     df = 爬取法規()
-    from zhongwen.date import 取日期
     df.rename(columns={'廢止/停止適用日期':'廢止停止適用日期'}, inplace=True)
     df['公發布日'] = df.公發布日.map(取日期)
     df['修正日期'] = df.修正日期.map(取日期)
@@ -196,7 +196,7 @@ def 法規條文(排除廢止者=True):
         try:
             return 法規分條(l)
         except Exception as e:
-            logging.info(f'法規分條錯誤：{e}')
+            logging.error(f'法規分條錯誤：{e}')
             return l
     df['法規分條'] = df.法規內容.map(_法規分條)
     df = df.explode('法規分條')
@@ -215,6 +215,8 @@ def 法規條文(排除廢止者=True):
 if __name__ == '__main__':
     pass
     import logging
-    logging.getLogger().setLevel(logging.DEBUG)
+    from zhongwen.pandas_tools import show_html
     # cache.evict('法規條文')
-    法規條文(顯示=True)
+    df = 法規條文()
+    df = df.query('法規名稱.str.contains("縣有財產")')
+    show_html(df)
