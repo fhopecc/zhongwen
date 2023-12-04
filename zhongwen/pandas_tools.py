@@ -57,7 +57,6 @@ def 增加批次緩存功能(資料庫檔, 資料名稱, 批號欄名):
                     df0 = 批次讀取(批號, 批號欄名, 資料名稱, db) 
                     if 更新:
                         df1 = 資料存取函數(批號, *args, **kargs)
-                        breakpoint()
                         if 覆寫: raise 使用者要求覆寫()
                         if df1.shape[0] > df0.shape[0]:
                             logging.info(
@@ -138,14 +137,17 @@ def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 覆寫=False):
         # raise e
     logging.debug(f'寫入成功！')
 
-def 載入時間序列(資料庫檔, 表格, 時間欄名, 最早時間=None):
+def 載入時間序列(資料庫檔, 表格, 時間欄名, 最早時間=None, 實體欄名=None):
+    '由實體及時間組成索引鍵'
     import pandas as pd
     import sqlite3
     with sqlite3.connect(資料庫檔) as c:
         sql = f"select * from {表格}"
         if 最早時間:
             sql += f" where {時間欄名} >= '{最早時間:%Y-%m-%d}' order by {時間欄名}"
-        return pd.read_sql_query(sql, c, index_col='index', parse_dates=時間欄名) 
+        df = pd.read_sql_query(sql, c, index_col='index', parse_dates=時間欄名) 
+        df[實體欄名] = df[實體欄名].astype(str)
+        return df.set_index([實體欄名, 時間欄名])
 
 def 可顯示(查詢資料函數):
     '裝飾查詢資料函數，指名參數設為【顯示=True】，即將查詢結果以 html 顯示。'

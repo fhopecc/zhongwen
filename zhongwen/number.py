@@ -9,6 +9,41 @@ import re
 半型數字表 = "0123456789"
 全型數字表 = "０１２３４５６７８９"
 
+# 取得數值
+def 轉數值(n, 傳回格式=False) -> int|float:  
+    if isinstance(n, str):
+        # 百分比
+        pat = r'(-?[\d](\.\d+)?)%'
+        if m:=re.match(pat, n):
+            import pandas as pd
+            return pd.to_numeric(m[1])/100
+
+        pat = f'^[{全型數字表}]+$'
+        if re.match(pat, n):
+            d = str.maketrans(全型數字表, 半型數字表)
+            return int(n.translate(d))
+
+        # 不具位名之中文數
+        中文數字='○0０零壹貳參肆伍陸柒捌玖一二三四五六七八九'
+        pat = f'^[{中文數字}]+$'
+        if re.match(pat, n):
+            d = str.maketrans(中文數字, '0000123456789123456789')
+            return int(n.translate(d))
+
+        # 具位名之中文數
+        pat = r'^[零壹貳參肆伍陸柒捌玖拾一二三四五六七八九十百千佰仟萬億兆]+$'
+        if m:=re.match(pat, n):
+            return 中文數字轉數值(m.group(0))
+        try:
+            n = re.sub(r'[ ,，]', '', n)
+            pat = r'^-?\d+$'
+            if m:=re.match(pat, n):
+                return int(n)
+            return float(n)
+        except:
+            return 0
+    return n
+
 def 全型數字(number):
     if isinstance(number, int) or (isinstance(number, str) and number.isdigit()):
         translation_table = str.maketrans(半型數字表, 全型數字表)
@@ -43,39 +78,6 @@ def 中文數字轉數值(n):
         r+=v
     return r
     
-def 轉數值(n, 傳回格式=False) -> int|float:  
-    if isinstance(n, str):
-        # 百分比
-        pat = r'(-?[\d](\.\d+)?)%'
-        if m:=re.match(pat, n):
-            import pandas as pd
-            return pd.to_numeric(m[1])/100
-
-        pat = f'^[{全型數字表}]+$'
-        if re.match(pat, n):
-            d = str.maketrans(全型數字表, 半型數字表)
-            return int(n.translate(d))
-
-        # 不具位名之中文數
-        中文數字='○0０零壹貳參肆伍陸柒捌玖一二三四五六七八九'
-        pat = f'^[{中文數字}]+$'
-        if re.match(pat, n):
-            d = str.maketrans(中文數字, '0000123456789123456789')
-            return int(n.translate(d))
-
-        # 具位名之中文數
-        pat = r'^[零壹貳參肆伍陸柒捌玖拾一二三四五六七八九十百千佰仟萬億兆]+$'
-        if m:=re.match(pat, n):
-            return 中文數字轉數值(m.group(0))
-        try:
-            n = re.sub(r'[ ,，]', '', n)
-            pat = r'^-?\d+$'
-            if m:=re.match(pat, n):
-                return int(n)
-            return float(n)
-        except:
-            return 0
-    return n
 
 def 中文數字(
     n: int | float | str,
@@ -136,6 +138,15 @@ def 大寫中文數字(n):
 def 大写中文数字(n):
     return 中文數字(n, 大寫=True, 簡體=True)
 
+def 增減(變動數, 增減用語=['增加', '減少']):
+    return (增減用語[0] if 變動數 > 0 else 增減用語[1]) + f'{abs(變動數):,.0f}'
+
+# def 衰長(變動數):
+    # return ('成長' if 變動數 > 0 else '減少') + f'{abs(變動數):,.0f}'
+
+def 增減數(變動數):
+    return ('增加' if 變動數 > 0 else '減少') + f'{abs(變動數)*100:,.2f}'
+
 def 約數(n) -> str:
     '中文萬約數表達，未達萬以全數表達'
     n = 轉數值(n)
@@ -152,7 +163,6 @@ def 約數(n) -> str:
     if h:s+=f"{h:,.0f}萬"
     if r: s+= "餘" 
     return s
-
 
 def 最簡約數(n) -> str:
     '僅表達最高位數字，舉如：17億500萬餘元表達為17億餘元。'
@@ -175,6 +185,9 @@ def 最簡約數(n) -> str:
     if r: s+= "餘" 
     return s
 
+def 增減約數(變動數):
+    return ('增加' if 變動數 > 0 else '減少') + 約數(abs(變動數))
+
 def 百分比(n):
   '表達至2位小數百分比，另以--表達缺失值'
   import pandas as pd
@@ -186,7 +199,7 @@ def 增減百分比(r, 增減文字=["增加", "減少"]):
     if pd.isnull(r): return ''
     n = abs(r)
     _增減文字 = 增減文字[0] if r>0 else  增減文字[1] 
-    return f'{_增減文字}約{n:.2%}'
+    return f'{_增減文字}{n:.2%}'
 
 def 消長百分比(r):
     '比較前時序之數值用消長'
@@ -194,7 +207,7 @@ def 消長百分比(r):
 
 def 同比百分比(r):
     '數據較去年同期增減'
-    return 增減百分比(r, ['年增', '年減'])
+    return 增減百分比(abs(r), ['年增', '年減'])
 
 def 二位實數(f):
     import pandas as pd
@@ -256,6 +269,15 @@ def 連續正負次數(數列):
         s+=n
     return s
 
+def 最近連續正負次數(時序):
+    import numpy as np
+    a = np.sign(時序)
+    s = 0
+    for n in reversed(a):
+        if np.isnan(n) or s*n < 0: return s
+        s+=n
+    return s
+
 def 連續正數(數列):
     import numpy as np
     n = np.array(數列)
@@ -265,11 +287,6 @@ def 連續正數(數列):
         s = v*(s+v) 
     return s
 
-def 增減約數(變動數):
-    return ('增加' if 變動數 > 0 else '減少') + 約數(abs(變動數))
-
-def 增減數(變動數):
-    return ('增加' if 變動數 > 0 else '減少') + f'{abs(變動數)*100:,.2f}'
 
 def 貸方科目收支金額轉借方金額(金額):
     return abs(min(0, 金額))
