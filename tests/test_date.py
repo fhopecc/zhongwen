@@ -77,6 +77,10 @@ class Test(unittest.TestCase):
         self.assertEqual(next(qs), 取日期('20190630'))
         # self.assertEqual(qs[0], 取日期('1120813'))
 
+    def test_year(self):
+        from zhongwen.date import 民國年底, 取日期, 自起算年迄逐民國年列舉
+        self.assertEqual(民國年底(110), 取日期('1101231'))
+        self.assertEqual(list(自起算年迄逐民國年列舉(110)),[110, 111, 112])
 
 if __name__ == '__main__':
     unittest.main()

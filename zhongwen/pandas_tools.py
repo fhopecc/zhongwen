@@ -60,8 +60,8 @@ def 增加批次緩存功能(資料庫檔, 資料名稱, 批號欄名):
                         if 覆寫: raise 使用者要求覆寫()
                         if df1.shape[0] > df0.shape[0]:
                             logging.info(
-                                f'目前線上公布{批號}之{資料名稱}計{df1.shape[0]}筆，'
-                                f'較資料庫存放計{df0.shape[0]}筆還多，爰更新資料庫！')    
+                                f'目前抓取{批號}之{資料名稱}計{df1.shape[0]}筆，'
+                                f'已較緩存資料庫{df0.shape[0]}筆多，爰更新資料庫！')    
                             raise 使用者要求更新且線上資料較線下多()
                     return df0 
                 except (pd.errors.DatabaseError, 批號查無資料錯誤) as e:
@@ -289,7 +289,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
         pat = '^.*述|借貸$'
         if re.match(pat, c):
             continue
-        pat = '^.*(金額|次數|損益|淨利|股利|累計|差異|期末|負債|營收|\(元\))|成本|支出|存入|現值|借券|年數|餘額|借|貸$'
+        pat = '^.*(金額|次數|損益|淨利|股利|累計|差異|期末|負債|營收|年數|\(元\))|成本|支出|存入|現值|借券|餘額|借|貸$'
         if re.match(pat, c):
             if (np.issubclass_(df[c].dtype.type, np.integer)  
                 or df[c].dtype == float
@@ -298,7 +298,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
                     整數欄位.append(c)
                 except AttributeError:
                     整數欄位 = [c]
-        pat = '^現金轉換天數|估計每股配發現金|股價|配息|每股盈餘|.*比|.*指數|每股.*$'
+        pat = '^現金轉換天數|估計每股配發現金|(元/股)|股價|配息|配股|r方|每股盈餘|.*比|.*指數|每股.*$'
         if re.match(pat, c):
             if df[c].dtype == float and not c in 隱藏欄位 and not c in 百分比欄位: 
                 try:

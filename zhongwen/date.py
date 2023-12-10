@@ -209,9 +209,19 @@ def 上年底() -> date:
     d = 今日()
     return d.replace(year=d.year-1, month=12, day=31)
 
-def 年底() -> date:
+def 年底(年數=None) -> date:
+    if 年數:
+        return date(年數, 12, 31)
     d = 今日()
     return d.replace(month=12, day=31)
+
+def 民國年底(民國年數) -> date:
+    if 民國年數:
+        return date(民國年數+1911, 12, 31)
+    d = 今日()
+    return d.replace(month=12, day=31)
+
+
 
 def 季別(日期=今日()) -> (int, int):
     '指定日期之季數，以(年數, 季數)表達，未指定為今日歸屬季別'
@@ -380,6 +390,10 @@ def 應公布財報季別(公司類型='一般公司') -> (int, int):
         年 = 年-1
         季 = 3
     return 年, 季 
+
+def 自起算年迄逐民國年列舉(起算年):
+    迄年 = 今日().year - 1911
+    return range(起算年, 迄年+1)
 
 if __name__ == '__main__':
     for 月 in 近幾個月底(112):
