@@ -7,13 +7,13 @@ def 增加自動更新資料功能(更新頻率='每月十日之前'):
     import logging
     from pathlib import Path
     from diskcache import Cache
+    from functools import wraps
+    from zhongwen.date import 今日 
     cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
     def _增加按期更新查詢結果功能(查詢資料):
-        from functools import wraps
         @wraps(查詢資料)
         def 查詢按期更新資料(*args, 更新=False,**kargs):
             if 更新頻率=='每月十日之前':
-                from zhongwen.date import 今日 
                 if 今日().day <= 10 or 更新:
                     df = 查詢資料(*args, **kargs)
                     cache.set(查詢資料.__name__, df)
@@ -22,25 +22,46 @@ def 增加自動更新資料功能(更新頻率='每月十日之前'):
         return 查詢按期更新資料
     return _增加按期更新查詢結果功能
 
+class 應更新(Exception): pass
+
 def 增加按期更新查詢結果功能(更新頻率='每月十日之前'):
     '如將參數「更新」設為True，則強制更新該批資料'
     import logging
     from pathlib import Path
     from diskcache import Cache
+    from zhongwen.date import 今日 
+    warn(f'【增加按期更新查詢結果功能】將廢棄，請使用【batch_data.增加定期更新】', DeprecationWarning, stacklevel=2)
     cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
     def _增加按期更新查詢結果功能(查詢資料):
         from functools import wraps
         @wraps(查詢資料)
         def 查詢按期更新資料(*args, 更新=False,**kargs):
-            if 更新頻率=='每月十日之前':
-                from zhongwen.date import 今日 
-                if 今日().day <= 10 or 更新:
-                    df = 查詢資料(*args, **kargs)
-                    cache.set(查詢資料.__name__, df)
-                    return df
-            return cache.read(查詢資料.__name__)
+            try:
+                if 更新 or (更新頻率=='每月十日之前' and 今日().day <= 10): raise 應更新()
+                return cache.read(查詢資料.__name__)
+            except (KeyError, 應更新) as e:
+                df = 查詢資料(*args, **kargs)
+                cache.set(查詢資料.__name__, df)
+                return df
         return 查詢按期更新資料
     return _增加按期更新查詢結果功能
+
+def 增加批次儲存(資料庫檔, 資料名稱, 批號欄名):
+    from functools import wraps
+    from sqlite3 import connect
+    import pandas as pd
+    import logging
+    from warnings import warn
+    warn(f'【增加批次緩存】將廢棄，請使用【batch_data.結果批次寫入】', DeprecationWarning, stacklevel=2)
+    def 增加批次儲存功能(資料存取函數):
+        @wraps(資料存取函數)
+        def 批次資料存取(批號, *args, **kargs):
+            df = 資料存取函數(批號, *args, **kargs)
+            with connect(資料庫檔) as db: 
+                批次寫入(df, 批號, 批號欄名, 資料名稱, db)
+            return df
+        return 批次資料存取
+    return 增加批次儲存功能
 
 def 增加批次緩存功能(資料庫檔, 資料名稱, 批號欄名):
     '如將參數「更新」設為True，則強制更新該批資料'
@@ -48,7 +69,8 @@ def 增加批次緩存功能(資料庫檔, 資料名稱, 批號欄名):
     from sqlite3 import connect
     import pandas as pd
     import logging
-
+    from warnings import warn
+    warn(f'【增加批次緩存功能】將廢棄，請使用【batch_data.結果批次寫入】', DeprecationWarning, stacklevel=2)
     def _增加批次緩存功能(資料存取函數):
         @wraps(資料存取函數)
         def 批次緩存資料存取(批號, *args, 更新=False, 覆寫=False,**kargs):
@@ -289,7 +311,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
         pat = '^.*述|借貸$'
         if re.match(pat, c):
             continue
-        pat = '^.*(金額|次數|損益|淨利|股利|累計|差異|期末|負債|營收|年數|\(元\))|成本|支出|存入|現值|借券|餘額|借|貸$'
+        pat = '^.*(金額|次數|損益|淨利|股利|累計|差異|評分|期末|負債|營收|年數|\(元\))|成本|支出|存入|現值|借券|餘額|借|貸$'
         if re.match(pat, c):
             if (np.issubclass_(df[c].dtype.type, np.integer)  
                 or df[c].dtype == float
@@ -298,14 +320,14 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
                     整數欄位.append(c)
                 except AttributeError:
                     整數欄位 = [c]
-        pat = '^現金轉換天數|估計每股配發現金|(元/股)|股價|配息|配股|r方|每股盈餘|.*比|.*指數|每股.*$'
+        pat = '^現金轉換天數|估計每股配發現金|估計股利|(元/股)|股價|配息|配股|r方|每股盈餘|.*符合度|.*比|.*指數|每股.*$'
         if re.match(pat, c):
             if df[c].dtype == float and not c in 隱藏欄位 and not c in 百分比欄位: 
                 try:
                     實數欄位.append(c)
                 except AttributeError:
                     實數欄位 = [c]
-        pat = '^.*(漲跌幅|率|比例|\(%\))$'
+        pat = '^.*(漲跌幅|率|比例|趨勢|\(%\))$'
         if re.match(pat, c):
             if df[c].dtype == float and not c in 隱藏欄位: 
                 try:
@@ -440,17 +462,22 @@ def 分割鏈(鏈, 長度):
     chunk = list(iter(lambda: list(islice(it, size)), []))
     return chunk
 
-def 製作排行榜(排行個數, 排行鍵):
+def 製作排行榜(排行個數或名次清單, 排行鍵, 漸增=False):
     def _製作排行榜(資料函數):
         from functools import wraps
         @wraps(資料函數)
         def 排行榜(*args, **kargs):
             df = 資料函數(*args, **kargs)
-            df.sort_values(排行鍵, ascending=False, inplace=True)
-            df = df.iloc[:排行個數]
+            df.sort_values(排行鍵, ascending=漸增, inplace=True)
             df.reset_index(drop=True, inplace=True)
             df.index = df.index+1
             df.index.name = '名次'
+            if isinstance(排行個數或名次清單, int):
+                排行個數 = 排行個數或名次清單 
+                df = df.iloc[:排行個數]
+            elif isinstance(排行個數或名次清單, list):
+                名次清單 = 排行個數或名次清單 
+                df = df.iloc[map(lambda n: n-1, 名次清單)]
             return df
         return 排行榜
     return _製作排行榜

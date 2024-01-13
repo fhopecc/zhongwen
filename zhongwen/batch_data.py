@@ -1,3 +1,18 @@
+from pathlib import Path
+import logging
+logger = logging.getLogger(Path(__file__).stem)
+
+def 通知執行時間(f):
+    from functools import wraps
+    from time import time
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = time()
+        result = f(*args, **kw)
+        te = time()
+        logger.info(f'{f.__name__}費時{time()-ts:.2f}秒。')
+        return result
+    return wrap
 
 class 查無批號錯誤(Exception): pass
 
@@ -14,13 +29,12 @@ def 批次讀取(批號, 批號欄名, 表格, 資料庫, 日期欄位=None):
     return df
 
 def 批次刪除(批號, 批號欄名, 表格, 資料庫):
-    import logging
-    logging.debug(f'批次刪除{批號}、{表格}……')
+    logger.debug(f'{表格}刪除{批號}整批紀錄……')
     c = 資料庫.cursor()
     sql = f'delete from {表格} where {批號欄名}=="{批號}"'
     c.execute(sql)
     資料庫.commit()
-    logging.debug(f'成功')
+    logger.debug(f'成功')
 
 def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫):
     from zhongwen.text import 臚列
@@ -31,8 +45,8 @@ def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫):
     try:
         批次刪除(批號, 批號欄名, 表格, 資料庫)
     except sqlite3.OperationalError as e:
-        logging.debug(f'批次刪除發生錯誤：{e}')
-    logging.debug(f'批次寫入{批號}批號資料至{表格}……')
+        logger.debug(f'批次刪除發生錯誤：{e}')
+    logger.debug(f'整批寫入{批號}資料至{表格}……')
     try:
         資料.to_sql(表格, 資料庫, if_exists='append')
         logging.debug(f'寫入成功！')
@@ -41,17 +55,50 @@ def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫):
         寫入資料欄位 = 資料.columns.to_list()
         資料庫欄位 = df.columns.to_list()
         差異欄位 = set(寫入資料欄位) - set(資料庫欄位)
-        logging.debug(f'寫入資料之{臚列(差異欄位)}等欄位，資料庫尚未建立……')
+        logger.debug(f'寫入資料之{臚列(差異欄位)}等欄位，資料庫尚未建立……')
         cursor = 資料庫.cursor()
         for c in 差異欄位:
             alter_query = f'ALTER TABLE {表格} ADD COLUMN "{c}" INT'
             cursor.execute(alter_query)
         資料庫.commit()
-        logging.debug('前開資料庫未建立欄位已新增……')
+        logger.debug('前開資料庫未建立欄位已新增……')
         資料.to_sql(表格, 資料庫, if_exists='append')
-        logging.debug(f'寫入成功！')
+        logger.debug(f'寫入成功！')
+
+def 期日資料批次寫入(資料庫檔, 資料名稱, 資料日期欄名, 預設資料日期組=[]):
+    '''逐批寫入期日資料，資料日期一定為日期，即有year及month方法，舉如：
+爬取損益表(資料日期組=迄每季(季末(2019, 1)))
+會爬取自2019第1季至今每一季之損益表。
+'''
+    from collections.abc import Iterable
+    from functools import wraps
+    from sqlite3 import connect
+    def 增加結果批次寫入(爬取期日資料函數):
+        @wraps(爬取期日資料函數)
+        def 批次寫入爬取資料(資料日期組=None, **kargs):
+            if not 資料日期組:
+                資料日期組 = 預設資料日期組
+            if not isinstance(資料日期組, Iterable):
+                資料日期組 = [資料日期組]
+            with connect(資料庫檔) as db: 
+                for 資料日期 in 資料日期組:
+                    try:
+                        資料日期.year
+                        資料日期.month
+                    except AttributeError:
+                        raise TypeError(f'資料日期不為日期型態，而為{type(資料日期)}')
+                    df = 爬取期日資料函數(資料日期)
+                    批次寫入(df, 資料日期, 資料日期欄名, 資料名稱, db)
+                return df
+        return 批次寫入爬取資料
+    return 增加結果批次寫入
+    
 
 def 結果批次寫入(資料庫檔, 資料名稱, 批號欄名, 預設批號組=[]):
+    '''「批號組」指定一組批號逐批寫入查詢結果，舉如：
+爬取損益表(批號組=迄每季(季末(2019, 1)))
+會爬取自2019第1季至今每一季之損益表。
+'''
     from collections.abc import Iterable
     from functools import wraps
     from sqlite3 import connect
@@ -88,3 +135,84 @@ def 載入批次資料(資料庫檔, 表格, 批次欄名, 時間欄位=None):
         sql = f"select * from {表格}"
         df = pd.read_sql_query(sql, c, index_col='index', parse_dates=時間欄位) 
         return df
+
+def 增加定期更新功能(更新頻率='每月十日之前'):
+    '如將參數「更新」設為True，則強制更新該批資料'
+    import logging
+    from pathlib import Path
+    from diskcache import Cache
+    cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
+    def _增加按期更新查詢結果功能(查詢資料):
+        from functools import wraps
+        @wraps(查詢資料)
+        def 查詢按期更新資料(*args, 更新=False,**kargs):
+            if 更新頻率=='每月十日之前':
+                from zhongwen.date import 今日 
+                if 今日().day <= 10 or 更新:
+                    df = 查詢資料(*args, **kargs)
+                    cache.set(查詢資料.__name__, df)
+                    return df
+            return cache.read(查詢資料.__name__)
+        return 查詢按期更新資料
+    return _增加按期更新查詢結果功能
+
+def 應更新資料時期(更新頻率='次月十日前'):
+    from zhongwen.date import 今日, 上月
+    if 更新頻率=='次月十日前':
+        if 今日().day <= 10:
+            return 上月()
+
+def 解析更新期限(更新期限='次月10日前'):
+    '解析更新期限，格式如"次月10日前"、"次季45日前"及"次月底前"等，傳回(應更新資料時期、應更新資料期限及定期更新資訊)'
+    from zhongwen.date import  今日, 上月, 民國日期, 民國年月, 月底
+    import re
+    today = 今日()
+    應更新資料時期, 應更新資料期限 = None, None
+
+    if '次月'in 更新期限:
+        應更新資料時期 = 上月()
+
+    pat = r'(\d+)日前'
+    if m:=re.search(pat, 更新期限):
+        應更新資料期限 = today.replace(day=int(m[1]))
+
+    pat = r'月底前'
+    if m:=re.search(pat, 更新期限):
+        應更新資料期限 = 月底()
+
+    return (應更新資料時期, 應更新資料期限, f'{民國日期()}應公布{民國年月(應更新資料時期)}資訊。')
+
+def 增加定期更新(更新期限='次月10日前', 更新程序=解析更新期限):
+    '''更新期限可為「次月10日前」、「次季45日前」及「次月底前」等。
+查詢函數之參數「更新」設為True，則強制更新該批資料。'''
+    import logging
+    from pathlib import Path
+    from functools import wraps
+    from zhongwen.batch_data import 解析更新期限
+    from zhongwen.date import 今日
+    def 增加定期更新功能(查詢資料):
+        @wraps(查詢資料)
+        def 查詢定期更新資料(*args, 更新=False,**kargs):
+            資料時期, 公布期限, 資訊 = 解析更新期限()
+            today = 今日()
+            if 更新 or 今日() <= 公布期限:
+                更新程序(資料時期)
+            return 查詢資料()
+        return 查詢定期更新資料
+    return 增加定期更新功能
+
+def 去除重覆(資料庫, 表格, 批號, 時間欄位=None):
+    import sqlite3
+    df = 載入批次資料(資料庫, 表格, 批號, 時間欄位)
+    df = df.drop_duplicates()
+    with sqlite3.connect(資料庫) as c:
+        sql = f'drop table {表格}'
+        c.execute(sql)
+        c.commit()
+        df.to_sql(表格, c)
+    logger.info(f'{表格}去除重覆紀錄完成！') 
+ 
+if __name__ == '__main__':
+    pass
+    from 股票分析.公開資訊觀測站爬蟲 import 股利分派資料庫
+    # 去除重覆(股利分派資料庫, '股利分派表', '股東會召開年度', 時間欄位=['股利所屬年度'])

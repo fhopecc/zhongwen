@@ -55,11 +55,13 @@ class Test(unittest.TestCase):
         self.assertEqual(今日(), 取日期(datetime.now()))
 
     def test_month(self):
-        from zhongwen.date import 月末
+        from zhongwen.date import 月底, 上月
         from datetime import date
-        self.assertEqual(月末(2022, 10), date(2022, 10, 31))
-
         from zhongwen.date import 月起迄
+        self.assertEqual(月底(2022, 10), date(2022, 10, 31))
+
+        self.assertEqual(上月(), date(2023, 12, 31))
+
         self.assertEqual(月起迄(2022, 4), [date(2022, 4, 1), date(2022, 4, 30)])
 
     def test_quarter(self):
@@ -78,9 +80,11 @@ class Test(unittest.TestCase):
         # self.assertEqual(qs[0], 取日期('1120813'))
 
     def test_year(self):
-        from zhongwen.date import 民國年底, 取日期, 自起算年迄逐民國年列舉
+        from zhongwen.date import 民國年底, 取日期, 自起算民國年逐年列舉迄今年, 取日期
         self.assertEqual(民國年底(110), 取日期('1101231'))
-        self.assertEqual(list(自起算年迄逐民國年列舉(110)),[110, 111, 112])
+        self.assertEqual(list(自起算民國年逐年列舉迄今年(110))[:2]
+                        ,[民國年底(110), 民國年底(111)]
+                        )
 
 if __name__ == '__main__':
     unittest.main()

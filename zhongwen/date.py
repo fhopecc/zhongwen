@@ -38,6 +38,8 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
             if d > 2_01_01:
                 return 取日期(f'{d:07}')
             return 取日期(f'{d:05}')
+        case pd.Timestamp():
+            return d.date()
         case datetime():
             return date(d.year, d.month, d.day)
         case date():
@@ -112,7 +114,7 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
             pat = r'(\d+)年\D*(\d+)月'
             if m:=re.match(pat, d):
                 try:
-                    return 月末(date(int(m[1])+1911, int(m[2]), 1))
+                    return 月底(date(int(m[1])+1911, int(m[2]), 1))
                 except ValueError: return pd.NaT
 
             if default: return default 
@@ -135,9 +137,10 @@ def 上上月() -> date:
     from datetime import timedelta
     return 上月().replace(day=1) - timedelta(days=1)
 
-def 民國日期(d, fmt='%Y%m%d', 昨今明表達=False):
+def 民國日期(d=None, fmt='%Y%m%d', 昨今明表達=False):
     '%Y表年數、%m表月數前置0、%d表日數前置0、%M表月數不前置0'
     from datetime import timedelta
+    if not d: d = 今日()
     d = 取日期(d)
     import pandas as pd
     if pd.isnull(d):
@@ -204,6 +207,10 @@ def 今日() -> date:
 def 上年() -> date:
     d = 今日()
     return d.replace(year=d.year-1)
+
+def 上年初() -> date:
+    d = 今日()
+    return d.replace(year=d.year-1, month=1, day=1)
 
 def 上年底() -> date:
     d = 今日()
@@ -280,8 +287,9 @@ def 上季數() -> (int, int):
 def 上季初():
     return 季初(*上季數())
 
-def 月末(日期或年數=None, 月數=None):
-    '預設為本月末'
+def 月底(日期或年數=None, 月數=None):
+    '無指定參數則為本月底。'
+    import calendar
     年數 = 日期或年數
     if not 日期或年數:
         年數=今日().year
@@ -290,9 +298,13 @@ def 月末(日期或年數=None, 月數=None):
     if 是日期嗎(日期或年數):
         年數=日期或年數.year
         月數=日期或年數.month
-    import calendar
-    月末日數 = calendar.monthrange(年數, 月數)[1]
-    return date(年數, 月數, 月末日數)
+    月底日數 = calendar.monthrange(年數, 月數)[1]
+    return date(年數, 月數, 月底日數)
+
+def 月末(日期或年數=None, 月數=None):
+    from warnings import warn
+    warn(f'因【月末】名稱較罕用將廢棄，請改用【月底】', DeprecationWarning, stacklevel=2)
+    return 月底(日期或年數, 月數)
 
 def 與季末相距月數(日期):
     from dateutil.relativedelta import relativedelta
@@ -304,7 +316,7 @@ def 與年底相距月數(日期):
 
 def 月起迄(year, mon):
     月初 = date(year, mon, 1)
-    return [月初, 月末(year, mon)]
+    return [月初, 月底(year, mon)]
 
 def 前幾月(月數):
     from dateutil.relativedelta import relativedelta
@@ -349,8 +361,9 @@ def 迄每季(起季):
         curdate += timedelta(days=1)
         curdate = 季末(curdate)
 
-def 民國年月(日期):
+def 民國年月(日期=None):
     '日期格式如112年8月'
+    if not 日期: 日期 = 今日()
     return 民國日期(日期, '%Y年%M月')
 
 def 學期(日期=None):
@@ -391,9 +404,11 @@ def 應公布財報季別(公司類型='一般公司') -> (int, int):
         季 = 3
     return 年, 季 
 
-def 自起算年迄逐民國年列舉(起算年):
-    迄年 = 今日().year - 1911
-    return range(起算年, 迄年+1)
+def 自起算民國年逐年列舉迄今年(起算民國年數) -> date:
+    '自起算民國年列舉至今年底'
+    起算年數 = 民國年底(起算民國年數).year
+    今年數 = 年底().year
+    return [年底(y) for y in range(起算年數, 今年數+1)]
 
 if __name__ == '__main__':
     for 月 in 近幾個月底(112):
