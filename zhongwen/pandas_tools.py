@@ -264,12 +264,15 @@ def show_html(df, 無格式=False
              ,傳回超文件內容=False
              ):
     import pandas as pd
+    import os
+    from pathlib import Path
+    from warnings import warn
+
     if isinstance(df, pd.Series):
         df = df.to_frame()
-    df = df.head(顯示筆數)
-    if not 無格式:
-        from warnings import warn
+    if isinstance(df, pd.DataFrame) and not 無格式:
         try:
+            df = df.head(顯示筆數)
             return 自動格式(df
                            ,整數欄位
                            ,實數欄位
@@ -286,10 +289,8 @@ def show_html(df, 無格式=False
             import traceback
             trace = traceback.format_exc()
             warn(f'發生例外：{trace}')
-    from pathlib import Path
     html = Path.home() / 'TEMP' / 'output.html'
     df.to_html(html)
-    import os
     os.system(f'start {html}')
 
 
