@@ -323,7 +323,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
                     整數欄位 = [c]
         pat = '^現金轉換天數|估計每股配發現金|估計股利|(元/股)|股價|配息|配股|r方|每股盈餘|.*符合度|.*比|.*指數|每股.*$'
         if re.match(pat, c):
-            if df[c].dtype == float and not c in 隱藏欄位 and not c in 百分比欄位: 
+            if df[c].dtype == float and not c in 隱藏欄位 and not c in 百分比欄位 and not c in 整數欄位: 
                 try:
                     實數欄位.append(c)
                 except AttributeError:

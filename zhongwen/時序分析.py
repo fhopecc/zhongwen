@@ -1,4 +1,7 @@
 from zhongwen.number import 發生例外則回覆非數常數
+from pathlib import Path
+import logging
+logger = logging.getLogger(Path(__file__).stem)
 
 @發生例外則回覆非數常數
 def 連續消長次數(時序資料):
@@ -19,20 +22,25 @@ def 最近連續非零正數次數(時序):
 @發生例外則回覆非數常數
 def 最近連續正負次數(時序) -> int:
     import numpy as np
-    a = np.sign(時序)
+    a = np.sign(時序).dropna()
     s = 0
-    for n in reversed(a):
+    for n in a[::-1]:
         if np.isnan(n): return int(s)
         if s != 0 and s*n < 0: return int(s)
         s+=n
     return int(s)
 
-def 趨勢分析(時序, 時序數下限=3):
+def 趨勢分析(時序, 時序數下限=3, 數據名稱=None, 匯出圖檔=None, 圖示=None, 時序周期="年", 數值單位='元'):
     '回傳趨勢及r方數之數組，如時序數低於下限則回傳(0, 0)'
+    from fhopecc.洄瀾打狗人札記 import 網站本地目錄
     from sklearn.linear_model import LinearRegression
     from sklearn.metrics import r2_score
+    import matplotlib.pyplot as plt
     import numpy as np
+    import pandas as pd
     s = 時序
+    if not isinstance(s, pd.Series):
+        raise ValueError('時序參數型態需為 pd.Series，而傳入型態為{type(時序)}')
     if len(s) < 時序數下限:
         return (0, 0)
     X = np.arange(1, len(s)+1).reshape(-1, 1)
@@ -41,6 +49,22 @@ def 趨勢分析(時序, 時序數下限=3):
     std = Y.std()
     趨勢 = reg.coef_[0]/std
     r2 =  r2_score(Y, reg.predict(X))
+    if 匯出圖檔 or 圖示:
+        title = f'{數據名稱}趨勢圖'
+        plt.rcParams['font.sans-serif'] = ['Microsoft YaHei'] 
+        plt.title(title)
+        plt.xlabel(f'{時序周期}數')
+        plt.ylabel(f'{數值單位}')
+        plt.scatter(X, Y)
+        line = [reg.coef_* x for x in X] + reg.intercept_
+        plt.plot(X, line, color='red')
+        if 匯出圖檔:
+            png = f'{title}.png'
+            plt.savefig(網站本地目錄 / 'images' / png)
+            plt.close()
+            logger.info(f'匯出{png}')
+        if 圖示:
+            plt.show()
     return (趨勢, r2)
 
 def 數據周期(數據, 發布周期='年', 圖示=None, 數據名稱=None, 頻譜圖=False):
@@ -160,6 +184,7 @@ if __name__ == '__main__':
         s = s[s.index < pd.to_datetime(上年初())]
     else:
         s = s[s.index < pd.to_datetime(今日())] # 歸屬今年度股利可能尚未完全發放，故排除。
-    s = s.配息.to_list()
-    t = 數據周期(s, 圖示=True)
-    print(t)
+    # t = 數據周期(s, 圖示=True)
+    # breakpoint()
+    a, b = 趨勢分析(s.配息, 圖示=True, 數據名稱='配息')
+    print(a, b)
