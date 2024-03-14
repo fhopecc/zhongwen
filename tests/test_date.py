@@ -1,11 +1,13 @@
+from unittest.mock import patch
+from zhongwen.date import 今日
 import unittest
-from zhongwen.date import 取日期
-import pandas as pd
+
 
 class Test(unittest.TestCase):
     def test_parse_date(self):
-        from zhongwen.date import 是日期嗎
+        from zhongwen.date import 是日期嗎, 取日期
         from datetime import datetime, date, timedelta
+        import pandas as pd
         self.assertEqual(取日期('2022/6/3 上午 12:00:00'), date(2022,6,3) )
         self.assertEqual(取日期('2020.01.05'), date(2020,1,5))
         self.assertEqual(取日期('20200105'), date(2020,1,5))
@@ -39,8 +41,9 @@ class Test(unittest.TestCase):
 
         self.assertFalse(是日期嗎(pd.NaT))
 
-    def test_date_repr(self):
-        from zhongwen.date import 民國日期
+    @patch('zhongwen.date.今日')
+    def test_date_repr(self, 仿今日):
+        from zhongwen.date import 民國日期, 取日期, 民國正式日期
         from datetime import datetime
         import pandas as pd
 
@@ -51,13 +54,22 @@ class Test(unittest.TestCase):
         from zhongwen.date import 經過日數
         self.assertEqual(經過日數('108.5.13', '109.12.3'), 570)
 
-        from zhongwen.date import 今日
         self.assertEqual(今日(), 取日期(datetime.now()))
 
-    def test_month(self):
+        仿今日.return_value = 取日期('113.4.6')
+        self.assertEqual(民國日期(取日期('113.4.6'), '%Y年%M月%D日'), '113年4月6日')
+        self.assertEqual(民國正式日期(), '113年4月6日')
+
+
+    @patch('zhongwen.date.今日')
+    def testmonth(self, 仿今日):
+        from zhongwen.date import 取日期
         from zhongwen.date import 月底, 上月
         from datetime import date
         from zhongwen.date import 月起迄
+
+        仿今日.return_value = 取日期('113.1.14')
+        
         self.assertEqual(月底(2022, 10), date(2022, 10, 31))
 
         self.assertEqual(上月(), date(2023, 12, 31))
@@ -70,7 +82,7 @@ class Test(unittest.TestCase):
         self.assertEqual(季末(2022, 2), date(2022, 6, 30))
 
         self.assertEqual(季別(date(2023, 1, 2)), (2023, 1))
-
+        self.assertEqual(季別(date(2024, 7, 26)), (2024, 3))
         self.assertEqual(與季末相距月數(date(2023, 5, 3)), 1)
 
         self.assertIsNotNone(季初()) 

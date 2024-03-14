@@ -170,9 +170,11 @@ def 民國日期(d=None, fmt='%Y%m%d', 昨今明表達=False):
     year = d.year-1911
     return fmt % {"year":year, "month":d.month, "date":d.day}
 
-def 公文日期(d):
+def 民國正式日期(d=None):
     '格式如：112年7月29日'
-    return 民國日期(d, "%Y年%M月%d日")
+    if not d:
+        d = 今日()
+    return 民國日期(d, "%Y年%M月%D日")
 
 def 民國月份(d):
     '格式如：112年7月'
@@ -212,9 +214,16 @@ def 上年初() -> date:
     d = 今日()
     return d.replace(year=d.year-1, month=1, day=1)
 
-def 上年底() -> date:
+def 去年底() -> date:
     d = 今日()
     return d.replace(year=d.year-1, month=12, day=31)
+
+def 上年底() -> date:
+    return 去年底()
+
+def 前年底() -> date:
+    d = 今日()
+    return d.replace(year=d.year-2, month=12, day=31)
 
 def 年底(年數=None) -> date:
     if 年數:
@@ -227,8 +236,6 @@ def 民國年底(民國年數) -> date:
         return date(民國年數+1911, 12, 31)
     d = 今日()
     return d.replace(month=12, day=31)
-
-
 
 def 季別(日期=今日()) -> (int, int):
     '指定日期之季數，以(年數, 季數)表達，未指定為今日歸屬季別'
@@ -365,6 +372,17 @@ def 民國年月(日期=None):
     '日期格式如112年8月'
     if not 日期: 日期 = 今日()
     return 民國日期(日期, '%Y年%M月')
+
+def 民國年(日期=None):
+    '日期格式如112年'
+    if not 日期: 日期 = 今日()
+    return 民國日期(日期, '%Y年')
+
+def 民國季別(日期=None):
+    '季別格式如112年第1季'
+    if not 日期: 日期 = 今日()
+    年數, 季數 = 季別(日期)
+    return f'{年數-1911}年第{季數}季'
 
 def 學期(日期=None):
     if not 日期:

@@ -179,11 +179,14 @@ def 可顯示(查詢資料函數):
     def wrapper(*args, 顯示=False, 圖示=False, **kargs):
         try:
             display_rows = kargs['顯示筆數']
+            real_columns = kargs['實數欄位']
             del kargs['顯示筆數']
+            del kargs['實數欄位']
         except KeyError:
             display_rows = 100
+            real_columns = []
         df = 查詢資料函數(*args, **kargs)
-        if 顯示: show_html(df, 顯示筆數=display_rows)
+        if 顯示: show_html(df, 顯示筆數=display_rows, 實數欄位=real_columns)
         if 圖示: 
             plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']
             df.plot()
@@ -312,10 +315,10 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
         pat = '^.*述|借貸$'
         if re.match(pat, c):
             continue
-        pat = '^.*(金額|次數|損益|淨利|股利|累計|差異|評分|期末|負債|營收|年數|\(元\))|成本|支出|存入|現值|借券|餘額|借|貸$'
+        pat = '^.*(金額|淨股利|次數|損益|淨利|累計|差異|評分|期末|負債|營收|年數|\(元\))|成本|支出|存入|現值|借券|餘額|借|貸$'
         if re.match(pat, c):
             if (np.issubclass_(df[c].dtype.type, np.integer)  
-                or df[c].dtype == float
+                or df[c].dtype == float or df[c].dtype == 'float64'
             ) and not c in 隱藏欄位:
                 try:
                     整數欄位.append(c)

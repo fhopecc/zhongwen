@@ -167,39 +167,79 @@ def 應更新資料時期(更新頻率='次月十日前'):
 
 def 解析更新期限(更新期限='次月10日前'):
     '解析更新期限，格式如"次月10日前"、"次季45日前"及"次月底前"等，傳回(應更新資料時期、應更新資料期限及定期更新資訊)'
-    from zhongwen.date import  今日, 上月, 民國日期, 民國年月, 月底
+    from zhongwen.date import  上年底, 上月, 上季, 今日, 月底
+    from zhongwen.date import  民國正式日期, 民國年月, 民國年, 民國季別
+    from datetime import timedelta
     import re
     today = 今日()
     應更新資料時期, 應更新資料期限 = None, None
 
-    if '次月'in 更新期限:
+    if '上市櫃財報' in 更新期限:
         應更新資料時期 = 上月()
+        pass
 
-    pat = r'(\d+)日前'
+    if '次月' in 更新期限:
+        應更新資料時期 = 上月()
+    elif '次年' in 更新期限:
+        應更新資料時期 = 上年底()
+    elif '次季' in 更新期限:
+        應更新資料時期 = 上季()
+
+    pat = r'(\d+)(日|個月)(內|前)'
     if m:=re.search(pat, 更新期限):
-        應更新資料期限 = today.replace(day=int(m[1]))
+        n = int(m[1])
+        if m[2] == "日":
+            應更新資料期限 = 應更新資料時期 + timedelta(days=n)
+        elif m[2] == "個月":
+            from datetime import datetime, timedelta
+            import calendar
+            data_date = 應更新資料時期 + timedelta(days=1)
+            month = data_date.month-1
+            year = data_date.year
+            # breakpoint()
+            # 計算2個月後的日期
+            future_month = month + n
+            if future_month > 12:
+                future_month -= 12
+                year += 1
+
+            # 確定未來月份的天數
+            _, days_in_future_month = calendar.monthrange(year, future_month)
+
+            # 設定未來日期
+            future_date = data_date.replace(year=year, month=future_month, day=max(data_date.day, days_in_future_month))
+
+            應更新資料期限 = future_date
         if today.month == 2: # 因應2月初通常為春節假期，是以延長更新期限至2月底
             應更新資料期限 = 月底()
 
     pat = r'月底前'
     if m:=re.search(pat, 更新期限):
         應更新資料期限 = 月底()
-
-    return (應更新資料時期, 應更新資料期限, f'{民國日期()}應公布{民國年月(應更新資料時期)}資訊。')
+    if '次月' in 更新期限:
+        return (應更新資料時期, 應更新資料期限, f'{民國正式日期()}應公布{民國年月(應更新資料時期)}資訊。')
+    elif '次年' in 更新期限:
+        return (應更新資料時期, 應更新資料期限, f'{民國正式日期()}應公布{民國年(應更新資料時期)}資訊。')
+    elif '次季' in 更新期限:
+        return (應更新資料時期, 應更新資料期限, f'{民國正式日期()}應公布{民國季別(應更新資料時期)}資訊。')
 
 def 增加定期更新(更新期限='次月10日前', 更新程序=解析更新期限):
-    '''更新期限可為「次月10日前」、「次季45日前」及「次月底前」等。
-查詢函數之參數「更新」設為True，則強制更新該批資料。'''
+    '''更新期限包含「次月10日前」、「次季45日前」及「次月底前」等。
+查詢函數之參數「更新」設為True，則強制更新該批資料。
+次季45日前係自季初連續45日更新上季資料，逾45日則停更，但實作上會延長3日作緩衝，防止公司遇假日未及更新。
+'''
     import logging
     from pathlib import Path
     from functools import wraps
     from zhongwen.batch_data import 解析更新期限
     from zhongwen.date import 今日
+    from datetime import timedelta
+    緩衝期 = timedelta(days=3)
     def 增加定期更新功能(查詢資料):
         @wraps(查詢資料)
         def 查詢定期更新資料(*args, 更新=False,**kargs):
             資料時期, 公布期限, 資訊 = 解析更新期限(更新期限)
-            if 更新 or 今日() <= 公布期限:
+            if 更新 or (資料時期 < 今日() <= 公布期限 + 緩衝期):
                 更新程序(資料時期)
             return 查詢資料()
         return 查詢定期更新資料
