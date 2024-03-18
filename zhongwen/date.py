@@ -428,6 +428,31 @@ def 自起算民國年逐年列舉迄今年(起算民國年數) -> date:
     今年數 = 年底().year
     return [年底(y) for y in range(起算年數, 今年數+1)]
 
+def 自起算民國年初逐月列舉迄上個月(起算民國年數) -> date:
+    '民國年數'
+    from datetime import timedelta
+    from zhongwen.date import 月末, 取日期, 上月
+    start = 取日期(f'{起算民國年數}.1.1')
+    end = 上月()
+    curdate = 月末(start)
+    while curdate <= end:
+        yield curdate
+        curdate += timedelta(days=1)
+        curdate = 月末(curdate)
+
+def 自起算民國年月逐月列舉迄上個月(起算民國年數, 起算月) -> date:
+    '民國年數'
+    from datetime import timedelta
+    from zhongwen.date import 月末, 取日期, 上月
+    start = 取日期(f'{起算民國年數}.{起算月}.1')
+    end = 上月()
+    curdate = 月末(start)
+    while curdate <= end:
+        yield curdate
+        curdate += timedelta(days=1)
+        curdate = 月末(curdate)
+ 
+   
 if __name__ == '__main__':
     for 月 in 近幾個月底(112):
         print(月)

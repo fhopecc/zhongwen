@@ -8,7 +8,12 @@ class Test(unittest.TestCase):
         f = FileLocation(line)
         self.assertEqual(f.路徑, r'd:\github\zhongwen\test_file.py')
         self.assertEqual(f.列, 9)
- 
+
+        line = "g:\我的雲端硬碟\股票分析\公開資訊觀測站爬蟲.py:299: SettingWithCopyWarning:"
+        f = FileLocation(line)
+        self.assertEqual(f.路徑, r'g:\我的雲端硬碟\股票分析\公開資訊觀測站爬蟲.py')
+        self.assertEqual(f.列, 299)
+
         line = 'at Object.toBe (jandas.test.js:7:18)'
         f = FileLocation(line)
         self.assertEqual(f.路徑, 'jandas.test.js')
@@ -24,6 +29,7 @@ class Test(unittest.TestCase):
         line = "const Series = require('./jandas.js').Series"
         f = FileLocation(line)
         self.assertEqual(f.路徑, './jandas.js')
+
 
     def test_file(self):
         # from zhongwen.file import 抓取, cache

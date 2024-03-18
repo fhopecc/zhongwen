@@ -227,8 +227,9 @@ def 標準格式(整數欄位=[], 實數欄位=[], 百分比欄位=[], 日期欄
     logging.debug(f'最大值顯著欄位：{最大值顯著欄位!r}')
     logging.debug(f'日期欄位：{日期欄位!r}')
     logging.debug(f'隱藏欄位：{隱藏欄位!r}')
+
     def formatter(style):
-        style.applymap(lambda r:'text-align:right')
+        style.map(lambda r:'text-align:right')
         if 整數欄位:
             style.format('{:,.0f}', subset=整數欄位)
         if 百分比欄位:
@@ -255,6 +256,8 @@ def 標準格式(整數欄位=[], 實數欄位=[], 百分比欄位=[], 日期欄
             'props':[('background-color', '#ffffb3'), ('border-style', 'dotted')]
         }
         style.set_table_styles([tr_hover], overwrite=False)
+
+
         return style
     return formatter
 
@@ -270,6 +273,7 @@ def show_html(df, 無格式=False
     import os
     from pathlib import Path
     from warnings import warn
+
 
     if isinstance(df, pd.Series):
         df = df.to_frame()
@@ -317,13 +321,17 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
             continue
         pat = '^.*(金額|淨股利|次數|損益|淨利|累計|差異|評分|期末|負債|營收|年數|\(元\))|成本|支出|存入|現值|借券|餘額|借|貸$'
         if re.match(pat, c):
-            if (np.issubclass_(df[c].dtype.type, np.integer)  
-                or df[c].dtype == float or df[c].dtype == 'float64'
-            ) and not c in 隱藏欄位:
-                try:
-                    整數欄位.append(c)
-                except AttributeError:
-                    整數欄位 = [c]
+            try:
+                if (np.issubclass_(df[c].dtype.type, np.integer)  or
+                    df[c].dtype == float or df[c].dtype == 'float64'
+                ) and not c in 隱藏欄位:
+                    try:
+                        整數欄位.append(c)
+                    except AttributeError:
+                        整數欄位 = [c]
+            except:
+                breakpoint()
+                pass
         pat = '^現金轉換天數|估計每股配發現金|估計股利|(元/股)|股價|配息|配股|r方|每股盈餘|.*符合度|.*比|.*指數|每股.*$'
         if re.match(pat, c):
             if df[c].dtype == float and not c in 隱藏欄位 and not c in 百分比欄位 and not c in 整數欄位: 

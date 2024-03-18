@@ -4,7 +4,9 @@ from urllib import request
 from urllib.parse import urlparse
 from diskcache import Cache
 from functools import lru_cache
+import logging
 cache = Cache(Path.home() / 'cache' / 'zhongwen.file')
+logger = logging.getLogger(Path(__file__).stem)
 
 def 轉換(來源:Path, 目的格式):
     '格式以副檔名推論'
@@ -22,6 +24,7 @@ def 轉換(來源:Path, 目的格式):
 class FileLocation:
     '萃取文字內之路徑資訊'
     模式集 ={"python":r'File "(?P<path>.+.py)", line (?P<line>\d+).*'
+            ,"python_warn":r'^(?P<path>.+.py):(?P<line>\d+):.*'
             ,"jest":r'\((?P<path>.+\.js):(?P<line>\d+):(?P<pos>\d+)\)'
             ,"path":r'(?P<path>[^"\']+\.(js|py))'
             }
@@ -39,6 +42,7 @@ class FileLocation:
         if not hasattr(self, '路徑'): raise ValueError(f'訊息："{訊息}"不包含路徑資訊！')
         if not hasattr(self, '列'): self.列 = 0
         if not hasattr(self, '行'): self.行 = 0
+        
 
 def 最新檔(目錄, 檔案樣式="*"):
     import os
@@ -159,3 +163,27 @@ def 解壓(壓縮檔, 目錄):
             raise IOError(f'{壓縮檔}非ZipFile格式')
     壓縮檔.extractall(目錄)
     print(f'解壓[{壓縮檔}]成功！')
+
+
+def 下載跳出對話視窗連結檔案(url, 目錄=None):
+    import requests
+    from urllib.parse import urlparse
+    import os
+    
+    response = requests.head(url)
+    if 'Content-Disposition' in response.headers:
+        content_disposition = response.headers['Content-Disposition']
+        filename = content_disposition.split('filename=')[1].strip('"')
+    else:
+        filename = os.path.basename(urlparse(url).path)
+    filepath = Path.home() / 'TEMP' / filename
+    response = requests.get(url)
+    with open(filepath, 'wb') as file:
+        file.write(response.content)
+    logger.info(f'文件已下載到：{filepath}')
+    return filepath
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+    url = "https://www.chinesecj.com/forum/forum.php?mod=attachment&aid=NTc1NXxiNDlhMjUzZXwxNzEwNTAyMzc5fDB8MTk1MzIw"
+    下載跳出對話視窗連結檔案(url)
