@@ -140,11 +140,13 @@ def 載入批次資料(資料庫檔, 表格, 批次欄名, 時間欄位=None):
         return df
 
 def 增加定期更新功能(更新頻率='每月十日之前'):
-    '如將參數「更新」設為True，則強制更新該批資料'
+    '已廢棄請使用「增加定期更新」'
     import logging
     from pathlib import Path
     from diskcache import Cache
     cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
+    from warnings import warn
+    warn(f'【增加定期更新功能】將廢棄，請使用【增加定期更新】', DeprecationWarning, stacklevel=2)
     def _增加按期更新查詢結果功能(查詢資料):
         from functools import wraps
         @wraps(查詢資料)
