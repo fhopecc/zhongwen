@@ -229,7 +229,7 @@ def 標準格式(整數欄位=[], 實數欄位=[], 百分比欄位=[], 日期欄
     logging.debug(f'隱藏欄位：{隱藏欄位!r}')
 
     def formatter(style):
-        style.map(lambda r:'text-align:right')
+        style.applymap(lambda r:'text-align:right')
         if 整數欄位:
             style.format('{:,.0f}', subset=整數欄位)
         if 百分比欄位:

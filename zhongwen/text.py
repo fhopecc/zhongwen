@@ -205,8 +205,8 @@ def 公司正名(公司名稱):
 def 符號轉半型(s, 輸出錯誤訊息=False):
     import logging
     try:
-        return s.translate(str.maketrans('，；：％。'
-                                        ,',;:%.')
+        return s.translate(str.maketrans('，；：％。、'
+                                        ,',;:%.,')
                 )
     except AttributeError as e:
         if 輸出錯誤訊息:
