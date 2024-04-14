@@ -229,7 +229,7 @@ def 標準格式(整數欄位=[], 實數欄位=[], 百分比欄位=[], 日期欄
     logging.debug(f'隱藏欄位：{隱藏欄位!r}')
 
     def formatter(style):
-        style.applymap(lambda r:'text-align:right')
+        style.map(lambda r:'text-align:right')
         if 整數欄位:
             style.format('{:,.0f}', subset=整數欄位)
         if 百分比欄位:
@@ -319,7 +319,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
         pat = '^.*述|借貸$'
         if re.match(pat, c):
             continue
-        pat = '^.*(金額|淨股利|次數|損益|淨利|累計|差異|評分|期末|負債|營收|年數|\(元\))|成本|支出|存入|現值|借券|餘額|借|貸$'
+        pat = '^.*(金額|專戶|淨股利|次數|損益|淨利|累計|差異|評分|期末|負債|營收|年數|\(元\))|成本|支出|存入|現值|借券|餘額|借|貸$'
         if re.match(pat, c):
             try:
                 if (np.issubclass_(df[c].dtype.type, np.integer)  or

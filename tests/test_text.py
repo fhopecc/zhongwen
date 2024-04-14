@@ -105,6 +105,11 @@ class Test(unittest.TestCase):
 
         # self.assertEqual(中文詞界(10, line), (9,10))
 
+    def test_to_css_string(self):
+        from zhongwen.text import 轉樣式表字串
+        s = '[長空]：上年度股利估計相對誤差達20.40%；[短多]：毛利率達54.27%，營利率達23.48%'
+        r = r'[\009577\007a7a]\00ff1a\004e0a\005e74\005ea6\0080a1\005229\004f30\008a08\0076f8\005c0d\008aa4\005dee\00905420.40%\00ff1b[\0077ed\00591a]\00ff1a\006bdb\005229\007387\00905454.27%\00ff0c\0071df\005229\007387\00905423.48%'
+        self.assertEqual(轉樣式表字串(s), r)
       
 if __name__ == '__main__':
     unittest.main()

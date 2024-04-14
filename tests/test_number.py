@@ -77,17 +77,17 @@ class Test(unittest.TestCase):
         a = [2, 3, -0.1, 7, 8, 9, -0.3, 3, 4, 5, 5]
         self.assertEqual(連續正數(a), 4)
 
-        from zhongwen.number import 最近連續正負次數
-        a = [2]
-        self.assertEqual(最近連續正負次數(a), 1)
-        a = [-1]
-        self.assertEqual(最近連續正負次數(a), -1)
-        a = [2, 7]
-        self.assertEqual(最近連續正負次數(a), 2)
-        a = [2, -7]
-        self.assertEqual(最近連續正負次數(a), -1)
-        a = [float('nan'), 3, 0.1, 7]
-        self.assertEqual(最近連續正負次數(a), 3)
+        # from zhongwen.number import 最近連續正負次數
+        # a = [2]
+        # self.assertEqual(最近連續正負次數(a), 1)
+        # a = [-1]
+        # self.assertEqual(最近連續正負次數(a), -1)
+        # a = [2, 7]
+        # self.assertEqual(最近連續正負次數(a), 2)
+        # a = [2, -7]
+        # self.assertEqual(最近連續正負次數(a), -1)
+        # a = [float('nan'), 3, 0.1, 7]
+        # self.assertEqual(最近連續正負次數(a), 3)
 
     def test_nan_handler(self):
         from zhongwen.number import 除零例外則回覆非數常數

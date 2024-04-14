@@ -197,6 +197,7 @@ def 百分比(n):
 def 增減百分比(r, 增減文字=["增加", "減少"]):
     import pandas as pd
     if pd.isnull(r): return ''
+    if isinstance(r, str): return r
     n = abs(r)
     _增減文字 = 增減文字[0] if r>0 else  增減文字[1] 
     return f'{_增減文字}{n:.2%}'
@@ -287,7 +288,6 @@ def 連續正數(數列):
     for v in n:
         s = v*(s+v) 
     return s
-
 
 def 貸方科目收支金額轉借方金額(金額):
     return abs(min(0, 金額))
