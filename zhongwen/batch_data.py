@@ -111,7 +111,7 @@ def 結果批次寫入(資料庫檔, 資料名稱, 批號欄名, 預設批號組
                 批號組 = [批號組]
             with connect(資料庫檔) as db: 
                 for 批號 in 批號組:
-                    df = 爬取資料函數(批號)
+                    df = 爬取資料函數(批號, **kargs)
                     批次寫入(df, 批號, 批號欄名, 資料名稱, db)
                 return df
         return 批次寫入爬取資料
@@ -131,7 +131,8 @@ def 載入批次資料(資料庫檔, 表格, 批次欄名, 時間欄位=None):
     import pandas as pd
     import sqlite3
     with sqlite3.connect(資料庫檔) as c:
-        sql = f"select distinct * from {表格}"
+        # sql = f"select distinct * from {表格}" # select distinct 將降低效能
+        sql = f"select * from {表格}"
         try:
             df = pd.read_sql_query(sql, c, index_col='index', parse_dates=時間欄位) 
         except KeyError as e:
@@ -194,7 +195,6 @@ def 解析更新期限(更新期限='次月10日前'):
                 應更新資料期限 = 應更新資料時期 + timedelta(days=45)
         return (應更新資料時期, 應更新資料期限, f'{民國正式日期()}應公布{民國季別(應更新資料時期)}資訊。')
         
-
     if '次月' in 更新期限:
         應更新資料時期 = 上月()
     elif '次年' in 更新期限:
