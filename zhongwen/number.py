@@ -30,6 +30,12 @@ def 轉數值(n, 傳回格式=False) -> int|float:
             d = str.maketrans(中文數字, '0000123456789123456789')
             return int(n.translate(d))
 
+        # 具單位之數值表示，如3年則取出3。
+        單位 = '年'
+        pat = rf'(\d+)[{單位}]+'
+        if m:=re.match(pat, n):
+            return int(m[1])
+
         # 具位名之中文數
         pat = r'^[零壹貳參肆伍陸柒捌玖拾一二三四五六七八九十百千佰仟萬億兆]+$'
         if m:=re.match(pat, n):
@@ -42,6 +48,8 @@ def 轉數值(n, 傳回格式=False) -> int|float:
             return float(n)
         except:
             return 0
+
+
     return n
 
 def 全型數字(number):

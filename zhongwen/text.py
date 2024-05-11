@@ -227,3 +227,9 @@ def 符號轉半型(s, 輸出錯誤訊息=False):
         if 輸出錯誤訊息:
             logging.error(f'符號轉半型錯誤{e}')
         return s
+
+def 移除非中文字(text):
+    '移除非中文字及符號，可用於表頭標題的正規化。'
+    import re
+    chinese_pattern = re.compile(r'[^\u4e00-\u9fa5]')  # 匹配非中文字的正則表達式
+    return chinese_pattern.sub('', text)
