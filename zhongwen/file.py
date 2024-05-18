@@ -65,6 +65,7 @@ def 抓取(url
         ,headers=None
         ,參數={}
         ,return_json=False
+        ,return_bytes=False
         ,除錯=False
         ,use_requests=None
         ,資料={}
@@ -114,6 +115,8 @@ def 抓取(url
     logging.debug(除錯訊息)
     if return_json:
         return r.json()
+    if return_bytes:
+        return r.content
     return r.text
 
 def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False, selenium=False, 等待下載時間=20):
