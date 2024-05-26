@@ -233,3 +233,23 @@ def 移除非中文字(text):
     import re
     chinese_pattern = re.compile(r'[^\u4e00-\u9fa5]')  # 匹配非中文字的正則表達式
     return chinese_pattern.sub('', text)
+
+def 交談(text):
+    import requests 
+
+    headers = {
+        "Content-Type": "application/json; charset=utf-8"
+    }
+
+    url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyDF7loLYLpl7V4XXJzP4uJsOy59vZSOZB4'
+    data = '{"contents":[{"parts":[{"text":"'+text+'"}]}]}'
+    # data = [{"parts":[{"text":f"{text}"}]}]
+    # print(data)
+    import json.encoder
+    r = requests.post(url, data=data, headers=headers)
+    
+    return r.json()
+
+if __name__ == '__main__':
+    r = 交談('love is poem.')
+    print(r)

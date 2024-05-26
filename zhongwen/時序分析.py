@@ -52,7 +52,7 @@ def 趨勢分析(時序, 時序數下限=3, 數據名稱=None, 匯出圖檔=None
     if 匯出圖檔 or 圖示:
         title = f'{數據名稱}趨勢圖'
         plt.rcParams['font.sans-serif'] = ['Microsoft YaHei'] 
-        plt.title(title)
+        plt.title(f'{title}(成長率：{趨勢:.2%}、r方：{r2:.2%})')
         plt.xlabel(f'{時序周期}數')
         plt.ylabel(f'{數值單位}')
         plt.scatter(X, Y)
@@ -61,10 +61,10 @@ def 趨勢分析(時序, 時序數下限=3, 數據名稱=None, 匯出圖檔=None
         if 匯出圖檔:
             png = f'{title}.png'
             plt.savefig(網站本地目錄 / 'images' / png)
-            plt.close()
             logger.info(f'匯出{png}')
         if 圖示:
             plt.show()
+        plt.close()
     return (趨勢, r2)
 
 def 數據周期(數據, 發布周期='年', 圖示=None, 數據名稱=None, 頻譜圖=False):

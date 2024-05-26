@@ -319,7 +319,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
         pat = '^.*述|借貸$'
         if re.match(pat, c):
             continue
-        pat = '^.*(金額|專戶|淨股利|次數|損益|淨利|累計|差異|評分|期末|負債|營收|年數|\(元\))|成本|支出|存入|現值|借券|餘額|借|貸$'
+        pat = '^.*(金額|專戶|淨股利|次數|損益|[毛淨營]利|累計|差異|評分|期末|負債|營收|年數|\(元\))|成本|支出|存入|現值|借券|餘額|借|貸$'
         if re.match(pat, c):
             try:
                 if (np.issubclass_(df[c].dtype.type, np.integer)  or
@@ -334,7 +334,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
                 pass
         pat = '^現金轉換天數|估計每股配發現金|估計股利|(元/股)|股價|配息|配股|r方|每股盈餘|.*符合度|.*比|.*指數|每股.*$'
         if re.match(pat, c):
-            if df[c].dtype == float and not c in 隱藏欄位 and not c in 百分比欄位 and not c in 整數欄位: 
+            if df[c].dtype in [float] and not c in 隱藏欄位 and not c in 百分比欄位 and not c in 整數欄位: 
                 try:
                     實數欄位.append(c)
                 except AttributeError:
