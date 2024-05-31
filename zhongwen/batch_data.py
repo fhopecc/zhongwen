@@ -140,28 +140,6 @@ def 載入批次資料(資料庫檔, 表格, 批次欄名, 時間欄位=None):
             df = pd.read_sql_query(sql, c, parse_dates=時間欄位) 
         return df
 
-def 增加定期更新功能(更新頻率='每月十日之前'):
-    '已廢棄請使用「增加定期更新」'
-    import logging
-    from pathlib import Path
-    from diskcache import Cache
-    cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
-    from warnings import warn
-    warn(f'【增加定期更新功能】將廢棄，請使用【增加定期更新】', DeprecationWarning, stacklevel=2)
-    def _增加按期更新查詢結果功能(查詢資料):
-        from functools import wraps
-        @wraps(查詢資料)
-        def 查詢按期更新資料(*args, 更新=False,**kargs):
-            if 更新頻率=='每月十日之前':
-                from zhongwen.date import 今日 
-                if 今日().day <= 10 or 更新:
-                    df = 查詢資料(*args, **kargs)
-                    cache.set(查詢資料.__name__, df)
-                    return df
-            return cache.read(查詢資料.__name__)
-        return 查詢按期更新資料
-    return _增加按期更新查詢結果功能
-
 def 應更新資料時期(更新頻率='次月十日前'):
     from zhongwen.date import 今日, 上月
     if 更新頻率=='次月十日前':
@@ -241,16 +219,14 @@ def 解析更新期限(更新期限='次月10日前'):
         return (應更新資料時期, 應更新資料期限, f'{民國正式日期()}應公布{民國季別(應更新資料時期)}資訊。')
 
 def 增加定期更新(更新期限='次月10日前', 更新程序=解析更新期限):
-    '''更新期限包含「次月10日前」、「次季45日前」及「次月底前」等。
-查詢函數之參數「更新」設為True，則強制更新該批資料。
-次季45日前係自季初連續45日更新上季資料，逾45日則停更，但實作上會延長3日作緩衝，防止公司遇假日未及更新。
+    '''參數「更新期限」如指定值為「次季45日前」，係指自季初連續45日，另因應公司遇假日未及更新資料加計緩衝期3日，合計48日，執行更新上季資料程序，逾限停更，更多期限如「次月10日前」、「次月底前」……。
+查詢函數之參數「更新」如指定為True，則強制更新該批資料。
 '''
-    import logging
-    from pathlib import Path
-    from functools import wraps
     from zhongwen.batch_data import 解析更新期限
     from zhongwen.date import 今日
     from datetime import timedelta
+    from functools import wraps
+    from pathlib import Path
     緩衝期 = timedelta(days=3)
     def 增加定期更新功能(查詢資料):
         @wraps(查詢資料)
