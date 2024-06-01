@@ -135,20 +135,19 @@ def 上上月() -> Timestamp:
 
 def 民國日期(d=None, fmt='%Y%m%d', 昨今明表達=False):
     '%Y表年數、%m表月數前置0、%d表日數前置0、%M表月數不前置0'
-    from datetime import timedelta
     if not d: d = 今日()
     d = 取日期(d)
     import pandas as pd
     if pd.isnull(d):
         return ''
     if 昨今明表達:
-        if d == 今日()-timedelta(days=1):
+        if d == 今日()-Timedelta(days=1):
             return '昨'
         if d == 今日():
             return '今'
-        if d == 今日()+timedelta(days=1):
+        if d == 今日()+Timedelta(days=1):
             return '明'
-        if d == 今日()+timedelta(days=2):
+        if d == 今日()+Timedelta(days=2):
             return '後天'
 
     fmt = fmt.replace(
