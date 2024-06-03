@@ -129,7 +129,7 @@ def 上月() -> Timestamp:
 
 @lru_cache()
 def 上上月() -> Timestamp:
-    '上月底'
+    '上上月底'
     from datetime import timedelta
     return 上月().replace(day=1) - timedelta(days=1)
 
@@ -447,7 +447,6 @@ def 自起算民國年月逐月列舉迄上個月(起算民國年數, 起算月)
         curdate += timedelta(days=1)
         curdate = 月末(curdate)
  
-   
 if __name__ == '__main__':
     for 月 in 近幾個月底(112):
         print(月)
