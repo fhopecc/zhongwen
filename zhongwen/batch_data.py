@@ -131,6 +131,10 @@ def 載入批次資料(資料庫檔, 表格, 批次欄名, 時間欄位=None):
     import pandas as pd
     import sqlite3
     from zhongwen.date import 取日期
+    from collections.abc import Iterable 
+    cs = 時間欄位
+    if isinstance(cs, str) or not isinstance(cs, Iterable):
+        cs = [cs]
     with sqlite3.connect(資料庫檔) as c:
         # sql = f"select distinct * from {表格}" # select distinct 將降低效能
         sql = f"select * from {表格}"
@@ -139,7 +143,7 @@ def 載入批次資料(資料庫檔, 表格, 批次欄名, 時間欄位=None):
         except KeyError as e:
             logger.info(f'{表格}無 index 欄位！')
             df = pd.read_sql_query(sql, c) 
-        for c in 時間欄位:
+        for c in cs:
             df[c] = df[c].map(取日期)
         return df
 
