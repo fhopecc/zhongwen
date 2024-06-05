@@ -48,6 +48,9 @@ def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫):
         logger.debug(f'批次刪除發生錯誤：{e}')
     logger.debug(f'整批寫入{批號}資料至{表格}……')
     try:
+        for c in 資料.columns:
+            if type(資料.iloc[0][c]) == pd.Timestamp:
+                資料[c] = 資料[c].map(lambda d: d.date())
         資料.to_sql(表格, 資料庫, if_exists='append')
         logging.debug(f'寫入成功！')
     except sqlite3.OperationalError as e:
