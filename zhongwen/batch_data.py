@@ -19,7 +19,7 @@ class 查無批號錯誤(Exception): pass
 def 批次讀取(批號, 批號欄名, 表格, 資料庫, 日期欄位=None):
     import pandas as pd
     from zhongwen.date import 是日期嗎
-    # sql 相等運算子係單等號，而python為雙等號，易誤植
+    # sql 相等運算子係單等號，而 Python 係雙等號，易彼此誤植
     sql = f'select * from {表格} where {批號欄名}={批號}' 
     if 是日期嗎(批號) or isinstance(批號, str):
         sql = f'select * from {表格} where {批號欄名}="{批號}"' 

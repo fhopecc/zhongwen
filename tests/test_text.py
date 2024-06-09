@@ -31,7 +31,6 @@ class Test(unittest.TestCase):
         self.assertEqual(轉全型('%'), '％')
         self.assertEqual(轉半型('％'), '%')
 
-
         from zhongwen.text import 是否為字元
         self.assertTrue(是否為字元('簡'))
         self.assertTrue(是否為字元('a'))
@@ -110,6 +109,16 @@ class Test(unittest.TestCase):
         s = '[長空]：上年度股利估計相對誤差達20.40%；[短多]：毛利率達54.27%，營利率達23.48%'
         r = r'[\009577\007a7a]\00ff1a\004e0a\005e74\005ea6\0080a1\005229\004f30\008a08\0076f8\005c0d\008aa4\005dee\00905420.40%\00ff1b[\0077ed\00591a]\00ff1a\006bdb\005229\007387\00905454.27%\00ff0c\0071df\005229\007387\00905423.48%'
         self.assertEqual(轉樣式表字串(s), r)
+
+    def test_surround(self):
+        from zhongwen.text import 取最近環繞符號
+        s = 'There is a (parentheses) and the nearest (parenthese).'
+        self.assertEqual(取最近環繞符號(s), '()')
+        s = '這列一個「引號」，再列一個『雙引號』。'
+        self.assertEqual(取最近環繞符號(s), '『』')
       
 if __name__ == '__main__':
     unittest.main()
+    # suite = unittest.TestSuite()
+    # suite.addTest(Test('test_surround'))  # 指定要執行的測試方法
+    # unittest.TextTestRunner().run(suite)
