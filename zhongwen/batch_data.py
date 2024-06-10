@@ -110,7 +110,7 @@ def 結果批次寫入(資料庫檔, 資料名稱, 批號欄名, 預設批號組
         def 批次寫入爬取資料(批號組=None, **kargs):
             if not 批號組:
                 批號組 = 預設批號組
-            if not isinstance(批號組, Iterable):
+            if isinstance(批號組, str) or not isinstance(批號組, Iterable):
                 批號組 = [批號組]
             with connect(資料庫檔) as db: 
                 for 批號 in 批號組:
