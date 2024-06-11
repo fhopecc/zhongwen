@@ -1,4 +1,8 @@
 '輔助PANDAS工具'
+from pathlib import Path
+import logging
+logger = logging.getLogger(Path(__file__).stem)
+
 class 使用者要求更新且線上資料較線下多(Exception): pass
 class 使用者要求覆寫(Exception): pass
 
@@ -316,9 +320,14 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
         df = df[:顯示筆數]
     columns = df.columns
     for c in df.columns:
-        pat = '^.*述|借貸$'
-        if re.match(pat, c):
+        try:
+            pat = '^.*述|借貸$'
+            if re.match(pat, c):
+                continue
+        except TypeError:
+            logger.error(f'欄名{c}非字串格式')
             continue
+
         pat = '^.*(金額|專戶|淨股利|次數|損益|[毛淨營]利|累計|差異|評分|期末|負債|營收|年數|\(元\))|成本|支出|存入|現值|借券|餘額|借|貸$'
         if re.match(pat, c):
             try:
@@ -372,7 +381,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
                               ,採用民國日期格式=採用民國日期格式
                               ))
     tp = df.copy()
-    for c in df.columns: tp[c] = c
+    for c in df.columns: tp.loc[c] = c
 
     if 除錯提示:
         from pathlib import Path
