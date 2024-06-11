@@ -234,6 +234,7 @@ def 移除非中文字(text):
     chinese_pattern = re.compile(r'[^\u4e00-\u9fa5]')  # 匹配非中文字的正則表達式
     return chinese_pattern.sub('', text)
 
+
 def 交談(text):
     import requests 
 
@@ -249,6 +250,22 @@ def 交談(text):
     r = requests.post(url, data=data, headers=headers)
     
     return r.json()
+
+def 取最近環繞符號(字串:str) -> str:
+    環繞開啟符號 = "'\"([{「『（【"
+    環繞關閉符號 = "'\")]}」』）】"
+    最近環繞符號索引 = -1
+    最近環繞符號位置 = -1
+    for i, c in enumerate(環繞開啟符號):
+        p = 字串.rfind(c)
+        if p == -1:
+            continue
+        最近環繞符號位置 = max(最近環繞符號位置, p)
+        if 最近環繞符號位置 == p:
+            最近環繞符號索引 = i
+    if 最近環繞符號位置 == -1:
+        raise RuntimeError(f'以下字串尚無環繞符號：{字串}')
+    return 環繞開啟符號[最近環繞符號索引] + 環繞關閉符號[最近環繞符號索引]
 
 if __name__ == '__main__':
     r = 交談('love is poem.')

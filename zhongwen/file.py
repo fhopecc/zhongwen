@@ -119,11 +119,8 @@ def 抓取(url
         return r.content
     return r.text
 
-def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False, selenium=False, 等待下載時間=20):
-    '''下載 URL 內容至指定檔案，並且回傳檔案路徑。
-如運用併發 selenium 子程序下載，且於子程序下載完成前提早結束返回，
-則會中斷下載，須指定等待下載時間。
-'''
+def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False):
+    '''下載 URL 內容至指定檔案，並且回傳檔案路徑。'''
     p = 儲存路徑
     downloads = 儲存目錄
     重載 = 覆寫
@@ -141,17 +138,14 @@ def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False, selenium=Fal
 
     if p.exists():
         p.unlink()
-
-    if selenium:
-        c = chrome()
-        c.get(url)
-        from time import sleep
-        sleep(等待下載時間) # 等待 chrome 下載完成
-        print(f'下載[{url}]至[{p}]成功！')
+    import requests
+    response = requests.get(url)
+    if response.status_code == 200:
+        with open(p, 'wb') as file:
+            file.write(response.content)
+        logger.info(f'下載[{url}]至[{p}]成功！')
     else:
-        import urllib.request
-        urllib.request.urlretrieve(url, str(p))
-        print(f'下載[{url}]至[{p}]成功！')
+        raise RuntimeError(r"{url}下載失敗，原因如次：", response.status_code, response.reason)
     return p
 
 def 解壓(壓縮檔, 目錄):
