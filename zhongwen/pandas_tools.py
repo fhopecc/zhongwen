@@ -396,8 +396,8 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
     if 顯示:
         from pathlib import Path
         html = Path.home() / 'TEMP' / 'showdf.html'
+        html.parent.mkdir(parents=True, exist_ok=True)
         s.to_html(html, encoding='utf8', doctype_html=True)
-        # s.to_html(html)
         import os
         os.system(f'start {html}')
     return s
