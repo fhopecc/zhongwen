@@ -111,14 +111,18 @@ class Test(unittest.TestCase):
         self.assertEqual(轉樣式表字串(s), r)
 
     def test_surround(self):
-        from zhongwen.text import 取最近環繞符號
+        from zhongwen.text import 取最近環繞符號, 插入環繞符號
         s = 'There is a (parentheses) and the nearest (parenthese).'
         self.assertEqual(取最近環繞符號(s), '()')
+        s = 'delete (the [neareast surround]).'
+        self.assertEqual(取最近環繞符號(s), '[]')
         s = '這列一個「引號」，再列一個『雙引號』。'
         self.assertEqual(取最近環繞符號(s), '『』')
+        t = 'enclose this (cursorword) in parentheses.'
+        self.assertEqual(插入環繞符號('enclose this cursorword in parentheses.', 列=14), t)
       
 if __name__ == '__main__':
-    unittest.main()
-    # suite = unittest.TestSuite()
-    # suite.addTest(Test('test_surround'))  # 指定要執行的測試方法
-    # unittest.TextTestRunner().run(suite)
+    # unittest.main()
+    suite = unittest.TestSuite()
+    suite.addTest(Test('test_surround'))  # 指定要執行的測試方法
+    unittest.TextTestRunner().run(suite)
