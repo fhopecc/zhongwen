@@ -281,8 +281,8 @@ def show_html(df, 無格式=False
     if isinstance(df, pd.Series):
         df = df.to_frame()
 
-    df = df.fillna(' ')
-    df = df.dropna(axis='columns', how='all')
+    # df = df.fillna(' ')
+    # df = df.dropna(axis='columns', how='all')
 
     if isinstance(df, pd.DataFrame) and not 無格式:
         try:
@@ -318,7 +318,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
     import pandas as pd
     import numpy as np
     import re
-    df = df.fillna('')
+    # df = df.fillna('')
     if 顯示筆數:
         df = df[:顯示筆數]
     columns = df.columns
@@ -520,3 +520,21 @@ def 連續增減次數(時序資料):
     連續次數 = 連續次數 * 消長
     return 連續次數 
 
+def 清查資料表非全數值欄(df, 列出非數值明細之欄=None):
+    import pandas as pd
+
+    # 將所有值轉換為數字類型，無法轉換的值設置為 NaN
+    df_converted = df.apply(pd.to_numeric, errors='coerce')
+
+    # 找出無法轉換的值
+    invalid_cells = df_converted.isna()
+
+    # 遍歷所有無法轉換的值並輸出
+    for column in df.columns:
+        if invalid_cells[column].any():
+            invalid_values = df[column][invalid_cells[column]]
+            logger.warn(f"{column} 欄有無法轉換成數值之資料值！")
+            if column in 列出非數值明細之欄:
+                logger.warn(f"非數值之資料值及其索引: {invalid_values.index.tolist()} - {invalid_values.tolist()}")
+            else:
+                logger.debug(f"非數值之資料值及其索引: {invalid_values.index.tolist()} - {invalid_values.tolist()}")
