@@ -271,6 +271,9 @@ def 取最近環繞符號(字串:str) -> str:
         raise RuntimeError(f'以下字串尚無環繞符號：{字串}')
     return 環繞開啟符號[最近環繞符號索引] + 環繞關閉符號[最近環繞符號索引]
 
+def 刪除環繞符號(字串:str, 環繞符號='(', 列:int=0) -> str:
+    pass
+
 def 插入環繞符號(字串:str, 環繞符號='(', 列:int=0, 區間='w') -> str:
     '區間是vim的 motion 命令，如 w、$'
     import re
@@ -280,6 +283,7 @@ def 插入環繞符號(字串:str, 環繞符號='(', 列:int=0, 區間='w') -> s
             pat = r'[a-zA-Z\u4e00-\u9fff]+'
             if m:=re.match(pat, s):
                 return f'{字串[:列-1]}{環繞符號}{m[0]}{取環繞關閉符號(環繞符號)}{s[m.end():]}' 
+
 if __name__ == '__main__':
     r = 交談('love is poem.')
     print(r)

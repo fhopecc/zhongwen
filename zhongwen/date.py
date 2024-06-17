@@ -113,7 +113,12 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
                 try:
                     return 月底(Timestamp(int(m[1])+1911, int(m[2]), 1))
                 except ValueError: return pd.NaT
-
+            pat = r"'\d\d/\d\d/\d\d"
+            if m:=re.match(pat, d):
+                try:
+                    return 取日期(m[0].replace("'", "20"))
+                except ValueError: return pd.NaT
+ 
             if default: return default 
             return d
         case _:

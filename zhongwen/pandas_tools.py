@@ -278,9 +278,9 @@ def show_html(df, 無格式=False
     from pathlib import Path
     from warnings import warn
 
-
     if isinstance(df, pd.Series):
         df = df.to_frame()
+    df = df.fillna(' ')
     if isinstance(df, pd.DataFrame) and not 無格式:
         try:
             df = df.head(顯示筆數)
@@ -315,7 +315,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
     import pandas as pd
     import numpy as np
     import re
-
+    df = df.fillna('')
     if 顯示筆數:
         df = df[:顯示筆數]
     columns = df.columns

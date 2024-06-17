@@ -9,6 +9,7 @@ class Test(unittest.TestCase):
         from pandas import Timestamp, Timedelta
         from datetime import datetime
         import pandas as pd
+        self.assertEqual(取日期("'24/01/19"), Timestamp(2024,1,19))
         self.assertEqual(取日期('2022/6/3 上午 12:00:00'), Timestamp(2022,6,3) )
         self.assertEqual(取日期('2020.01.05'), Timestamp(2020,1,5))
         self.assertEqual(取日期('20200105'), Timestamp(2020,1,5))
@@ -38,6 +39,7 @@ class Test(unittest.TestCase):
         self.assertEqual(取日期(1110213), Timestamp(2022,2,13))
         self.assertEqual(取日期(1110213.0), Timestamp(2022,2,13))
         
+
         self.assertEqual(取日期('昨日'), Timestamp.today().normalize() - Timedelta(days=1))
 
         self.assertFalse(是日期嗎(pd.NaT))
@@ -68,7 +70,6 @@ class Test(unittest.TestCase):
         from zhongwen.date import 月底, 上月
         from zhongwen.date import 月起迄
         from pandas import Timestamp
-
         仿今日.return_value = 取日期('113.1.14')
         
         self.assertEqual(月底(2022, 10), Timestamp(2022, 10, 31))

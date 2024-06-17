@@ -54,8 +54,8 @@ def 最新檔(目錄, 檔案樣式="*"):
 
 @lru_cache
 def chrome():
-    from webdriver_manager.chrome import ChromeDriverManager
-    path = ChromeDriverManager().install()
+    # from webdriver_manager.chrome import ChromeDriverManager
+    # path = ChromeDriverManager().install()
     from selenium import webdriver
     return webdriver.Chrome()
 
@@ -92,6 +92,8 @@ def 抓取(url
     if 抓取方式 == 'selenium':
         c = chrome()
         c.get(url)
+        import time
+        time.sleep(3)
         return c.page_source
     if not headers:
         from faker import Faker
