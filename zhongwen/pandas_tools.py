@@ -280,7 +280,10 @@ def show_html(df, 無格式=False
 
     if isinstance(df, pd.Series):
         df = df.to_frame()
+
     df = df.fillna(' ')
+    df = df.dropna(axis='columns', how='all')
+
     if isinstance(df, pd.DataFrame) and not 無格式:
         try:
             df = df.head(顯示筆數)

@@ -7,7 +7,7 @@ class Test(unittest.TestCase):
     def test_parse_date(self):
         from zhongwen.date import 是日期嗎, 取日期
         from pandas import Timestamp, Timedelta
-        from datetime import datetime
+        from datetime import datetime, date
         import pandas as pd
         self.assertEqual(取日期("'24/01/19"), Timestamp(2024,1,19))
         self.assertEqual(取日期('2022/6/3 上午 12:00:00'), Timestamp(2022,6,3) )
@@ -31,7 +31,6 @@ class Test(unittest.TestCase):
         self.assertEqual(取日期('0831'), Timestamp(now.year, 8, 31))
 
         self.assertEqual(取日期(datetime(2022,2,1,23,11)), Timestamp(2022,2,1))
-        # self.assertEqual(取日期(None).date(), datetime.now().date())
         self.assertEqual(取日期('1110527'), Timestamp(2022,5,27))
 
         self.assertEqual(取日期('1110213.000000'), Timestamp(2022,2,13))
@@ -39,9 +38,9 @@ class Test(unittest.TestCase):
         self.assertEqual(取日期(1110213), Timestamp(2022,2,13))
         self.assertEqual(取日期(1110213.0), Timestamp(2022,2,13))
         
-
         self.assertEqual(取日期('昨日'), Timestamp.today().normalize() - Timedelta(days=1))
 
+        self.assertEqual(取日期(date(2022,6,23)), Timestamp(2022,6,23))
         self.assertFalse(是日期嗎(pd.NaT))
 
     @patch('zhongwen.date.今日')

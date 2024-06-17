@@ -24,7 +24,7 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
            日期大於今日省略年推論為去年=False) -> Timestamp:
     import re
     import pandas as pd
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, date
     if not default: 
         default=pd.NaT
     if pd.isnull(d):
@@ -37,6 +37,8 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
                 return 取日期(f'{d:07}')
             return 取日期(f'{d:05}')
         case datetime():
+            return Timestamp(d).normalize()
+        case date():
             return Timestamp(d).normalize()
         case Timestamp():
             return Timestamp(d).normalize()
@@ -61,7 +63,7 @@ def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=No
                     od = d
                     sep = m[2]
                     d = 取日期(f'{year}{sep}{d}')
-                    if 日期大於今日省略年推論為去年 and d > datetime.now().Timestamp(): 
+                    if 日期大於今日省略年推論為去年 and d > 取日期(datetime.now()): 
                         # 省略年推論為今年大於今日，則推論為去年
                         return 取日期(f'{year-1}{sep}{od}')
                     return d
