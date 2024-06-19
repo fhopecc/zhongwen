@@ -282,7 +282,8 @@ def show_html(df, 無格式=False
         df = df.to_frame()
 
     # df = df.fillna(' ')
-    # df = df.dropna(axis='columns', how='all')
+    if isinstance(df, pd.DataFrame):
+        df = df.dropna(axis='columns', how='all')
 
     if isinstance(df, pd.DataFrame) and not 無格式:
         try:
