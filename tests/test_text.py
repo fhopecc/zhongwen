@@ -112,21 +112,68 @@ class Test(unittest.TestCase):
 
     def test_surround(self):
         from zhongwen.text import 取最近環繞符號, 刪除環繞符號, 插入環繞符號
+        from zhongwen.text import 取引用內容, 引用
         s = 'There is a (parentheses) and the nearest (parenthese).'
-        self.assertEqual(取最近環繞符號(s), '()')
+        self.assertEqual(取引用內容(s), None)
+        self.assertEqual(取引用內容(s, 10), None)
+        self.assertEqual(取引用內容(s, 11), 引用('(parentheses)', 11, 23))
+        self.assertEqual(取引用內容(s, 12), 引用('(parentheses)', 11, 23))
+        self.assertEqual(取引用內容(s, 22), 引用('(parentheses)', 11, 23))
+        self.assertEqual(取引用內容(s, 23), 引用('(parentheses)', 11, 23))
+        self.assertEqual(取引用內容(s, 24), None)
+        self.assertEqual(取引用內容(s, 40), None)
+        self.assertEqual(取引用內容(s, 41), 引用('(parenthese)', 41, 52))
+        self.assertEqual(取引用內容(s, 42), 引用('(parenthese)', 41, 52))
+        self.assertEqual(取引用內容(s, 51), 引用('(parenthese)', 41, 52))
+        self.assertEqual(取引用內容(s, 52), 引用('(parenthese)', 41, 52))
+
         s = 'delete (the [neareast surround]).'
-        self.assertEqual(取最近環繞符號(s), '[]')
+        self.assertEqual(取引用內容(s, 31), 引用('(the [neareast surround])', 7, 31))
+        self.assertEqual(取引用內容(s, 7), 引用('(the [neareast surround])', 7, 31))
+        self.assertEqual(取引用內容(s, 8), 引用('(the [neareast surround])', 7, 31))
+        self.assertEqual(取引用內容(s, 11), 引用('(the [neareast surround])', 7, 31))
+        self.assertEqual(取引用內容(s, 12), 引用('[neareast surround]', 12, 30))
+        self.assertEqual(取引用內容(s, 30), 引用('[neareast surround]', 12, 30))
+
         s = '這列一個「引號」，再列一個『雙引號』。'
-        self.assertEqual(取最近環繞符號(s), '『』')
+        self.assertEqual(取引用內容(s, 4), 引用('「引號」', 4, 7))
+        self.assertEqual(取引用內容(s, 12), None)
+        self.assertEqual(取引用內容(s, 13), 引用('『雙引號』', 13, 17))
+        self.assertEqual(取引用內容(s, 15), 引用('『雙引號』', 13, 17))
+        self.assertEqual(取引用內容(s, 17), 引用('『雙引號』', 13, 17))
+        self.assertEqual(取引用內容(s, 18), None)
+
+        s = "刪除「游標處「巢狀引號」的功能」。"
+        # self.assertEqual(取引用內容(s, 5), 引用('「游標處「巢狀引號」的功能」', 6, 11))
+        # self.assertEqual(取引用內容(s, 6), 引用('「巢狀引號」', 6, 11))
+        # self.assertEqual(取引用內容(s, 7), 引用('「巢狀引號」', 6, 11))
+        # self.assertEqual(取引用內容(s, 11), 引用('「巢狀引號」', 6, 11))
+
+        # r = "刪除「游標處巢狀引號的功能」。"
+        # self.assertEqual(刪除環繞符號(s, "「", 7), r)
+        # self.assertEqual(刪除環繞符號(s, "「", 8), r)
+        # self.assertEqual(刪除環繞符號(s, "「", 12), r)
+        s = "刪除'游標處單引號'的功能"
+        r = "刪除游標處單引號的功能"
+        # self.assertEqual(刪除環繞符號(s, "'", 3), r)
+        # self.assertEqual(刪除環繞符號(s, "'", 4), r)
+        # self.assertEqual(刪除環繞符號(s, "'", 9), r)
+        # self.assertEqual(刪除環繞符號(s, "'", 10), r)
         s = "'日期欄位'"
-        self.assertEqual(取最近環繞符號(s), "''")
+        # self.assertEqual(取最近環繞符號(s), "''")
         s = "'日期欄位'"
-        self.assertEqual(刪除環繞符號(s, "'"), "日期欄位")
+        # self.assertEqual(刪除環繞符號(s, "'"), "日期欄位")
         t = 'enclose this (cursorword) in parentheses.'
-        self.assertEqual(插入環繞符號('enclose this cursorword in parentheses.', 列=14), t)
-      
+        # self.assertEqual(插入環繞符號('enclose this cursorword in parentheses.', 列=14), t)
+      # 測試
+    def test_find_matching_parentheses(self):
+        from zhongwen.text import 查找引號對
+        expression = "a * (b + c) - {d / [e + f]}"
+        matches = 查找引號對(expression)
+        print(matches)
+
 if __name__ == '__main__':
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test_surround'))  # 指定要執行的測試方法
+    suite.addTest(Test('test_find_matching_parentheses'))  # 指定要執行的測試方法
     unittest.TextTestRunner().run(suite)

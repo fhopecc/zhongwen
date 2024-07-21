@@ -4,20 +4,143 @@ import unittest
 
 class Test(unittest.TestCase):
     def setUp(self):
-        import pandas as pd
+        from zhongwen.batch_data import 取資料庫
         from zhongwen.date import 取日期
-        data = [['1101', 取日期('113.3.31'), '合併', '100', '110', 'text']
-               ,['1101', 取日期('113.6.30'), '合併', '200', '210', 'text']
-               ,['1101', 取日期('113.9.30'), '合併', '300', '310', 'text']
-               ,['1102', 取日期('113.3.30'), '合併', '101', '111', 'text']
-               ,['1102', 取日期('113.6.30'), '合併', '201', '211', 'text']
-               ,['1102', 取日期('113.9.30'), '合併', '301', '311', 'text']
+        from pathlib import Path
+        import pandas as pd
+        data = [['1101', '合併', pd.NA, '110', 'text']
+               ,['1102', '合併', '100', '110', 'text']
                ]
-        self.財報甲 = pd.DataFrame(data
-                        ,columns=['股票代號', '財報日期', '財報種類', '毛利', '營利', '其他'])
-    def testIO(self):
-        from zhongwen.batch_data import 批次寫入
-    
+        self.損益表集甲 = pd.DataFrame(data
+                          ,columns=['股票代號', '財報種類', '毛利', '營利', '其他'])
+
+        data = [['1101', '合併', '100', '110', 'text']
+               ,['1102', '合併', '101', '111', 'text']
+               ]
+        self.損益表集乙 = pd.DataFrame(data
+                          ,columns=['股票代號', '財報種類', '毛利', '營利', '其他'])
+
+        data = [['1101', '合併', '100', '110', 'text']
+               ,['1102', '合併', '101', '111', 'text']
+               ,['1104', '個別', '101', '111', 'text']
+               ]
+        self.損益表集丙 = pd.DataFrame(data
+                          ,columns=['股票代號', '財報種類', '毛利', '營利', '其他'])
+
+
+        self.測試資料庫路徑 = Path.home() / 'TEMP' / '測試資料庫'
+
+        self.原始測試資料庫路徑 = Path.home() / 'TEMP' / '原始測試資料庫'
+
+    def tearDown(self):
+        from zhongwen.batch_data import 取資料庫
+        取資料庫(self.測試資料庫路徑).close()
+        self.測試資料庫路徑.unlink()
+        取資料庫(self.原始測試資料庫路徑).close()
+        self.原始測試資料庫路徑.unlink()
+
+    def test_date_converter(self):
+        from zhongwen.date import 取日期
+        from zhongwen.batch_data import 轉日期字串
+        self.assertEqual(轉日期字串(取日期('1979.7.29')), '1979-7-29')
+
+    def test_sqlite_accessor(self):
+        '測試讀寫SQLite功能'
+        from zhongwen.batch_data import 取資料庫檔路徑, 批次寫入, 批次讀取
+        from zhongwen.batch_data import 取資料表內容, 取資料庫, 取原始資料表內容
+        from zhongwen.batch_data import 自原始資料庫重建
+        from zhongwen.date import 取日期
+        from pathlib import Path 
+
+        self.assertEqual(取資料庫檔路徑(取資料庫(self.測試資料庫路徑)), self.測試資料庫路徑)
+
+        # 測試指定欄位
+        批次寫入(self.損益表集甲
+                ,取日期('113.9.30')
+                ,'財報日期'
+                ,'損益表'
+                ,取資料庫(self.測試資料庫路徑)
+                ,['股票代號', '財報種類', '毛利', '營利'])
+
+        df = 取資料表內容(self.測試資料庫路徑, '損益表')
+        self.assertEqual(df.shape, (2, 5))
+        self.assertEqual(df.iloc[-1].財報日期, ('2024-9-30'))
+
+        df = 取資料表內容(self.原始測試資料庫路徑, '損益表')
+        self.assertEqual(df.shape, (2, 6))
+        self.assertEqual(df.iloc[-1].財報日期, ('2024-9-30'))
+        self.assertEqual(df.iloc[-1].其他, 'text')
+
+        # 測試增加批次資料
+        批次寫入(self.損益表集乙
+                ,取日期('113.12.31')
+                ,'財報日期'
+                ,'損益表'
+                ,取資料庫(self.測試資料庫路徑)
+                ,['股票代號', '財報種類', '毛利', '營利'])
+
+        df = 取資料表內容(self.測試資料庫路徑, '損益表')
+        self.assertEqual(df.shape, (4, 5))
+        df = 取資料表內容(self.原始測試資料庫路徑, '損益表')
+        self.assertEqual(df.shape, (4, 6))
+        
+        # 測試覆寫批次功能，須刪除舊批次資料後，寫入新批次資料
+        批次寫入(self.損益表集丙 
+                ,取日期('113.9.30')
+                ,'財報日期'
+                ,'損益表'
+                ,取資料庫(self.測試資料庫路徑)
+                ,['股票代號', '財報種類', '毛利', '營利'])
+        批次寫入(self.損益表集丙 
+                ,取日期('113.9.30')
+                ,'財報日期'
+                ,'損益表'
+                ,取資料庫(self.測試資料庫路徑)
+                ,['股票代號', '財報種類', '毛利', '營利'])
+        df = 取資料表內容(self.測試資料庫路徑, '損益表')
+        df = df.query('財報日期=="2024-9-30"')
+        self.assertEqual(df.shape, (3, 5))
+
+        df = 取原始資料表內容(self.測試資料庫路徑, '損益表')
+        self.assertEqual(df.shape, (5, 6))
+        df = df.query('財報日期=="2024-9-30"')
+        self.assertEqual(df.shape, (3, 6))
+
+        df = 批次讀取(取日期('113.9.30')
+                     ,'財報日期'
+                     ,'損益表'
+                     ,取資料庫(self.測試資料庫路徑)
+                     )
+        self.assertEqual(df.shape, (3, 6))
+        self.assertEqual(df.loc[0, '股票代號'], '1101')
+        self.assertEqual(df.loc[0, '毛利'], '100')
+
+        批次寫入(self.損益表集甲
+                ,取日期('113.6.30')
+                ,'財報日期'
+                ,'損益表'
+                ,取資料庫(self.測試資料庫路徑)
+                ,指定欄位=['股票代號', '財報種類', '毛利', '營利'
+                          ,'稅前淨利', '淨利'])
+
+        df = 取原始資料表內容(self.測試資料庫路徑, '損益表')
+        self.assertEqual(df.shape, (7, 6))
+
+        df = 批次讀取(取日期('113.6.30')
+                     ,'財報日期'
+                     ,'損益表'
+                     ,取資料庫(self.測試資料庫路徑)
+                     )
+        self.assertEqual(df.loc[0, '股票代號'], '1101')
+        self.assertEqual(df.loc[0, '毛利'], None)
+
+        # 測試自原始資料料表重建
+        自原始資料庫重建(self.測試資料庫路徑, '損益表', 
+                        ['財報日期', '股票代號', '財報種類'
+                        ,'其他'])
+        df = 取資料表內容(self.測試資料庫路徑, '損益表')
+        self.assertEqual(df.shape, (7, 4))
+ 
     @patch('zhongwen.date.今日')
     def test(self, 仿今日):
         from zhongwen.batch_data import 解析更新期限
@@ -69,6 +192,7 @@ class Test(unittest.TestCase):
         self.assertEqual(期限, 取日期('113.5.30'))
         self.assertEqual(資訊, f'113年4月22日應公布113年第1季資訊。')
 
-
 if __name__ == '__main__':
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
     unittest.main()

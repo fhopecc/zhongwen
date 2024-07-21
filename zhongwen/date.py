@@ -3,16 +3,44 @@ from datetime import date
 from functools import lru_cache
 from pandas import Timestamp, Timedelta
 
+def 全是日期嗎(vs):
+    from datetime import datetime
+    import pandas as pd
+    from collections.abc import Iterable 
+    match vs:
+        case list():
+            return all(全是日期嗎(v) for v in vs)
+        case pd.Series():
+            return vs.map(全是日期嗎).all()
+        case _:
+            v = vs
+            return not pd.isnull(v) and (isinstance(v, pd.Timestamp) or
+                                         isinstance(v, datetime) or
+                                         isinstance(v, date) 
+                                         )
+
+def 有日期嗎(vs):
+    from datetime import datetime
+    import pandas as pd
+    from collections.abc import Iterable 
+    match vs:
+        case list():
+            return any(全是日期嗎(v) for v in vs)
+        case pd.Series():
+            return vs.map(全是日期嗎).any()
+        case _:
+            v = vs
+            return not pd.isnull(v) and (isinstance(v, pd.Timestamp) or
+                                         isinstance(v, datetime) or
+                                         isinstance(v, date) 
+                                         )
+
+
 def 取日數(期間):
     try:
         return 期間.days
     except:
         return float('nan')
-
-def 是日期嗎(v):
-    from datetime import datetime
-    import pandas as pd
-    return not pd.isnull(v) and (isinstance(v, date) or isinstance(v, datetime))
 
 def 取過去日期(d):
     return 取日期(d, 日期大於今日省略年推論為去年=True)
@@ -255,7 +283,7 @@ def 季數(日期=今日()):
 def 季初(年數或日期=None, 季別參數=None) -> Timestamp:
     '指定季之最初日，未指定為本季'
     y, q = 季別()
-    if 是日期嗎(年數或日期):
+    if 全是日期嗎(年數或日期):
         d = 年數或日期
         y, q = 季別(d)
     if 年數或日期 and 季別參數:
@@ -271,7 +299,7 @@ def 季初(年數或日期=None, 季別參數=None) -> Timestamp:
 def 季末(年數或日期=None, 季別參數=None):
     '指定季之最末日，未指定為本季末'
     y, q = 季別()
-    if 是日期嗎(年數或日期):
+    if 全是日期嗎(年數或日期):
         d = 年數或日期
         y, q = 季別(d)
     if 年數或日期 and 季別參數:
@@ -304,7 +332,7 @@ def 月底(日期或年數=None, 月數=None):
         年數=今日().year
     if not 月數:
         月數=今日().month
-    if 是日期嗎(日期或年數):
+    if 全是日期嗎(日期或年數):
         年數=日期或年數.year
         月數=日期或年數.month
     月底日數 = calendar.monthrange(年數, 月數)[1]

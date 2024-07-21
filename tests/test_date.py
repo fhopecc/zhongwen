@@ -2,10 +2,9 @@ from unittest.mock import patch
 from zhongwen.date import 今日
 import unittest
 
-
 class Test(unittest.TestCase):
     def test_parse_date(self):
-        from zhongwen.date import 是日期嗎, 取日期
+        from zhongwen.date import 全是日期嗎, 取日期
         from pandas import Timestamp, Timedelta
         from datetime import datetime, date
         import pandas as pd
@@ -37,11 +36,18 @@ class Test(unittest.TestCase):
         self.assertEqual(取日期(940101), Timestamp(2005,1,1))
         self.assertEqual(取日期(1110213), Timestamp(2022,2,13))
         self.assertEqual(取日期(1110213.0), Timestamp(2022,2,13))
-        
         self.assertEqual(取日期('昨日'), Timestamp.today().normalize() - Timedelta(days=1))
+        self.assertEqual(取日期(date(2022,7,29)), Timestamp(2022,7,29))
 
-        self.assertEqual(取日期(date(2022,6,23)), Timestamp(2022,6,23))
-        self.assertFalse(是日期嗎(pd.NaT))
+    def test_date_predicate(self):
+        from zhongwen.date import 取日期
+        from zhongwen.date import 全是日期嗎, 有日期嗎
+        import pandas as pd
+
+        self.assertFalse(全是日期嗎(pd.NaT))
+        self.assertFalse(全是日期嗎([取日期('7.29'), pd.NaT]))
+        self.assertTrue(全是日期嗎(取日期('7.29')))
+        self.assertTrue(有日期嗎([取日期('7.29'), pd.NaT]))
 
     @patch('zhongwen.date.今日')
     def test_date_repr(self, 仿今日):

@@ -254,6 +254,7 @@ def 交談(text):
 環繞開啟符號 = "'\"([{「『（【"
 環繞關閉符號 = "'\")]}」』）】"
 環繞關閉符號對應 = str.maketrans(環繞開啟符號, 環繞關閉符號)
+
 def 取環繞關閉符號(環繞開啟符號:str):
     return 環繞開啟符號.translate(環繞關閉符號對應)
 
@@ -271,8 +272,24 @@ def 取最近環繞符號(字串:str) -> str:
         raise RuntimeError(f'以下字串尚無環繞符號：{字串}')
     return 環繞開啟符號[最近環繞符號索引] + 環繞關閉符號[最近環繞符號索引]
 
-def 刪除環繞符號(字串:str, 環繞符號='(', 列:int=0) -> str:
-    pass
+def 刪除環繞符號(字串:str, 環繞符號='(', 游標位置:int=0) -> str:
+    import re
+    l = 環繞符號
+    r = 取環繞關閉符號(l)
+    p = 游標位置
+    pat = f"{l}[^{r}]?{r}"
+    istart = 0
+    iend = 0
+    for m in re.finditer(pat, 字串):
+        start = m.start()
+        end = m.end()
+        if start <= p <= end:
+            if start > istart:
+                istart = start
+                iend = end
+    if istart != iend:
+        return 字串[:start] + 字串[start+1:end-1] + 字串[end:]
+    return 字串
 
 def 插入環繞符號(字串:str, 環繞符號='(', 列:int=0, 區間='w') -> str:
     '區間是vim的 motion 命令，如 w、$'
@@ -284,6 +301,63 @@ def 插入環繞符號(字串:str, 環繞符號='(', 列:int=0, 區間='w') -> s
             if m:=re.match(pat, s):
                 return f'{字串[:列-1]}{環繞符號}{m[0]}{取環繞關閉符號(環繞符號)}{s[m.end():]}' 
 
-if __name__ == '__main__':
-    r = 交談('love is poem.')
-    print(r)
+左引號 = "'\"([{「『（【"
+右引號 = "'\")]}」』）】"
+左引號表 = dict(zip(右引號, 左引號))
+
+from dataclasses import dataclass
+@dataclass
+class 引用:
+    內容:str
+    始:int
+    迄:int
+
+def 取引用內容(字串:str, 游標位置:int=0):
+    s = 字串
+    slen = len(s)
+    可能右引號 = 右引號
+    pos = 游標位置
+    rpos = pos
+    while len(可能右引號) > 0:
+        r = None
+        while rpos < slen:
+            if s[rpos] in 可能右引號:
+                r = s[rpos]
+                break
+            rpos += 1
+        if not r:
+            return None
+        l = 左引號表[r]
+        left = s[:rpos+1]
+        lpos = left.rfind(l)
+        if pos < lpos:
+            可能右引號 = 可能右引號.replace(r, "")
+            continue
+        return 引用(字串[lpos:rpos+1], lpos, rpos)
+    return None
+
+def 查找引號對(expression):
+    stack = []
+    matches = {}
+
+    for i, char in enumerate(expression):
+        if char in "([{":
+            stack.append((char, i))
+        elif char in ")]}":
+            if not stack:
+                raise ValueError(f"Unmatched closing {char} at index {i}")
+            opening_char, opening_index = stack.pop()
+            if (opening_char == '(' and char != ')') or \
+               (opening_char == '[' and char != ']') or \
+               (opening_char == '{' and char != '}'):
+                raise ValueError(f"Unmatched {opening_char} at index {opening_index} with {char} at index {i}")
+            matches[opening_index] = i
+            matches[i] = opening_index
+
+    if stack:
+        remaining_opening = stack.pop()
+        raise ValueError(f"Unmatched opening {remaining_opening[0]} at index {remaining_opening[1]}")
+
+    return matches
+
+

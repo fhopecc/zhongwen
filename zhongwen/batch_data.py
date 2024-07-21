@@ -1,5 +1,6 @@
 from pathlib import Path
 import logging
+import atexit
 logger = logging.getLogger(Path(__file__).stem)
 
 def 通知執行時間(f):
@@ -18,10 +19,12 @@ class 查無批號錯誤(Exception): pass
 
 def 批次讀取(批號, 批號欄名, 表格, 資料庫, 日期欄位=None):
     import pandas as pd
-    from zhongwen.date import 是日期嗎
+    from zhongwen.date import 全是日期嗎
     # sql 相等運算子係單等號，而 Python 係雙等號，易彼此誤植
     sql = f'select * from {表格} where {批號欄名}={批號}' 
-    if 是日期嗎(批號) or isinstance(批號, str):
+    if 全是日期嗎(批號):
+        sql = f'select * from {表格} where {批號欄名}="{轉日期字串(批號)}"' 
+    elif isinstance(批號, str):
         sql = f'select * from {表格} where {批號欄名}="{批號}"' 
     df = pd.read_sql_query(sql, 資料庫, parse_dates=日期欄位)
     if df.empty: 
@@ -29,30 +32,64 @@ def 批次讀取(批號, 批號欄名, 表格, 資料庫, 日期欄位=None):
     return df
 
 def 批次刪除(批號, 批號欄名, 表格, 資料庫):
+    from zhongwen.date import 全是日期嗎
     logger.debug(f'{表格}刪除{批號}整批紀錄……')
     c = 資料庫.cursor()
     sql = f'delete from {表格} where {批號欄名}=="{批號}"'
+    if 全是日期嗎(批號):
+        sql = f'delete from {表格} where {批號欄名}="{轉日期字串(批號)}"' 
     c.execute(sql)
     資料庫.commit()
     logger.debug(f'成功')
 
-def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫):
+def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 指定欄位=None):
+    '如有指定欄位，原始資料則另寫入原始資料庫'
     from zhongwen.text import 臚列
+    from zhongwen.date import 有日期嗎
     import pandas as pd
-    import logging
     import sqlite3
     import re
+    資料.loc[:, 批號欄名] = 批號
+    表格不存在=False
     try:
         批次刪除(批號, 批號欄名, 表格, 資料庫)
     except sqlite3.OperationalError as e:
-        logger.debug(f'批次刪除發生錯誤：{e}')
-    logger.debug(f'整批寫入{批號}資料至{表格}……')
+        if 'no such table' in str(e):
+            logger.debug(f'尚無【{表格}】資料表……')
+            表格不存在=True
+        else:
+            logger.debug(f'批次刪除發生錯誤：{e}')
+    logger.debug(f'批號【{批號}】資料擬整批寫入至{表格}……')
+    if 指定欄位:
+        if 批號欄名 not in 指定欄位:
+            指定欄位.append(批號欄名)
+        指定欄位 = [c for c in 資料.columns if c in 指定欄位]
+        欄位縮減資料庫 = 資料庫
+        資料庫檔路徑 = 取資料庫檔路徑(資料庫)
+        資料庫檔路徑 = 資料庫檔路徑.with_stem(f'原始{資料庫檔路徑.stem}')
+        資料庫 = 取資料庫(資料庫檔路徑)
+        try:
+            批次刪除(批號, 批號欄名, 表格, 資料庫)
+        except sqlite3.OperationalError as e:
+            if 'no such table' in str(e):
+                logger.debug(f'原始資料庫尚無【{表格}】資料表……')
+                表格不存在=True
+            else:
+                logger.debug(f'批次刪除發生錯誤：{e}')
+        批次寫入(資料[指定欄位], 批號, 批號欄名, 表格, 欄位縮減資料庫)
     try:
         for c in 資料.columns:
-            if type(資料.iloc[0][c]) == pd.Timestamp:
-                資料[c] = 資料[c].map(lambda d: d.date())
+            if 有日期嗎(資料[c]):
+                資料[c] = 資料[c].map(轉日期字串)
         資料.to_sql(表格, 資料庫, if_exists='append')
-        logging.debug(f'寫入成功！')
+        if 表格不存在:
+            logger.debug(f'擬建立表格【{表格}】及其索引【{批號欄名}】……')
+            sql = f'CREATE INDEX idx_{批號欄名} ON {表格}({批號欄名})'
+            cursor = 資料庫.cursor()
+            cursor.execute(sql)
+            資料庫.commit()
+            logger.debug('完成！')
+        logger.debug(f'寫入成功！')
     except sqlite3.OperationalError as e:
         df = pd.read_sql_query(f'select * from {表格} limit 1', 資料庫)
         寫入資料欄位 = 資料.columns.to_list()
@@ -97,14 +134,13 @@ def 期日資料批次寫入(資料庫檔, 資料名稱, 資料日期欄名, 預
     return 增加結果批次寫入
     
 
-def 結果批次寫入(資料庫檔, 資料名稱, 批號欄名, 預設批號組=[]):
+def 結果批次寫入(資料庫檔, 資料名稱, 批號欄名, 預設批號組=[], 指定欄位=None):
     '''「批號組」指定一組批號逐批寫入查詢結果，舉如：
 爬取損益表(批號組=迄每季(季末(2019, 1)))
 會爬取自2019第1季至今每一季之損益表。
 '''
     from collections.abc import Iterable
     from functools import wraps
-    from sqlite3 import connect
     def 增加結果批次寫入(爬取資料函數):
         @wraps(爬取資料函數)
         def 批次寫入爬取資料(批號組=None, **kargs):
@@ -112,11 +148,11 @@ def 結果批次寫入(資料庫檔, 資料名稱, 批號欄名, 預設批號組
                 批號組 = 預設批號組
             if isinstance(批號組, str) or not isinstance(批號組, Iterable):
                 批號組 = [批號組]
-            with connect(資料庫檔) as db: 
-                for 批號 in 批號組:
-                    df = 爬取資料函數(批號, **kargs)
-                    批次寫入(df, 批號, 批號欄名, 資料名稱, db)
-                return df
+            db =  取資料庫(資料庫檔) 
+            for 批號 in 批號組:
+                df = 爬取資料函數(批號, **kargs)
+                批次寫入(df, 批號, 批號欄名, 資料名稱, db, 指定欄位)
+            return df
         return 批次寫入爬取資料
     return 增加結果批次寫入
 
@@ -157,13 +193,15 @@ def 應更新資料時期(更新頻率='次月十日前'):
             return 上月()
 
 def 解析更新期限(更新期限='次月10日前'):
-    '解析更新期限，目前支援"次月10日前"、"次季45日前"、"次月底前"及"財報"等形式，傳回(應更新資料時期、應更新資料期限及定期更新資訊)'
+    '解析更新期限之有效值有【每次更新】、【次月10日前】、【次季45日前】、【次月底前】及【財報】，傳回【應更新資料時期、應更新資料期限及定期更新資訊】'
     from zhongwen.date import  上年底, 上月, 上季, 今日, 月底, 取日期, 季別
     from zhongwen.date import  民國正式日期, 民國年月, 民國年, 民國季別
     from datetime import timedelta
     import re
     today = 今日()
     應更新資料時期, 應更新資料期限 = None, None
+    if 更新期限=='每次更新':
+        return 解析更新期限('次月底前')
 
     if '財報' in 更新期限:
         '''證交所規定上市公司公告申報財務報表之期限如下：
@@ -258,8 +296,50 @@ def 去除重覆(資料庫, 表格, 批號, 時間欄位=None):
         c.commit()
         df.to_sql(表格, c)
     logger.info(f'{表格}去除重覆紀錄完成！') 
- 
-if __name__ == '__main__':
-    pass
-    from 股票分析.公開資訊觀測站爬蟲 import 股利分派資料庫
-    # 去除重覆(股利分派資料庫, '股利分派表', '股東會召開年度', 時間欄位=['股利所屬年度'])
+
+def 取資料庫檔路徑(conn) -> Path:
+    'PRAGMA database_list 查詢資料庫及其儲存檔案資料表，其欄位名稱為 seq, name 及 file 分別表示資料庫序號、名稱及檔案路徑。'
+    cursor = conn.cursor()
+    cursor.execute('PRAGMA database_list;')
+    db_list = cursor.fetchall()
+    cursor.close()
+    return Path(db_list[0][2])
+
+@通知執行時間
+def 取資料表內容(資料庫路徑, 資料表):
+    from sqlite3 import connect
+    from zhongwen.batch_data import 取資料庫
+    import pandas as pd
+    sql = f'select * from "{資料表}"'
+    return pd.read_sql_query(sql, 取資料庫(資料庫路徑), index_col='index') 
+
+@通知執行時間
+def 取原始資料表內容(資料庫路徑, 資料表):
+    return 取資料表內容(資料庫路徑.with_stem(f'原始{資料庫路徑.stem}'), 資料表)
+
+def 自原始資料庫重建(資料庫路徑:Path, 資料表, 批號及指定欄位):
+    df = 取原始資料表內容(資料庫路徑, 資料表)
+    df[批號及指定欄位].to_sql(資料表, 取資料庫(資料庫路徑), if_exists='replace')
+
+def 轉日期字串(日期):
+    '日期轉換為格式如"1979-7-29"之字串，而無效日期為"無效日期"字串，俾將日期以字串儲存於 SQLite 資料庫。'
+    from zhongwen.date import 全是日期嗎
+    if 全是日期嗎(日期):
+        return f"{日期.year}-{日期.month}-{日期.day}"
+    return "無效日期"
+資料庫池 = {}
+def 取資料庫(資料庫檔路徑):
+    import sqlite3
+    try:
+        db = 資料庫池[資料庫檔路徑]
+        db.execute("select 1")
+        return db
+    except (KeyError, sqlite3.ProgrammingError):
+        db = sqlite3.connect(資料庫檔路徑)
+        資料庫池[資料庫檔路徑] = db 
+        return db
+
+def 關閉資料庫池():
+    for conn in 資料庫池.values(): 
+        conn.close()
+atexit.register(關閉資料庫池)

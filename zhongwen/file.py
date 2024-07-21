@@ -2,6 +2,7 @@
 from pathlib import Path
 from urllib import request
 from urllib.parse import urlparse
+from zhongwen.batch_data import 通知執行時間
 from diskcache import Cache
 from functools import lru_cache
 import logging
@@ -65,11 +66,13 @@ def 抓取(url
         ,headers=None
         ,參數={}
         ,return_json=False
+        ,return_content=False
         ,return_bytes=False
         ,除錯=False
         ,use_requests=None
         ,資料={}
         ,encoding="utf-8"
+        ,等待秒數=5
         ):
     '''抓取網頁回傳原始碼，就已抓取網頁內容鏈結再抓取則稱為「爬取」。
 抓取方式：'get' 指定使用 requests.get；'post' 係 requests.post；'selenium' 係 selenium 模組。
@@ -86,14 +89,16 @@ def 抓取(url
         warn(f'為命名正確，參數「參數」將廢棄並由「資料」取代。'
             ,DeprecationWarning, stacklevel=2)
         資料=參數
-
     import requests
     import logging
     if 抓取方式 == 'selenium':
         c = chrome()
         c.get(url)
         import time
-        time.sleep(3)
+        time.sleep(等待秒數)
+        if '使用支援JavaScript' in c.page_source:
+            c.get(url)
+            time.sleep(等待秒數)
         return c.page_source
     if not headers:
         from faker import Faker
@@ -117,7 +122,11 @@ def 抓取(url
     logging.debug(除錯訊息)
     if return_json:
         return r.json()
+    if return_content:
+        return r.content
     if return_bytes:
+        from warnings import warn
+        warn(f'參數【return_bytes】將廢棄，請使用【return_content】', DeprecationWarning, stacklevel=2)
         return r.content
     return r.text
 
@@ -135,7 +144,7 @@ def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False):
         p = downloads / fn
 
     if not 覆寫 and p.exists(): 
-        print(f'警告：[{url}]已下載至[{p}]！')
+        logger.warn(f'警告：[{url}]已下載至[{p}]！')
         return p
 
     if p.exists():
@@ -150,6 +159,7 @@ def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False):
         raise RuntimeError(r"{url}下載失敗，原因如次：", response.status_code, response.reason)
     return p
 
+@通知執行時間
 def 解壓(壓縮檔, 目錄):
     if 壓縮檔.suffix == '.7z':
         import py7zr
