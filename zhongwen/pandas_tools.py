@@ -285,6 +285,9 @@ def show_html(df, 無格式=False
     if isinstance(df, pd.DataFrame):
         df = df.dropna(axis='columns', how='all')
 
+    if not df.index.is_unique:
+        df = df.reset_index(drop=True)
+
     if isinstance(df, pd.DataFrame) and not 無格式:
         try:
             df = df.head(顯示筆數)
