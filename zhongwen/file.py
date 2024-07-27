@@ -172,7 +172,6 @@ def 解壓(壓縮檔, 目錄):
     壓縮檔.extractall(目錄)
     print(f'解壓[{壓縮檔}]成功！')
 
-
 def 下載跳出對話視窗連結檔案(url, 目錄=None):
     import requests
     from urllib.parse import urlparse

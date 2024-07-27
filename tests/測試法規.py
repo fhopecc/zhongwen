@@ -5,7 +5,7 @@ class Test(unittest.TestCase):
     def test_query_by_content(self):
         from zhongwen.中央法規 import 法規條文, cache
         # cache.clear()
-        # pass
+        pass
         # df = 法規條文()
         # df = df.query('法規名稱.str.contains("各類場所消防安全設備設置標準")')
         # df = df.query('條文內容.str.contains("，及")')
