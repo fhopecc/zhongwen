@@ -2,10 +2,13 @@ from invoke import task
 from pathlib import Path
 
 @task(default=True)
-def setup(c):
-    from fhopecc.winman import addpath
+def setup_dev(c):
+    from fhopecc import env
+    import os
+    github = env.githubdrive / 'github'
     p = Path(__file__).parent
-    addpath(str(p), 'PYTHONPATH')
+    pythonpath = ";".join([str(Path(__file__).parent), os.environ['PYTHONPATH']])
+    os.system(f'setx PYTHONPATH {pythonpath}')
 
 @task
 def hanlp(c):
