@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zhongwen"
-version = "3.14219"
+version = "5.12"
 authors = [
   { name="fhopecc", email="fhopecc@gmail.com" },
 ]
@@ -17,8 +17,11 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-dependencies = [
-  "diskcache", "pygtrans", "marisa_trie", "hanlp", "selenium"
+dependencies = ["diskcache"
+               ,"pandas", "pygtrans", "marisa_trie"
+               ,"selenium"
+               ,"requests"
+               ,"winshell", "pywin32"
 ]
 [project.urls]
 "Homepage" = "https://github.com/fhopecc/zhongwen"

@@ -1,10 +1,8 @@
 '檔案處理'
-from pathlib import Path
-from urllib import request
-from urllib.parse import urlparse
 from zhongwen.batch_data import 通知執行時間
-from diskcache import Cache
 from functools import lru_cache
+from diskcache import Cache
+from pathlib import Path
 import logging
 cache = Cache(Path.home() / 'cache' / 'zhongwen.file')
 logger = logging.getLogger(Path(__file__).stem)
@@ -132,6 +130,7 @@ def 抓取(url
 
 def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False):
     '''下載 URL 內容至指定檔案，並且回傳檔案路徑。'''
+    from urllib.parse import urlparse
     p = 儲存路徑
     downloads = 儲存目錄
     重載 = 覆寫
@@ -173,7 +172,6 @@ def 解壓(壓縮檔, 目錄):
     壓縮檔.extractall(目錄)
     print(f'解壓[{壓縮檔}]成功！')
 
-
 def 下載跳出對話視窗連結檔案(url, 目錄=None):
     import requests
     from urllib.parse import urlparse
@@ -191,8 +189,3 @@ def 下載跳出對話視窗連結檔案(url, 目錄=None):
         file.write(response.content)
     logger.info(f'文件已下載到：{filepath}')
     return filepath
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
-    url = "https://www.chinesecj.com/forum/forum.php?mod=attachment&aid=NTc1NXxiNDlhMjUzZXwxNzEwNTAyMzc5fDB8MTk1MzIw"
-    下載跳出對話視窗連結檔案(url)
