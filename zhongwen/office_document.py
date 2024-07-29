@@ -3,13 +3,14 @@ from lark.visitors import Interpreter
 from zhongwen.date import 取日期, 民國日期
 from zhongwen.number import 中文數字, 大寫中文數字
 from pathlib import Path
-import re
-wdir = Path(__file__).parent
-
 from docx import Document
 from docx.shared import Pt, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+import re
+import logging
 
+logger = logging.getLogger(Path(__file__).stem)
+wdir = Path(__file__).parent
 TITLE = -1
 PROPOSER = -2
 EVENTS = -3
@@ -135,16 +136,28 @@ def 游標模式替換(模式, 替換函式):
         i = m.end()+1
     raise ValueError(f'游標處無此模式，模式:{模式}，游標:{c}，行:{line}')
 
+微軟辦公室軟體共用範本路徑 = [
+        'AppData/Roaming/Microsoft/Templates/Normal.dotm' # Word
+       ,'AppData/Roaming/Microsoft/Excel/XLSTART/fhopecc.xlsb' # Excel
+       ]
+
 def 設定環境():
-    import winshell
-    捷徑 = Path(winshell.sendto()) / f"複製文字.lnk"
-    程式 = Path(__file__) 
-    winshell.CreateShortcut(
-        Path=str(捷徑),#右鍵sendto快捷方式
-        Target=f'{程式}',
-        Icon=(str(程式), 0),
-        Description='複製文字')
-    print(f'建立傳送到[複製文字]。')
+    for t in 微軟辦公室軟體共用範本路徑:
+        t = Path.home() / t
+        s = Path(__file__).parent.parent / 'resource' / t.name
+        try:
+            copy(s, t)
+        except FileNotFoundError:
+            t.parent.mkdir(exist_ok=True)
+            copy(s, t)
+
+def 更新微軟辦公室軟體共用範本():
+    from shutil import copy
+    for s in 微軟辦公室軟體共用範本路徑:
+        s = Path.home() / s
+        t = Path(__file__).parent.parent / 'resource' / s.name
+        copy(s, t)
+    logger.info('更新微軟辦公室軟體共用範本完成！')
 
 class MakeContentList(Transformer):
     '回傳[階層碼、段落文字]清單'
@@ -242,9 +255,12 @@ if __name__ == '__main__':
     parser.add_argument("docx", nargs='?')
     parser.add_argument("--setup", help="設定環境", action="store_true")
     parser.add_argument("--test", help="測試", action="store_true")
+    parser.add_argument("--update_temp", help="更新微軟辦公室軟體共用範本", action="store_true")
     args = parser.parse_args()
     if args.setup:
         設定環境()
+    elif args.update_temp:
+        更新微軟辦公室軟體共用範本()
     elif args.test:
         import os
         file_path = Path(__file__)
@@ -255,6 +271,3 @@ if __name__ == '__main__':
         text = read_docx(args.docx)
         clipboard.copy(text)
         print(text)
-
-    # p = r'd:\g\111-2漁港建設專調\大事記.txt'    
-    # todocx(p)
