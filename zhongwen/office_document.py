@@ -1,10 +1,5 @@
-from lark import Lark, Tree, Token, Transformer, Visitor
-from lark.visitors import Interpreter
-from zhongwen.date import 取日期, 民國日期
-from zhongwen.number import 中文數字, 大寫中文數字
+from lark import Lark
 from pathlib import Path
-from pathlib import Path
-import re
 import logging
 
 logger = logging.getLogger(Path(__file__).stem)
@@ -142,6 +137,7 @@ def 游標模式替換(模式, 替換函式):
        ]
 
 def 設定環境():
+    from shutil import copy
     for t in 微軟辦公室軟體共用範本路徑:
         t = Path.home() / t
         s = Path(__file__).parent.parent / 'resource' / t.name
