@@ -1,9 +1,7 @@
 from lark import Lark
 from pathlib import Path
 import logging
-
 logger = logging.getLogger(Path(__file__).stem)
-wdir = Path(__file__).parent
 TITLE = -1
 PROPOSER = -2
 EVENTS = -3
