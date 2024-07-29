@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zhongwen"
-version = "5.12"
+version = "5.14"
 authors = [
   { name="fhopecc", email="fhopecc@gmail.com" },
 ]
@@ -22,6 +22,7 @@ dependencies = ["diskcache"
                ,"selenium"
                ,"requests"
                ,"winshell", "pywin32"
+               ,"docx", "lark"
 ]
 [project.urls]
 "Homepage" = "https://github.com/fhopecc/zhongwen"

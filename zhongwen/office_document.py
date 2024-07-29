@@ -3,9 +3,7 @@ from lark.visitors import Interpreter
 from zhongwen.date import 取日期, 民國日期
 from zhongwen.number import 中文數字, 大寫中文數字
 from pathlib import Path
-from docx import Document
-from docx.shared import Pt, Inches
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from pathlib import Path
 import re
 import logging
 
@@ -89,9 +87,8 @@ class MakeDocxTree(Transformer):
     def DATE(self, args):
         return 取日期(args)
 
-from pathlib import Path
-from docx.shared import Pt
 def setup_style(docx):
+    from docx.shared import Pt
     style = docx.styles['Heading 1']
     font = style.font
     font.name = 'Calibri' #'DFKai-SB' #標楷體
@@ -102,6 +99,9 @@ def setup_style(docx):
 
 def read_docx(doc):
     '讀取word文件文字'
+    from docx import Document
+    from docx.shared import Pt, Inches
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
     doc = Document(doc)
     return "\n".join([p.text for p in doc.paragraphs])
 

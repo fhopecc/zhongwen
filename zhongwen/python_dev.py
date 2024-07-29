@@ -27,11 +27,14 @@ def 布署(檔案:Path=None):
     else:
         try:
             n = 套件名稱('pyproject.toml') 
-            os.system('del dist\*')
-            os.system('py -m build')
-            os.system(r'twine upload dist\*')
-            os.system(f'python -m pip install {n} -U')
-            os.system(f'python -m pip install {n} -U')
+            cmd =  f'del dist\* && py -m build && twine upload dist\* && python -m pip install {n} -U &&'
+            cmd += f'python -m pip install {n} -U'
+            # os.system('del dist\*')
+            # os.system('py -m build')
+            # os.system(r'twine upload dist\*')
+            # os.system(f'python -m pip install {n} -U')
+            # os.system(f'python -m pip install {n} -U')
+            os.system(cmd)
         except FileNotFoundError:
             logger.error(f'當前目錄 {os.getcwd()} 無 pyproject.toml 檔案！')
 
