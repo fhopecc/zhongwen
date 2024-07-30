@@ -134,8 +134,9 @@ def 游標模式替換(模式, 替換函式):
        ,'AppData/Roaming/Microsoft/Excel/XLSTART/fhopecc.xlsb' # Excel
        ]
 
-def 設定環境():
+def 設定微軟辦公室軟體共用範本():
     from shutil import copy
+    logger.info('設定微軟辦公室軟體共用範本……')
     for t in 微軟辦公室軟體共用範本路徑:
         t = Path.home() / t
         s = Path(__file__).parent / 'resource' / t.name
@@ -144,6 +145,10 @@ def 設定環境():
         except FileNotFoundError:
             t.parent.mkdir(exist_ok=True)
             copy(s, t)
+    logger.info('完成。')
+
+def 設定環境():
+    設定微軟辦公室軟體共用範本()
 
 def 更新微軟辦公室軟體共用範本():
     from shutil import copy
@@ -245,6 +250,7 @@ def todocx(doc):
 
 if __name__ == '__main__':
     import argparse
+    logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser()
     parser.add_argument("docx", nargs='?')
     parser.add_argument("--setup", help="設定環境", action="store_true")
