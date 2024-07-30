@@ -1,4 +1,4 @@
-from lark import Lark
+from lark import Lark, Transformer
 from pathlib import Path
 import logging
 logger = logging.getLogger(Path(__file__).stem)
@@ -138,7 +138,7 @@ def 設定環境():
     from shutil import copy
     for t in 微軟辦公室軟體共用範本路徑:
         t = Path.home() / t
-        s = Path(__file__).parent.parent / 'resource' / t.name
+        s = Path(__file__).parent / 'resource' / t.name
         try:
             copy(s, t)
         except FileNotFoundError:
@@ -149,7 +149,7 @@ def 更新微軟辦公室軟體共用範本():
     from shutil import copy
     for s in 微軟辦公室軟體共用範本路徑:
         s = Path.home() / s
-        t = Path(__file__).parent.parent / 'resource' / s.name
+        t = Path(__file__).parent / 'resource' / s.name
         copy(s, t)
     logger.info('更新微軟辦公室軟體共用範本完成！')
 
