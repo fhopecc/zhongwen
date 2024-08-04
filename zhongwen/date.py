@@ -48,8 +48,9 @@ def 取過去日期(d):
 def 昨日():
     return 今日() - Timedelta(days=1)
 
-def 取日期(d, 錯誤為空值=True, first=True, defaulttoday=True, default=None,
+def 取日期(d=None, 錯誤為空值=True, first=True, defaulttoday=True, default=None,
            日期大於今日省略年推論為去年=False) -> Timestamp:
+    '日期表示 d 如為 None，傳回今日。'
     import re
     import pandas as pd
     from datetime import datetime, timedelta, date
@@ -236,6 +237,18 @@ def 上上年度():
 def 今日() -> Timestamp:
     return Timestamp.today().normalize()
 
+def 前天() -> Timestamp:
+    return 今日() + Timedelta(days=-2)
+
+def 明天() -> Timestamp:
+    return 今日() + Timedelta(days=1)
+
+def 近三日() -> Timestamp:
+    curdate = 前天()
+    while curdate <= 今日():
+        yield curdate
+        curdate += Timedelta(days=1)
+
 def 上年() -> Timestamp:
     d = 今日()
     return d.replace(year=d.year-1)
@@ -254,6 +267,12 @@ def 上年底() -> Timestamp:
 def 前年底() -> Timestamp:
     d = 今日()
     return d.replace(year=d.year-2, month=12, day=31)
+
+def 年初(年數=None) -> Timestamp:
+    if 年數:
+        return Timestamp(年數, 1, 1)
+    d = 今日()
+    return d.replace(month=1, day=1)
 
 def 年底(年數=None) -> Timestamp:
     if 年數:
@@ -452,16 +471,15 @@ def 應公布財報季別(公司類型='一般公司') -> (int, int):
         季 = 3
     return 年, 季 
 
-def 自起算民國年逐年列舉迄今年(起算民國年數) -> Timestamp:
+def 自起算民國年逐年列舉迄今年(起算民國年數):
     '自起算民國年列舉至今年底'
     起算年數 = 民國年底(起算民國年數).year
     今年數 = 年底().year
     return [年底(y) for y in range(起算年數, 今年數+1)]
 
-def 自起算民國年初逐月列舉迄上個月(起算民國年數) -> Timestamp:
+def 自起算民國年初逐月列舉迄上個月(起算民國年數):
     '民國年數'
     from datetime import timedelta
-    from zhongwen.date import 月末, 取日期, 上月
     start = 取日期(f'{起算民國年數}.1.1')
     end = 上月()
     curdate = 月末(start)
@@ -472,16 +490,19 @@ def 自起算民國年初逐月列舉迄上個月(起算民國年數) -> Timesta
 
 def 自起算民國年月逐月列舉迄上個月(起算民國年數, 起算月) -> Timestamp:
     '民國年數'
-    from datetime import timedelta
-    from zhongwen.date import 月末, 取日期, 上月
     start = 取日期(f'{起算民國年數}.{起算月}.1')
     end = 上月()
     curdate = 月末(start)
     while curdate <= end:
         yield curdate
-        curdate += timedelta(days=1)
+        curdate += Timedelta(days=1)
         curdate = 月末(curdate)
- 
-if __name__ == '__main__':
-    for 月 in 近幾個月底(112):
-        print(月)
+
+def 自起日按日列舉迄今(起日):
+    curdate = 起日
+    while curdate <= 今日():
+        yield curdate
+        curdate += Timedelta(days=1)
+
+def 自年初按日列舉迄今():
+    yield from 自起日按日列舉迄今(年初())

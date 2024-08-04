@@ -70,18 +70,31 @@ class Test(unittest.TestCase):
 
 
     @patch('zhongwen.date.今日')
+    def test_days(self, 仿今日):
+        from zhongwen.date import 取日期, 前天, 近三日
+        仿今日.return_value = 取日期('113.1.1')
+        self.assertEqual(前天(), 取日期('112.12.30'))
+        self.assertIn(取日期('112.12.30'), 近三日())
+        self.assertIn(取日期('112.12.31'), 近三日())
+        self.assertIn(取日期('113.1.1'), 近三日())
+
+    @patch('zhongwen.date.今日')
     def testmonth(self, 仿今日):
-        from zhongwen.date import 取日期
-        from zhongwen.date import 月底, 上月
-        from zhongwen.date import 月起迄
+        from zhongwen.date import 取日期, 月底, 上月
+        from zhongwen.date import 月起迄, 自起日按日列舉迄今
         from pandas import Timestamp
-        仿今日.return_value = 取日期('113.1.14')
-        
+
         self.assertEqual(月底(2022, 10), Timestamp(2022, 10, 31))
 
+        仿今日.return_value = 取日期('113.1.14')
         self.assertEqual(上月(), Timestamp(2023, 12, 31))
 
         self.assertEqual(月起迄(2022, 4), [Timestamp(2022, 4, 1), Timestamp(2022, 4, 30)])
+        dates = list(自起日按日列舉迄今(取日期('113.1.1')))
+        self.assertEqual(len(dates), 14)
+        self.assertIn(取日期('113.1.1'), dates)
+        self.assertIn(取日期('113.1.2'), dates)
+        self.assertIn(取日期('113.1.14'), dates)
 
     def test_quarter(self):
         from zhongwen.date import 季末, 季初, 季別, 與季末相距月數, 迄每季, 取日期
@@ -99,7 +112,7 @@ class Test(unittest.TestCase):
         self.assertEqual(next(qs), 取日期('20190630'))
         # self.assertEqual(qs[0], 取日期('1120813'))
 
-    def test_year(self):
+    def test2(self):
         from zhongwen.date import 民國年底, 取日期, 自起算民國年逐年列舉迄今年, 取日期
         self.assertEqual(民國年底(110), 取日期('1101231'))
         self.assertEqual(list(自起算民國年逐年列舉迄今年(110))[:2]

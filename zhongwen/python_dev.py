@@ -121,14 +121,25 @@ def 說明():
         # m = escape_vim_special_chars(m)
         vim.command(f"call popup_atcursor({m}, {{}})")
 
+def 當前目錄加入模組查找路徑():
+    '因 Python 係命令提示字元之子行程，無法更改其環境變數，須重啟。'
+    import os
+    pythonpath = ";".join([str(Path(os.getcwd())), os.environ['PYTHONPATH']])
+    os.system(f'setx PYTHONPATH {pythonpath}')
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--deploy2pypi"
                        ,help="布署至PyPI，執行目錄下應有 pyproject.toml 檔。"
                        ,action='store_true')
+    parser.add_argument("--add2pythonpath"
+                       ,help="當前目錄加入模組查找路徑"
+                       ,action='store_true')
     args = parser.parse_args()
     if args.deploy2pypi:
         布署()
+    elif args.add2pythonpath:
+        當前目錄加入模組查找路徑()
     else:
         pass

@@ -49,6 +49,8 @@ def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 指定欄位=N
     import pandas as pd
     import sqlite3
     import re
+    if 資料.empty:
+        return 
     資料.loc[:, 批號欄名] = 批號
     表格不存在=False
     try:
