@@ -76,17 +76,6 @@ class Test(unittest.TestCase):
         self.assertTrue('令' in 首碼搜尋表示式('o', text))
         self.assertTrue('係' in 首碼搜尋表示式('o', text))
 
-        # diskcache
-        # functools.cache 0.025, 0.025, 0.025
-        # 模組變數 0.023, 0.036, 0.023, 0.023
-        # 顯然使用模組變數緩存對照表效率更高
-        # import cProfile
-        # with cProfile.Profile() as pr:
-            # 首碼搜尋表示式('a', text*1000)
-        # from sys import stdout
-        # pr.print_stats()
-        # breakpoint()
-
         from zhongwen.text import 翻譯
         self.assertEqual(翻譯('test'), '測試')
         self.assertEqual(翻譯('取り'), '拿')
@@ -173,7 +162,7 @@ class Test(unittest.TestCase):
         print(matches)
 
 if __name__ == '__main__':
-    # unittest.main()
+    unittest.main()
     suite = unittest.TestSuite()
     suite.addTest(Test('test_find_matching_parentheses'))  # 指定要執行的測試方法
     unittest.TextTestRunner().run(suite)

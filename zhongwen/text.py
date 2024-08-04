@@ -71,7 +71,7 @@ def 轉半型(s):
     return s.translate(半型表).replace('—', '-')
 
 def 字元切換(string:str):
-    '''就大小寫字母，舉如拉丁字母，進行大小寫切換；異體字母進行校正；中文字母進行簡繁切換；日文字母平片假名切換；符號則為全半型轉換(Todo)。
+    '''就大小寫字母，舉如拉丁字母，進行大小寫切換；重碼字母進行校正；中文字母進行簡繁切換；日文字母平片假名切換；符號則為全半型轉換(Todo)。
 '''
     from opencc import OpenCC
     if string == '': return string
@@ -79,8 +79,8 @@ def 字元切換(string:str):
         if c == '[': return '「'
         if c == ']': return '」'
 
-        if 是否為異體字(c):
-            return 校正異體字(c)
+        if 是否為重碼字(c):
+            return 校正中文字(c)
 
         if 是否為中文字元(c):
             # 簡繁切換
@@ -148,16 +148,16 @@ def 翻譯(word):
     text = client.translate(word, 'zh-tw')
     return text.translatedText
 
-異體字 ='車路類例宅金易勒精神行煉練復療溜樓例列量料飯旅冷靈禮福利老六數歷里不拉簾來說度便力錄連年爐讀益'
-異體字+='立異理狀'
+重碼字 ='車路類例宅金易勒精神行煉練復療溜樓例列量料飯旅冷靈禮福利老六數歷里不拉簾來說度便力錄連年爐讀益'
+重碼字+='立異理狀'
 正體字 ='車路類例宅金易勒精神行煉練復療溜樓例列量料飯旅冷靈禮福利老六數歷里不拉簾來說度便力錄連年爐讀益'
 正體字+='立異理狀'
 
-def 是否為異體字(字串:str):
-    return 字串[0] in 異體字 
+def 是否為重碼字(字串:str):
+    return 字串[0] in 重碼字 
 
-def 校正異體字(字串:str):
-    t = str.maketrans(異體字, 正體字)
+def 校正中文字(字串:str):
+    t = str.maketrans(重碼字, 正體字)
     return 字串.translate(t)
 
 def 刪空格(n):
