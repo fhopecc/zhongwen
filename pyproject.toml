@@ -8,7 +8,7 @@ version = "5.25"
 authors = [
   { name="fhopecc", email="fhopecc@gmail.com" },
 ]
-description = "中文處理工具，含中文數轉換、字元切換、翻譯、民國日期處理等"
+description = "中文數轉換、字元切換、翻譯、民國紀年處理等中文工具"
 readme = "README.md"
 license = { file="LICENSE" }
 requires-python = ">=3.7"
