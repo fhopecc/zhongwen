@@ -1,4 +1,4 @@
-from lark import Lark
+from lark import Lark, Transformer
 from pathlib import Path
 import logging
 logger = logging.getLogger(Path(__file__).stem)
@@ -134,22 +134,27 @@ def 游標模式替換(模式, 替換函式):
        ,'AppData/Roaming/Microsoft/Excel/XLSTART/fhopecc.xlsb' # Excel
        ]
 
-def 設定環境():
+def 設定微軟辦公室軟體共用範本():
     from shutil import copy
+    logger.info('設定微軟辦公室軟體共用範本……')
     for t in 微軟辦公室軟體共用範本路徑:
         t = Path.home() / t
-        s = Path(__file__).parent.parent / 'resource' / t.name
+        s = Path(__file__).parent / 'resource' / t.name
         try:
             copy(s, t)
         except FileNotFoundError:
             t.parent.mkdir(exist_ok=True)
             copy(s, t)
+    logger.info('完成。')
+
+def 設定環境():
+    設定微軟辦公室軟體共用範本()
 
 def 更新微軟辦公室軟體共用範本():
     from shutil import copy
     for s in 微軟辦公室軟體共用範本路徑:
         s = Path.home() / s
-        t = Path(__file__).parent.parent / 'resource' / s.name
+        t = Path(__file__).parent / 'resource' / s.name
         copy(s, t)
     logger.info('更新微軟辦公室軟體共用範本完成！')
 
@@ -245,6 +250,7 @@ def todocx(doc):
 
 if __name__ == '__main__':
     import argparse
+    logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser()
     parser.add_argument("docx", nargs='?')
     parser.add_argument("--setup", help="設定環境", action="store_true")

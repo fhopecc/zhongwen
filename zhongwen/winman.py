@@ -89,9 +89,9 @@ def 增加所有檔案右鍵選單之功能(功能名稱:str, 指令:str):
         # 設置指令
         with reg.OpenKey(reg.HKEY_CLASSES_ROOT, command_key_path, 0, reg.KEY_WRITE) as key:
             reg.SetValue(key, '', reg.REG_SZ, 指令)
-        print(f"所有檔案右鍵選單增加【{功能名稱}】項目。")
+        logger.info(f"所有檔案右鍵選單增加【{功能名稱}】項目。")
     except Exception as e:
-        print(f"添加右鍵選單項目時出錯: {e}")
+        logger.info(f"添加右鍵選單項目時出錯: {e}")
 
 def where(command):
     '查找指定的可執行檔，以Windows where.exe 實作。'

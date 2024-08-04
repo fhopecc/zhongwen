@@ -343,11 +343,11 @@ if __name__ == '__main__':
     elif args.decrement:
         print(中文數遞減(args.decrement))
     elif args.percent:
-        print(百分比(eval(args.percent)))
+        print(百分比(轉數值(args.percent)))
     elif args.float:
-        print(小數(eval(args.float)))
+        print(小數(轉數值(args.float)))
     elif args.about:
-        print(約數(eval(args.about)))
+        print(約數(轉數值(args.about)))
     elif args.dec_level:
         n, l = 標號(args.dec_level)
         print(中文標號(n, l-1))
