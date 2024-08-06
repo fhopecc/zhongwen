@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zhongwen"
-version = "5.25"
+version = "5.26"
 authors = [
   { name="fhopecc", email="fhopecc@gmail.com" },
 ]
@@ -21,7 +21,7 @@ dependencies = ["diskcache"
                ,"pandas", "pygtrans", "marisa_trie"
                ,"selenium"
                ,"requests"
-               ,"winshell", "pywin32"
+               ,"winshell", "pywin32", "comtypes"
                ,"python-docx", "lark"
                ,"clipboard"
 ]

@@ -78,6 +78,7 @@ class MakeDocxTree(Transformer):
         return args.value
 
     def DATE(self, args):
+        from zhongwen.date import 取日期
         return 取日期(args)
 
 def setup_style(docx):
@@ -148,7 +149,18 @@ def 設定微軟辦公室軟體共用範本():
     logger.info('完成。')
 
 def 設定環境():
+    from zhongwen.winman import 增加檔案右鍵選單功能
+    from zhongwen.office_document import 設定微軟辦公室軟體共用範本
+    from shutil import copy
+    import sys
     設定微軟辦公室軟體共用範本()
+
+    cmd = f'{sys.executable} -m zhongwen.office_document --doc2pdf "%1"' 
+    增加檔案右鍵選單功能('2pdf', cmd, 'Word.Document.8')  # .doc
+    增加檔案右鍵選單功能('2pdf', cmd, 'Word.Document.12') # .docx
+
+    cmd = f'{sys.executable} -m zhongwen.office_document --doc2docx "%1"' 
+    增加檔案右鍵選單功能('2docx', cmd, 'Word.Document.8')
 
 def 更新微軟辦公室軟體共用範本():
     from shutil import copy
@@ -248,26 +260,109 @@ def todocx(doc):
         from os import system
         system(f'start {docx}')
 
+def 合併文件(文件集, 合併文件檔=None, 文件以換頁符號分隔=True):
+    '合併微軟辦公室文件(Word)，僅副檔名為 docx 者。' 
+    from docxcompose.composer import Composer
+    from docx import Document
+    from docx.oxml.ns import qn
+    from docx.oxml import OxmlElement
+    from pathlib import Path
+    文件集 = sorted(文件集)
+
+    if not 合併文件檔:
+        合併文件檔 = Path(文件集[0]).parent / '合併文件.docx'
+    
+    input_paths = 文件集
+    # Create a new document based on the first input document
+    merged_document = Document(input_paths[0])
+    composer = Composer(merged_document)
+
+    def 插入換頁符號(document):
+        # Create a page break element
+        page_break = OxmlElement('w:br')
+        page_break.set(qn('w:type'), 'page')
+        # Add the page break to the last paragraph
+        document.paragraphs[-1]._p.append(page_break)
+
+    for input_path in input_paths[1:]:
+        if 文件以換頁符號分隔:
+            插入換頁符號(merged_document)
+        # Append each subsequent document
+        composer.append(Document(input_path))
+
+    # Save the merged document to the specified output path
+    composer.save(str(合併文件檔))
+
+def doc2docx(docs):
+    '微軟辦公室文件為 doc 格式者，轉成 docx 格式。'
+    from collections.abc import Iterable 
+    import comtypes.client
+    import pypandoc
+    import os
+    if isinstance(docs, str) and not isinstance(docs, Iterable):
+        docs = [docs]
+    for doc in docs:
+        input_path = str(doc)
+        output_path = str(Path(doc).with_suffix('.docx'))
+        # Ensure the input file is a .doc file
+        if not input_path.lower().endswith('.doc'):
+            raise ValueError("Input file must be a .doc file")
+        # Ensure the output file is a .docx file
+        if not output_path.lower().endswith('.docx'):
+            raise ValueError("Output file must be a .docx file")
+
+        # Create a Word application object
+        word = comtypes.client.CreateObject('Word.Application')
+        word.Visible = False
+
+        # Open the .doc file
+        doc = word.Documents.Open(input_path)
+
+        # Save the file as .docx
+        doc.SaveAs(output_path, FileFormat=16)  # 16 corresponds to the wdFormatDocumentDefault format
+
+        # Close the document and quit the application
+        doc.Close()
+        word.Quit()
+
+def doc2pdf(words, output_dir=None):
+    'output_dir 功能暫未實作'
+    from collections.abc import Iterable 
+    from pathlib import Path
+    import win32com.client
+    if isinstance(words, str) or not isinstance(words, Iterable):
+        words = [words]
+    # if not output_dir:
+        # output_dir = Path(__file__).parent
+    word = win32com.client.Dispatch('Word.Application')
+    for w in words:
+        w = Path(w)
+        doc = word.Documents.Open(str(w))
+        doc.SaveAs(str(w.with_suffix('.pdf')), FileFormat=17)
+        doc.Close()
+    word.Quit()
+
 if __name__ == '__main__':
     import argparse
+    import clipboard
     logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser()
-    parser.add_argument("docx", nargs='?')
     parser.add_argument("--setup", help="設定環境", action="store_true")
-    parser.add_argument("--test", help="測試", action="store_true")
-    parser.add_argument("--update_temp", help="更新微軟辦公室軟體共用範本", action="store_true")
+    parser.add_argument("--update_temp", help="更新微軟辦公室軟體共用範本"
+                       ,action="store_true")
+    parser.add_argument("--doc2pdf", metavar='FILENAME', help="轉 PDF 格式。")
+    parser.add_argument("--doc2docx", metavar='FILENAME', help="doc 轉 docx 格式。")
+    parser.add_argument("docx", nargs='?', help="提取文字至剪貼簿。")
     args = parser.parse_args()
     if args.setup:
         設定環境()
     elif args.update_temp:
         更新微軟辦公室軟體共用範本()
-    elif args.test:
-        import os
-        file_path = Path(__file__)
-        os.system(str(file_path.with_name(f'test_{file_path.name}')))
+    elif args.doc2pdf:
+        doc2pdf(args.doc2pdf)
+    elif args.doc2docx:
+        doc2docx(args.doc2docx)
     elif args.docx:
-        import clipboard
-        from pathlib import Path
         text = read_docx(args.docx)
         clipboard.copy(text)
         print(text)

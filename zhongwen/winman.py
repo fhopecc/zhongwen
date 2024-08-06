@@ -66,7 +66,7 @@ def 建立傳送到項目(名稱:str, 命令:str):
     批次檔.write_text(命令)
     logger.info(f'建立傳送到【{名稱}】。')
 
-def 增加所有檔案右鍵選單之功能(功能名稱:str, 指令:str):
+def 增加檔案右鍵選單功能(功能名稱:str, 指令:str, 副檔名='*'):
     import winreg as reg
     import os
     import sys
@@ -74,8 +74,8 @@ def 增加所有檔案右鍵選單之功能(功能名稱:str, 指令:str):
     # 功能名稱
     context_menu_name = 功能名稱
     
-    key_path = fr'*\shell\{context_menu_name}'
-    command_key_path = fr'*\shell\{context_menu_name}\command'
+    key_path = fr'{副檔名}\shell\{context_menu_name}'
+    command_key_path = fr'{副檔名}\shell\{context_menu_name}\command'
 
     # 創建註冊表項目
     try:
@@ -89,7 +89,10 @@ def 增加所有檔案右鍵選單之功能(功能名稱:str, 指令:str):
         # 設置指令
         with reg.OpenKey(reg.HKEY_CLASSES_ROOT, command_key_path, 0, reg.KEY_WRITE) as key:
             reg.SetValue(key, '', reg.REG_SZ, 指令)
-        logger.info(f"所有檔案右鍵選單增加【{功能名稱}】項目。")
+        if 副檔名 == '*':
+            logger.info(f"所有檔案右鍵選單增加【{功能名稱}】項目。")
+        else:
+            logger.info(f"{副檔名} 右鍵選單增加【{功能名稱}】項目。")
     except Exception as e:
         logger.info(f"添加右鍵選單項目時出錯: {e}")
 
