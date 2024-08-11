@@ -127,6 +127,11 @@ def 當前目錄加入模組查找路徑():
     pythonpath = ";".join([str(Path(os.getcwd())), os.environ['PYTHONPATH']])
     os.system(f'setx PYTHONPATH {pythonpath}')
 
+def setgit():
+    import os
+    cmd = 'git config --global core.quotepath off'
+    os.system(cmd)
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
@@ -134,12 +139,17 @@ if __name__ == '__main__':
                        ,help="布署至PyPI，執行目錄下應有 pyproject.toml 檔。"
                        ,action='store_true')
     parser.add_argument("--add2pythonpath"
-                       ,help="當前目錄加入模組查找路徑"
+                       ,help="當前目錄加入模組查找路徑。"
+                       ,action='store_true')
+    parser.add_argument("--setgit"
+                       ,help="設定 git 環境。"
                        ,action='store_true')
     args = parser.parse_args()
     if args.deploy2pypi:
         布署()
     elif args.add2pythonpath:
         當前目錄加入模組查找路徑()
+    elif args.setgit:
+        setgit()
     else:
         pass

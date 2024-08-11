@@ -20,20 +20,6 @@ def 解鎖(pdfs, 覆蓋原檔=False):
             if 覆蓋原檔:
                 desecured_pdf.replace(pdf)
 
-def word2pdf(words, output_dir=None):
-    from collections.abc import Iterable 
-    from pathlib import Path
-    import win32com.client
-    if isinstance(words, str) or not isinstance(words, Iterable):
-        words = [word]
-    if not output_dir:
-        output_dir = Path(__file__).parent
-    word = win32com.client.Dispatch('Word.Application')
-    for w in words:
-        doc = word.Documents.Open(str(w))
-        doc.SaveAs(str(output_dir / w.with_suffix('.pdf').name), FileFormat=17)
-        doc.Close()
-    word.Quit()
 
 def 合併(pdfs, 合併檔名='merged.pdf'):
     from PyPDF2 import PdfWriter
