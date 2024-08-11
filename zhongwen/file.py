@@ -24,13 +24,15 @@ class FileLocation:
     '萃取文字內之路徑資訊'
     模式集 ={"python":r'File "(?P<path>.+.py)", line (?P<line>\d+).*'
             ,"python_warn":r'^(?P<path>.+.py):(?P<line>\d+):.*'
+            ,"python_debugger":r'^> (?P<path>.+.py)\((?P<line>\d+)\)'
             ,"jest":r'\((?P<path>.+\.js):(?P<line>\d+):(?P<pos>\d+)\)'
             ,"path":r'(?P<path>[^"\']+\.(js|py))'
             }
     def __init__(self, 訊息):
+        import re 
+        # if '股票估值' in 訊息:breakpoint()
         for k in self.模式集:
             模式=self.模式集[k]
-            import re 
             if m:=re.search(模式, 訊息):
                 try:
                     self.路徑 = m['path']
@@ -38,6 +40,7 @@ class FileLocation:
                     self.行 = int(m['pos'])
                     break
                 except IndexError: pass
+                break
         if not hasattr(self, '路徑'): raise ValueError(f'訊息："{訊息}"不包含路徑資訊！')
         if not hasattr(self, '列'): self.列 = 0
         if not hasattr(self, '行'): self.行 = 0

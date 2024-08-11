@@ -157,13 +157,11 @@ def 取日期(d=None, 錯誤為空值=True, first=True, defaulttoday=True, defau
                 return Timestamp.today()
             raise TypeError(f'不支援類型[{type(d)}]、值[{d}]！')
 
-@lru_cache()
 def 上月() -> Timestamp:
     '上月底'
     from datetime import timedelta
     return 今日().replace(day=1) - timedelta(days=1)
 
-@lru_cache()
 def 上上月() -> Timestamp:
     '上上月底'
     from datetime import timedelta
