@@ -14,6 +14,11 @@ class Test(unittest.TestCase):
         self.assertEqual(f.路徑, r'g:\我的雲端硬碟\股票分析\公開資訊觀測站爬蟲.py')
         self.assertEqual(f.列, 299)
 
+        line = "> g:\我的雲端硬碟\股票分析\股票估值.py(41)"
+        f = FileLocation(line)
+        self.assertEqual(f.路徑, r'g:\我的雲端硬碟\股票分析\股票估值.py')
+        self.assertEqual(f.列, 41)
+
         line = 'at Object.toBe (jandas.test.js:7:18)'
         f = FileLocation(line)
         self.assertEqual(f.路徑, 'jandas.test.js')
