@@ -11,6 +11,8 @@ def move_table_before(table, paragraph):
     tbl.addnext(p)
 
 def make_events_table(doc, title, events):
+    from docx.shared import Pt, Inches
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
     table = doc.add_table(rows=2, cols=2, style="Table Grid")
     title_row = table.rows[0]
     a, b = title_row.cells[:2]
@@ -51,12 +53,12 @@ def make_events_table(doc, title, events):
     move_table_before(table, p)
 
 def add_event_row(table, event): 
-    # print(event[0])
+    from docx.enum.text import WD_LINE_SPACING
+    from docx.shared import Pt, Inches
     date = 民國日期(取日期(event[0]))
     event = event[1]
     row = table.add_row().cells
     c = row[0]
-    from docx.enum.text import WD_LINE_SPACING
 
     p = c.paragraphs[0]
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -94,8 +96,6 @@ def setup_style(docx):
 def read_docx(doc):
     '讀取word文件文字'
     from docx import Document
-    from docx.shared import Pt, Inches
-    from docx.enum.text import WD_ALIGN_PARAGRAPH
     doc = Document(doc)
     return "\n".join([p.text for p in doc.paragraphs])
 
@@ -224,6 +224,9 @@ def parse(doc) -> Lark:
     return t
 
 def todocx(doc):
+    from docx.shared import Pt, Inches
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx import Document
     path = Path(doc)
     with open(doc, 'r', encoding='utf8') as f:
         doc = '\n'.join(f.readlines())
