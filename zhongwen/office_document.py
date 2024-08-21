@@ -148,6 +148,20 @@ def 設定微軟辦公室軟體共用範本():
             copy(s, t)
     logger.info('完成。')
 
+def 轉文字檔(filepath):
+    from pathlib import Path
+    import os
+    output_txt = Path(filepath).with_suffix('.txt')
+    cmd = f'pandoc -t plain "{filepath}" -o "{output_txt}"'
+    os.system(cmd)
+
+def 複製文字(filepath):
+    '複製文字至剪貼簿'
+    import clipboard
+    with open(args.copy_text, 'r', encoding='utf8') as f:
+        clipboard.copy(f.read())
+    print(clipboard.paste())
+
 def 設定環境():
     from zhongwen.winman import 增加檔案右鍵選單功能
     from zhongwen.office_document import 設定微軟辦公室軟體共用範本
@@ -161,6 +175,14 @@ def 設定環境():
 
     cmd = f'{sys.executable} -m zhongwen.office_document --doc2docx "%1"' 
     增加檔案右鍵選單功能('2docx', cmd, 'Word.Document.8')
+
+    cmd = f'{sys.executable} -m zhongwen.office_document --to_text "%1"' 
+    增加檔案右鍵選單功能('2txt', cmd, 'Word.Document.8')
+    增加檔案右鍵選單功能('2txt', cmd, 'Word.Document.12') # .docx
+
+    cmd = f'{sys.executable} -m zhongwen.office_document --copy_text "%1"' 
+    增加檔案右鍵選單功能('複製文字', cmd, 'Word.Document.8') # .docx
+    增加檔案右鍵選單功能('複製文字', cmd, 'Word.Document.12') # .docx
 
 def 更新微軟辦公室軟體共用範本():
     from shutil import copy
@@ -296,17 +318,20 @@ def 合併文件(文件集, 合併文件檔=None, 文件以換頁符號分隔=Tr
     # Save the merged document to the specified output path
     composer.save(str(合併文件檔))
 
-def doc2docx(docs):
+def doc2docx(docs, outputdir=None):
     '微軟辦公室文件為 doc 格式者，轉成 docx 格式。'
     from collections.abc import Iterable 
     import comtypes.client
     import pypandoc
     import os
-    if isinstance(docs, str) and not isinstance(docs, Iterable):
+    if isinstance(docs, str) or not isinstance(docs, Iterable):
         docs = [docs]
     for doc in docs:
         input_path = str(doc)
-        output_path = str(Path(doc).with_suffix('.docx'))
+        if outputdir:
+            output_path = str(Path(outputdir) / Path(doc).with_suffix('.docx').name)
+        else:
+            output_path = str(Path(doc).with_suffix('.docx'))
         # Ensure the input file is a .doc file
         if not input_path.lower().endswith('.doc'):
             raise ValueError("Input file must be a .doc file")
@@ -329,19 +354,20 @@ def doc2docx(docs):
         word.Quit()
 
 def doc2pdf(words, output_dir=None):
-    'output_dir 功能暫未實作'
     from collections.abc import Iterable 
     from pathlib import Path
     import win32com.client
     if isinstance(words, str) or not isinstance(words, Iterable):
         words = [words]
-    # if not output_dir:
-        # output_dir = Path(__file__).parent
     word = win32com.client.Dispatch('Word.Application')
     for w in words:
         w = Path(w)
+        if output_dir:
+            pdf = output_dir / w.with_suffix('.pdf').name
+        else:
+            pdf = w.with_suffix('.pdf')
         doc = word.Documents.Open(str(w))
-        doc.SaveAs(str(w.with_suffix('.pdf')), FileFormat=17)
+        doc.SaveAs(str(pdf), FileFormat=17)
         doc.Close()
     word.Quit()
 
@@ -351,11 +377,11 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser()
     parser.add_argument("--setup", help="設定環境", action="store_true")
-    parser.add_argument("--update_temp", help="更新微軟辦公室軟體共用範本"
-                       ,action="store_true")
-    parser.add_argument("--doc2pdf", metavar='FILENAME', help="轉 PDF 格式。")
-    parser.add_argument("--doc2docx", metavar='FILENAME', help="doc 轉 docx 格式。")
-    parser.add_argument("docx", nargs='?', help="提取文字至剪貼簿。")
+    parser.add_argument("--update_temp", help="更新微軟辦公室軟體共用範本", action="store_true")
+    parser.add_argument("--doc2pdf", type=str, help="轉 PDF 格式。", required=False)
+    parser.add_argument("--doc2docx", type=str, help="doc 轉 docx 格式。", required=False)
+    parser.add_argument("--to_text", type=str, help="轉文字檔", required=False)
+    parser.add_argument("--copy_text", type=str, help="複製文字", required=False)
     args = parser.parse_args()
     if args.setup:
         設定環境()
@@ -365,7 +391,7 @@ if __name__ == '__main__':
         doc2pdf(args.doc2pdf)
     elif args.doc2docx:
         doc2docx(args.doc2docx)
-    elif args.docx:
-        text = read_docx(args.docx)
-        clipboard.copy(text)
-        print(text)
+    elif args.to_text:
+        轉文字檔(args.to_text)
+    elif args.copy_text:
+        複製文字(args.copy_text)

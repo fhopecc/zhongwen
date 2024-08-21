@@ -21,14 +21,36 @@ def 解鎖(pdfs, 覆蓋原檔=False):
                 desecured_pdf.replace(pdf)
 
 
-def 合併(pdfs, 合併檔名='merged.pdf'):
+def 合併(pdfs, 合併檔名='合併檔案.pdf'):
+    from zhongwen.office_document import doc2docx, doc2pdf
     from PyPDF2 import PdfWriter
     from pathlib import Path
+    from shutil import copy
+    pdfs = sorted(pdfs)
     merger = PdfWriter()
     filedir = None
-    for pdf in pdfs:
+    docxdir = None
+    pdfdir = None
+    for src in pdfs:
+        src = Path(src)
         if not filedir:
-            filedir = Path(pdf).parent
+            filedir = Path(src).parent
+        if not docxdir:
+            docxdir = Path(src).parent / 'docxs'
+            docxdir.mkdir(exist_ok=True)
+        if not pdfdir:
+            pdfdir = Path(src).parent / 'pdfs'
+            pdfdir.mkdir(exist_ok=True)
+        if src.suffix == '.doc':
+            doc2docx(src, docxdir)
+            docx = docxdir / src.with_suffix('.docx').name
+            doc2pdf(docx, pdfdir)
+            pdf = pdfdir / docx.with_suffix('.pdf').name
+        if src.suffix == '.docx':
+            doc2pdf(src, pdfdir)
+            pdf = pdfdir / src.with_suffix('.pdf').name
+        if src.suffix == '.pdf':
+            copy(src, pdfdir)
         try:
             merger.append(pdf)
         except Exception as e:
@@ -121,8 +143,8 @@ def 解鎖(pdfs):
 def 設定環境():
     from zhongwen.winman import 建立傳送到項目
     import sys
-    cmd =  f'"{sys.executable}" -m fhopecc.pdf --merge_pdfs %*'
-    建立傳送到項目('合併PDF', cmd)
+    cmd =  f'"{sys.executable}" -m zhongwen.pdf --merge_pdfs %* && pause'
+    建立傳送到項目('合併為PDF', cmd)
 
 if __name__ == '__main__':
     import argparse
@@ -135,3 +157,4 @@ if __name__ == '__main__':
         設定環境()
     elif pdfs := args.merge_pdfs:
         合併(pdfs)
+
