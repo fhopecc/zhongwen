@@ -102,3 +102,13 @@ def where(command):
     result = subprocess.run(['where', command], capture_output=True, text=True)
     paths = result.stdout.strip().split('\n')
     return paths
+
+def 設定預設右鍵選單():
+    import sys
+    cmd = f'"{sys.executable}" -m zhongwen.file --copytext "%1"' 
+    增加檔案右鍵選單功能('複製檔案文字', cmd, '*')
+    cmd = f'"{sys.executable}" -m zhongwen.file --file2text "%1"' 
+    增加檔案右鍵選單功能('轉文字檔', cmd, '*')
+ 
+if __name__ == '__main__':
+    設定預設右鍵選單()

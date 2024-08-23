@@ -192,3 +192,42 @@ def 下載跳出對話視窗連結檔案(url, 目錄=None):
         file.write(response.content)
     logger.info(f'文件已下載到：{filepath}')
     return filepath
+
+def 轉文字檔(filepath):
+    from pathlib import Path
+    import os
+    output_txt = Path(filepath).with_suffix('.txt')
+    cmd = f'pandoc -t plain "{filepath}" -o "{output_txt}"'
+    os.system(cmd)
+    return output_txt
+
+def 複製檔案文字至剪貼簿(filepath):
+    '複製檔案文字至剪貼簿'
+    from pathlib import Path
+    import clipboard
+    filepath = Path(filepath)
+    if filepath.suffix == '.txt':
+        with open(filepath, 'r', encoding='utf8') as f:
+            clipboard.copy(f.read())
+    elif filepath.suffix == '.pdf':
+        import pdfplumber
+        text = ""
+        with pdfplumber.open(filepath) as pdf:
+            for page in pdf.pages:
+                text += page.extract_text()
+        clipboard.copy(text)
+    else:
+        textfile = 轉文字檔(filepath)
+        複製檔案文字至剪貼簿(textfile)
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--copytext", help='複製檔案文字至剪貼簿')
+    parser.add_argument("--file2text", help='轉文字檔')
+                       
+    args = parser.parse_args()
+    if file := args.copytext:
+        複製檔案文字至剪貼簿(file)
+    elif file := args.file2text:
+        轉文字檔(file)
