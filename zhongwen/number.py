@@ -331,9 +331,10 @@ def 發生例外則回覆非數常數(函數):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--percent", help="百分比")
-    parser.add_argument("--float", help="小數")
+    parser.add_argument("--int", help="整數")
     parser.add_argument("--about", help="約數")
+    parser.add_argument("--float", help="小數")
+    parser.add_argument("--percent", help="百分比")
     parser.add_argument("--test", help="測試", action='store_true')
     parser.add_argument("--increment", help="中文數遞增")
     parser.add_argument("--decrement", help="中文數遞減")
@@ -351,6 +352,8 @@ if __name__ == '__main__':
         print(小數(轉數值(args.float)))
     elif args.about:
         print(約數(轉數值(args.about)))
+    elif args.int:
+        print(f'{轉數值(args.int):,}')
     elif args.dec_level:
         n, l = 標號(args.dec_level)
         print(中文標號(n, l-1))

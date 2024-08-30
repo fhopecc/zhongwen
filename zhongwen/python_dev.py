@@ -135,10 +135,10 @@ def setgit():
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--deploy2pypi"
+    parser.add_argument("-d", "--deploy2pypi"
                        ,help="布署至PyPI，執行目錄下應有 pyproject.toml 檔。"
                        ,action='store_true')
-    parser.add_argument("--add2pythonpath"
+    parser.add_argument("-a", "--add2pythonpath"
                        ,help="當前目錄加入模組查找路徑。"
                        ,action='store_true')
     parser.add_argument("--setgit"
