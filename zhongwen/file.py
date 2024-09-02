@@ -134,6 +134,7 @@ def 抓取(url
 def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False):
     '''下載 URL 內容至指定檔案，並且回傳檔案路徑。'''
     from urllib.parse import urlparse
+    import requests
     p = 儲存路徑
     downloads = 儲存目錄
     重載 = 覆寫
@@ -151,7 +152,6 @@ def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False):
 
     if p.exists():
         p.unlink()
-    import requests
     response = requests.get(url)
     if response.status_code == 200:
         with open(p, 'wb') as file:

@@ -153,6 +153,8 @@ def 結果批次寫入(資料庫檔, 資料名稱, 批號欄名, 預設批號組
             db =  取資料庫(資料庫檔) 
             for 批號 in 批號組:
                 df = 爬取資料函數(批號, **kargs)
+                if df.empty:
+                    return df
                 批號 = df.iloc[0][批號欄名]
                 批次寫入(df, 批號, 批號欄名, 資料名稱, db, 指定欄位)
             return df
