@@ -1,8 +1,7 @@
-from zhongwen.file import 下載, 解壓
 from zhongwen.pandas_tools import 可顯示
 from pathlib import Path
 from diskcache import Cache
-import re
+import pandas as pd
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 
 def 中央法律():
@@ -25,7 +24,7 @@ def 中央命令():
 
 @可顯示
 @cache.memoize(expire=30*24*60*60)
-def 法規條文():
+def 法規條文() -> pd.DataFrame:
     '法規條文係以法規名稱、異動日期及條號為索引來查詢條文內容'
     from pandas import DataFrame, concat
     l = 中央法律()
@@ -47,6 +46,13 @@ def 法規條文():
     from zhongwen.date import 取日期
     df['異動日期'] = df.異動日期.map(取日期)
     return df
+
+def 產製法規文字檔(法規名稱):
+    df = 法規條文()
+    df = df.query('法規名稱==@法規名稱')[["條號", "條文內容"]]
+    content = '\n'.join([f"第{r.條號}條{r.條文內容}"for r in df.itertuples()])
+    txt = Path(f'{法規名稱}.txt')
+    txt.write_text(content)
 
 if __name__ == '__main__':
     法規條文(顯示=True)

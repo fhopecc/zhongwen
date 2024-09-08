@@ -320,8 +320,8 @@ def 季末(年數或日期=None, 季別參數=None):
         d = 年數或日期
         y, q = 季別(d)
     if 年數或日期 and 季別參數:
-        y = 年數或日期 
-        q = 季別參數
+        y = int(年數或日期 )
+        q = int(季別參數)
     match q:
         case 1: return Timestamp(y, 3, 31)
         case 2: return Timestamp(y, 6, 30)
