@@ -541,3 +541,16 @@ def 清查資料表非全數值欄(df, 列出非數值明細之欄=None):
                 logger.warn(f"非數值之資料值及其索引: {invalid_values.index.tolist()} - {invalid_values.tolist()}")
             else:
                 logger.debug(f"非數值之資料值及其索引: {invalid_values.index.tolist()} - {invalid_values.tolist()}")
+
+def 重名加序(columns):
+    seen = {}
+    new_columns = []
+    for col in columns:
+        if col in seen:
+            seen[col] += 1
+            new_columns.append(f"{col}.{seen[col]}")
+        else:
+            seen[col] = 0
+            new_columns.append(col)
+    return new_columns
+

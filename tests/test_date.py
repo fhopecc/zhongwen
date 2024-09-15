@@ -119,5 +119,11 @@ class Test(unittest.TestCase):
                         ,[民國年底(110), 民國年底(111)]
                         )
 
+    def test_year_apart(self):
+        from zhongwen.date import 相距年數, 取日期
+        self.assertEqual(相距年數(取日期('113.9.15'), 取日期('112.9.15')),  1)
+        self.assertEqual(相距年數(取日期('113.9.15'), 取日期('112.9.16')),  0)
+        self.assertEqual(相距年數(取日期('113.9.15'), 取日期('112.10.1')),  0)
+
 if __name__ == '__main__':
     unittest.main()

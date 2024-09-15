@@ -511,3 +511,11 @@ def 自起日按日列舉迄今(起日):
 
 def 自年初按日列舉迄今():
     yield from 自起日按日列舉迄今(年初())
+
+def 相距年數(迄, 起):
+    date1 = 起
+    date2 = 迄
+    years_diff_exact = date2.year - date1.year
+    if (date2.month, date2.day) < (date1.month, date1.day):
+        years_diff_exact -= 1
+    return years_diff_exact 
