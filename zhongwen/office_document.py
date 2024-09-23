@@ -6,6 +6,20 @@ TITLE = -1
 PROPOSER = -2
 EVENTS = -3
 
+def 列印(docs):
+    from collections.abc import Iterable 
+    import win32com.client as win32
+    from collections.abc import Iterable 
+    if isinstance(docs, str) or not isinstance(docs, Iterable):
+        docs = [docs]
+    word = win32.Dispatch("Word.Application")
+    for docfile in docs:
+        print(f'列印{docfile }')
+        doc = word.Documents.Open(docfile)
+        doc.PrintOut()
+        doc.Close(False)
+    word.Quit()
+
 def move_table_before(table, paragraph):
     tbl, p = table._tbl, paragraph._p
     tbl.addnext(p)
@@ -163,11 +177,14 @@ def 複製文字(filepath):
     print(clipboard.paste())
 
 def 設定環境():
-    from zhongwen.winman import 增加檔案右鍵選單功能
+    from zhongwen.winman import 增加檔案右鍵選單功能, 建立傳送到項目
     from zhongwen.office_document import 設定微軟辦公室軟體共用範本
     from shutil import copy
     import sys
     設定微軟辦公室軟體共用範本()
+
+    cmd =  f'"{sys.executable}" -m zhongwen.office_document --print %* && pause'
+    建立傳送到項目('列印微軟文件', cmd)
 
     cmd = f'{sys.executable} -m zhongwen.office_document --doc2pdf "%1"' 
     增加檔案右鍵選單功能('2pdf', cmd, 'Word.Document.8')  # .doc
@@ -377,14 +394,18 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser()
     parser.add_argument("--setup", help="設定環境", action="store_true")
+    parser.add_argument('--print', nargs='+', type=str, help='列印微軟文件')
     parser.add_argument("--update_temp", help="更新微軟辦公室軟體共用範本", action="store_true")
     parser.add_argument("--doc2pdf", type=str, help="轉 PDF 格式。", required=False)
     parser.add_argument("--doc2docx", type=str, help="doc 轉 docx 格式。", required=False)
     parser.add_argument("--to_text", type=str, help="轉文字檔", required=False)
     parser.add_argument("--copy_text", type=str, help="複製文字", required=False)
+
     args = parser.parse_args()
     if args.setup:
         設定環境()
+    elif docs := args.print:
+        列印(docs)
     elif args.update_temp:
         更新微軟辦公室軟體共用範本()
     elif args.doc2pdf:
@@ -395,3 +416,5 @@ if __name__ == '__main__':
         轉文字檔(args.to_text)
     elif args.copy_text:
         複製文字(args.copy_text)
+    # d = Path(r'p:\22審計結果年報\112年度\確認\112年度地方審計結果彙編彙整確認\乙')
+    # 列印(d.glob('*.docx'))
