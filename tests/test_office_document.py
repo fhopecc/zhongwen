@@ -2,6 +2,14 @@ import unittest
 
 class Test(unittest.TestCase):
 
+    def test_markdown(self):
+        from mistune import markdown
+        from pathlib import Path
+        f = Path(__file__).parent / '華德福查核表.txt'
+        ast = markdown(f.read_text(encoding='utf8'), renderer='ast')
+        print(ast)
+        self.assertEqual(ast, "")
+
     def test(self):
         from zhongwen.office_document import parse
         doc = '''工作底稿
@@ -37,4 +45,7 @@ class Test(unittest.TestCase):
         # self.assertEqual(t.children[1].children[0].data.value, 'h3')
 
 if __name__ == '__main__':
-    unittest.main()
+    # unittest.main()
+    suite = unittest.TestSuite()
+    suite.addTest(Test('test_markdown'))  # 指定要執行的測試方法
+    unittest.TextTestRunner().run(suite)

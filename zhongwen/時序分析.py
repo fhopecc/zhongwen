@@ -1,5 +1,6 @@
 from zhongwen.number import 發生例外則回覆非數常數
 from pathlib import Path
+import pandas as pd
 import logging
 logger = logging.getLogger(Path(__file__).stem)
 
@@ -43,6 +44,8 @@ def 趨勢分析(時序, 時序數下限=3, 數據名稱=None, 匯出圖檔=None
         raise ValueError('時序參數型態需為 pd.Series，而傳入型態為{type(時序)}')
     if len(s) < 時序數下限:
         return (0, 0)
+    if pd.api.types.is_integer_dtype(s.index):
+        s = 序列缺項補零(s)
     X = np.arange(1, len(s)+1).reshape(-1, 1)
     Y = s
     reg = LinearRegression().fit(X, Y)
@@ -170,8 +173,31 @@ def 正弦離散轉換():
     y2 = d + np.cos(f*2*np.pi*x1+p)
     plt.scatter(x1, y1)
     plt.scatter(x1, y2)
-    
     plt.show()
+
+def 最近缺失序列(序列:pd.Series):
+    '找出最大序列索引缺項，即不連續缺口，並回傳索引值及序位'
+    s = 序列.sort_index()
+    full_index = pd.Index(range(s.index[0], s.index[-1]))
+    # 找出缺項
+    missing_index = full_index.difference(s.index)
+    if not missing_index.empty:
+        return (missing_index[-1], s.index.max()-missing_index[-1])
+    else:
+        return (None, 0)
+
+def 序列缺項補零(序列:pd.Series):
+    '序列索引缺項，即不連續缺口補零'
+    s = 序列.sort_index()
+    full_index = pd.Index(range(s.index[0], s.index[-1]))
+    # 找出缺項
+    missing_index = full_index.difference(s.index)
+    # 將缺項插入序列並賦值為 0
+    for miss in missing_index:
+        s.loc[miss] = 0
+    # 按索引順序重排
+    return s.sort_index()
+
 if __name__ == '__main__':
     pass
     from 股票分析.股票基本資料分析 import 查股票代號
