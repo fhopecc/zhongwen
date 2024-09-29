@@ -5,7 +5,6 @@ from functools import lru_cache
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 warnings.filterwarnings("ignore", category=ResourceWarning) 
-
 cache = Cache(Path.home() / 'cache' / 'text')
 
 @lru_cache
@@ -234,6 +233,8 @@ def 移除非中文字(text):
     chinese_pattern = re.compile(r'[^\u4e00-\u9fa5]')  # 匹配非中文字的正則表達式
     return chinese_pattern.sub('', text)
 
+def 是否為空白字元(text):
+    raise Exception('請用 str.isspace() 替代！')
 
 def 交談(text):
     import requests 
