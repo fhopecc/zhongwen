@@ -428,6 +428,9 @@ def 民國年數(日期=None):
 def 今民國年數():
     return 民國年數()
 
+def 今年數():
+    return 今日().year
+
 def 民國年(日期=None):
     '取民國年表達字串，格式如112年。'
     return f'{民國年數(日期)}年'

@@ -3,12 +3,18 @@ import unittest
 class Test(unittest.TestCase):
 
     def test_markdown(self):
-        from mistune import markdown
-        from pathlib import Path
-        f = Path(__file__).parent / '華德福查核表.txt'
-        ast = markdown(f.read_text(encoding='utf8'), renderer='ast')
-        print(ast)
-        self.assertEqual(ast, "")
+        from zhongwen.office_document import 標題階層編號轉中文編號 
+        from subprocess import check_output
+        t = '6	擬議處理意見'
+        o = '陸、擬議處理意見'
+        self.assertEqual(標題階層編號轉中文編號(t), o)
+
+        t = '1.2.1 三級管控核有缺失'
+        o = '一、三級管控核有缺失'
+        self.assertEqual(標題階層編號轉中文編號(t), o)
+
+        out = check_output('py -m zhongwen.office_document --level_number_to_chinese_number "1.2.1 三級管控核有缺失"', shell=True)
+        self.assertEqual(out.decode('cp950').rstrip(), '一、三級管控核有缺失')
 
     def test(self):
         from zhongwen.office_document import parse

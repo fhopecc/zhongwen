@@ -200,6 +200,9 @@ def 設定環境():
     cmd = f'{sys.executable} -m zhongwen.office_document --copy_text "%1"' 
     增加檔案右鍵選單功能('複製文字', cmd, 'Word.Document.8') # .docx
     增加檔案右鍵選單功能('複製文字', cmd, 'Word.Document.12') # .docx
+    
+    cmd = f'{sys.executable} -m zhongwen.office_document --md2docx "%1"' 
+    增加檔案右鍵選單功能('markdown2docx', cmd, '.md') # .docx
 
 def 更新微軟辦公室軟體共用範本():
     from shutil import copy
@@ -388,6 +391,59 @@ def doc2pdf(words, output_dir=None):
         doc.Close()
     word.Quit()
 
+def 標題階層編號轉中文編號(標題):
+    from zhongwen.number import 中文數字, 大寫中文數字
+    import re
+    s = 標題
+    pat = r'((\d+.)*(\d+)[\t\s])(.*)'
+    if m:=re.match(pat, s):
+        階層 = m[1].count('.')+1
+        編號 = m[3]
+        內容 = m[4]
+        if 階層==1:
+            編號 = f'{大寫中文數字(編號)}、'
+        elif 階層==2: 
+            編號 = f'（{大寫中文數字(編號)}）'
+        elif 階層==3: 
+            編號 = f'{中文數字(編號)}、'
+        elif 階層==4: 
+            編號 = f'（{中文數字(編號)}）'
+        elif 階層==5: 
+            編號 = f'{編號}.'
+        elif 階層==6: 
+            編號 = f'({編號})'
+        return 編號 + 內容
+    return s
+
+def markdown2docx(md):
+    from pathlib import Path
+    import win32com.client
+    import pypandoc
+    import os
+    md = Path(md)
+    docx = Path(__file__).parent / md.with_suffix('.docx')
+    temp = r'd:\GitHub\zhongwen\zhongwen\resource\審核報告範本.docx'
+    pypandoc.convert_file(md
+                         ,'docx'
+                         ,format='markdown+east_asian_line_breaks'
+                         ,outputfile=docx
+                         ,extra_args=[f"--reference-doc={temp}"
+                                     ,"--number-sections"
+                                     ]
+                         )
+
+    word_app = win32com.client.Dispatch("Word.Application")
+    doc = word_app.Documents.Open(str(docx))
+    word_app.Visible = True
+    try:
+        word_app.Run('標題階層編號轉中文編號')
+    except Exception as e:
+        print(f"執行 VBA 宏時出現錯誤: {e}")
+    doc.Save()
+    doc.Close()
+    word_app.Quit()
+    os.system(f'start {docx}')
+
 if __name__ == '__main__':
     import argparse
     import clipboard
@@ -398,8 +454,10 @@ if __name__ == '__main__':
     parser.add_argument("--update_temp", help="更新微軟辦公室軟體共用範本", action="store_true")
     parser.add_argument("--doc2pdf", type=str, help="轉 PDF 格式。", required=False)
     parser.add_argument("--doc2docx", type=str, help="doc 轉 docx 格式。", required=False)
+    parser.add_argument("--md2docx", type=str, help="markdown 轉 docx 格式。", required=False)
     parser.add_argument("--to_text", type=str, help="轉文字檔", required=False)
     parser.add_argument("--copy_text", type=str, help="複製文字", required=False)
+    parser.add_argument("--level_number_to_chinese_number", help="標題階層編號轉中文編號")
 
     args = parser.parse_args()
     if args.setup:
@@ -412,9 +470,11 @@ if __name__ == '__main__':
         doc2pdf(args.doc2pdf)
     elif args.doc2docx:
         doc2docx(args.doc2docx)
+    elif args.md2docx:
+        markdown2docx(args.md2docx)
     elif args.to_text:
         轉文字檔(args.to_text)
     elif args.copy_text:
         複製文字(args.copy_text)
-    # d = Path(r'p:\22審計結果年報\112年度\確認\112年度地方審計結果彙編彙整確認\乙')
-    # 列印(d.glob('*.docx'))
+    elif args.level_number_to_chinese_number:
+        print(標題階層編號轉中文編號(args.level_number_to_chinese_number))
