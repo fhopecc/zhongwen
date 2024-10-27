@@ -1,4 +1,3 @@
-
 def show_map(gdf):
     '運用 folium 顯示 geopandas 資料框'
     from shapely.geometry import mapping
@@ -10,7 +9,7 @@ def show_map(gdf):
 
     for idx, row in gdf.iterrows():
         geojson = mapping(row.geometry)
-        folium.GeoJson(geojson ).add_to(m)
+        folium.GeoJson(geojson).add_to(m)
 
     html = Path.home() / 'TEMP' / 'output.html'
     m.save(html)
