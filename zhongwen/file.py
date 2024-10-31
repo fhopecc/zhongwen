@@ -62,7 +62,7 @@ def chrome():
     return webdriver.Chrome()
 
 # @cache.memoize(expire=100, tag='抓取')
-def 抓取(url
+def 抓取(url:str
         ,抓取方式='get'
         ,headers=None
         ,參數={}
@@ -75,34 +75,51 @@ def 抓取(url
         ,encoding="utf-8"
         ,等待秒數=5
         ):
-    '''抓取網頁回傳原始碼，就已抓取網頁內容鏈結再抓取則稱為「爬取」。
+    '''「抓取」網頁內容，傳回字串，惟鍵結以 .xls 或 .xlsx 結尾，視同 Excel 檔，傳回位元組。
+另再就抓取網頁內容之鏈結再進行抓取者，稱「爬取」。
 抓取方式：'get' 指定使用 requests.get；'post' 係 requests.post；'selenium' 係 selenium 模組。
 '''
     from warnings import warn
-    if 抓取方式=='request':
-        warn(f'為命名正確，參數選項「requests」將廢棄並由「get」取代。'
-            ,DeprecationWarning, stacklevel=2)
-        抓取方式='get'
-    if use_requests: 
-        warn(f'參數【use_request】將廢棄且已無作用，已預設使用 requests 模組。'
-            ,DeprecationWarning, stacklevel=2)
-    if 參數:
-        warn(f'為命名正確，參數「參數」將廢棄並由「資料」取代。'
-            ,DeprecationWarning, stacklevel=2)
-        資料=參數
+    from faker import Faker
     import requests
     import logging
+    import time
+
+    # 鍵結以 .xls 或 .xlsx 結尾，視同 Excel 檔，傳回位元組。
+    if not return_content:
+        for suffix in ['.xls', '.xlsx']:
+            if url.endswith(suffix):
+                return_content=True
+                break
+
+    if 抓取方式=='request':
+        warn(f'為強化命名，抓取方式參數之【request】選項將廢棄，請以【get】 替代。'
+            ,DeprecationWarning, stacklevel=2)
+        抓取方式='get'
+
+    if 參數:
+        warn(f'為強化命名，【參數】參數項將廢棄，請以【資料】替代。'
+            ,DeprecationWarning, stacklevel=2)
+        資料=參數
+
+    if return_bytes:
+        warn(f'為強化命名，【return_bytes】參數項將廢棄，請以【return_content】替代。'
+            ,DeprecationWarning, stacklevel=2)
+        return_content = return_bytes 
+
+    if use_requests: 
+        warn(f'預設使用【requests】模組，【use_request】參數項已無作用並將廢棄。'
+            ,DeprecationWarning, stacklevel=2)
+
     if 抓取方式 == 'selenium':
         c = chrome()
         c.get(url)
-        import time
         time.sleep(等待秒數)
         if '使用支援JavaScript' in c.page_source:
             c.get(url)
             time.sleep(等待秒數)
         return c.page_source
     if not headers:
-        from faker import Faker
         fake = Faker()
         headers = {'user-agent': fake.user_agent()
                   ,"accept-language": "zh-TW,zh;q=0.9,en;q=0.8,zh-CN;q=0.7"
@@ -124,10 +141,6 @@ def 抓取(url
     if return_json:
         return r.json()
     if return_content:
-        return r.content
-    if return_bytes:
-        from warnings import warn
-        warn(f'參數【return_bytes】將廢棄，請使用【return_content】', DeprecationWarning, stacklevel=2)
         return r.content
     return r.text
 
