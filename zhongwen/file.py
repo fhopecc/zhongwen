@@ -65,19 +65,21 @@ def chrome():
 def 抓取(url:str
         ,抓取方式='get'
         ,headers=None
+        ,回傳資料形態='str'
         ,參數={}
-        ,return_json=False
-        ,return_content=False
-        ,return_bytes=False
         ,除錯=False
-        ,use_requests=None
         ,資料={}
         ,encoding="utf-8"
         ,等待秒數=5
+        ,return_json=False
+        ,return_content=False
+        ,return_bytes=False
+        ,use_requests=None
         ):
     '''「抓取」網頁內容，傳回字串，惟鍵結以 .xls 或 .xlsx 結尾，視同 Excel 檔，傳回位元組。
 另再就抓取網頁內容之鏈結再進行抓取者，稱「爬取」。
 抓取方式：'get' 指定使用 requests.get；'post' 係 requests.post；'selenium' 係 selenium 模組。
+回傳資料形態: 'str' 傳回字串、'json' 傳回 JSON 物件、'bytes' 傳回位元組。
 '''
     from warnings import warn
     from faker import Faker
@@ -103,9 +105,19 @@ def 抓取(url:str
         資料=參數
 
     if return_bytes:
-        warn(f'為強化命名，【return_bytes】參數項將廢棄，請以【return_content】替代。'
+        warn(f'【return_bytes】參數項將廢棄，請將【回傳資料形態】參數設定【bytes】值替代。'
             ,DeprecationWarning, stacklevel=2)
-        return_content = return_bytes 
+        回傳資料形態 = 'bytes'
+
+    if return_content:
+        warn(f'【return_content】參數項將廢棄，請將【回傳資料形態】參數設定【bytes】值替代。'
+            ,DeprecationWarning, stacklevel=2)
+        回傳資料形態 = 'bytes'
+
+    if return_json:
+        warn(f'【return_json】參數項將廢棄，請將【回傳資料形態】參數設定【json】值替代。'
+            ,DeprecationWarning, stacklevel=2)
+        回傳資料形態 = 'json'
 
     if use_requests: 
         warn(f'預設使用【requests】模組，【use_request】參數項已無作用並將廢棄。'
@@ -138,11 +150,13 @@ def 抓取(url:str
                 f'{r.text!r}'
                )
     logging.debug(除錯訊息)
-    if return_json:
+
+    if 回傳資料形態=='json':
         return r.json()
-    if return_content:
+    elif 回傳資料形態=='bytes':
         return r.content
-    return r.text
+    else:
+        return r.text
 
 def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False):
     '''下載 URL 內容至指定檔案，並且回傳檔案路徑。'''

@@ -273,10 +273,17 @@ def show_html(df, 無格式=False
              ,顯示筆數=100, 採用民國日期格式=False, 標題=None
              ,傳回超文件內容=False
              ):
-    import pandas as pd
-    import os
     from pathlib import Path
     from warnings import warn
+    import pandas as pd
+    import numpy as np
+    import os
+
+    if isinstance(df, set):
+        df = pd.Series(list(df)).to_frame()
+
+    if isinstance(df, np.ndarray):
+        df = pd.Series(df).to_frame()
 
     if isinstance(df, pd.Series):
         df = df.to_frame()

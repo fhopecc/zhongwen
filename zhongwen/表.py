@@ -1,3 +1,22 @@
+from zhongwen.pandas_tools import read_docx, read_fwf, show_html
+
+def read_mhtml(mhtml:str):
+    from pathlib import Path
+    import pandas as pd 
+    import email
+    
+    # 解析 mhtml 文件
+    msg = email.message_from_string(mhtml)
+    html_content = ""
+
+    # 遍歷 mhtml 文件的內容，提取 HTML 部分
+    for part in msg.walk():
+        if part.get_content_type() == "text/html":  # 確認是 HTML 部分
+            html_content = part.get_payload(decode=True).decode('utf-8')
+            break
+    # 使用 pandas 讀取 HTML 表格
+    return pd.read_html(html_content)
+
 def 取表(字串:str):
     import re
     s = 字串
@@ -35,7 +54,6 @@ def 取字塊(字串:str):
         b = ''
         in_block = False
     return bs
-
 
 def 取欄(字串:str):
     import re

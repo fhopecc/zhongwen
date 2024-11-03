@@ -36,11 +36,6 @@ def 有日期嗎(vs):
                                          )
 
 
-def 取日數(期間):
-    try:
-        return 期間.days
-    except:
-        return float('nan')
 
 def 取過去日期(d):
     return 取日期(d, 日期大於今日省略年推論為去年=True)
@@ -156,6 +151,12 @@ def 取日期(d=None, 錯誤為空值=True, first=True, defaulttoday=True, defau
             if defaulttoday:
                 return Timestamp.today()
             raise TypeError(f'不支援類型[{type(d)}]、值[{d}]！')
+
+def 取日數(期間):
+    try:
+        return 期間.days
+    except:
+        return float('nan')
 
 def 上月() -> Timestamp:
     '上月底'
