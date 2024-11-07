@@ -41,6 +41,7 @@ def 取節點最短路程(起點, 終點, 路網=None):
         G = 取路網()
     origin_node = 起點
     destination_node = 終點
+    
     try:
         shortest_route = nx.shortest_path(G, origin_node, destination_node, weight='length')
         route_length = nx.shortest_path_length(G, origin_node, destination_node, weight='length')
@@ -112,3 +113,34 @@ def 取路口(查詢地點=None):
     intersections['name'] = intersections.index.map(lambda node: get_intersection_name(node, G))
     return intersections
 
+def 繪路程(起點, 終點, 地圖, 路網=None, 色彩='blue'):
+    import folium
+    import osmnx as ox
+    s, e, m, G = 起點, 終點, 地圖, 路網
+    folium.Marker((s.y, s.x)
+                 ,icon=folium.DivIcon(
+                     html=f'<div style="font-size: 10pt; color: white; background:black">{s.名稱}</div>')
+                 ).add_to(m)
+    folium.Marker((e.y, e.x)
+                 ,icon=folium.DivIcon(
+                     html=f'<div style="font-size: 10pt; color: white; background:black">{e.名稱}</div>')
+                 ).add_to(m)
+    if not G:
+        G = 取路網()
+    snode = ox.distance.nearest_nodes(G, s.geometry.x, s.geometry.y)
+    enode = ox.distance.nearest_nodes(G, e.geometry.x, e.geometry.y)
+    d, route = 取節點最短路程(snode, enode, G)
+    km = d / 1000  # 將距離轉換為公里
+
+    # 路徑中心節點
+    route_center_index = len(route) // 2
+    route_center = route[route_center_index]
+
+    # 繪製路徑節點
+    route_points = [(G.nodes[node]['y'], G.nodes[node]['x']) for node in route]
+    folium.PolyLine(route_points, color=色彩, weight=5, opacity=0.7).add_to(m)
+
+    folium.Marker(
+        location=(G.nodes[route_center]['y'], G.nodes[route_center]['x']),
+        icon=folium.DivIcon(html=f'<div style="text-align:center;width:48pt; font-size: 8pt; color: white; background:black">{km:.2f}公里</div>')
+    ).add_to(m)
