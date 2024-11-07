@@ -200,6 +200,10 @@ def 設定環境():
     cmd = f'{sys.executable} -m zhongwen.office_document --copy_text "%1"' 
     增加檔案右鍵選單功能('複製文字', cmd, 'Word.Document.8') # .docx
     增加檔案右鍵選單功能('複製文字', cmd, 'Word.Document.12') # .docx
+
+    cmd = f'{sys.executable} -m zhongwen.office_document --save_highlight "%1"' 
+    增加檔案右鍵選單功能('另存醒目文字', cmd, 'Word.Document.8') # .docx
+    增加檔案右鍵選單功能('另存醒目文字', cmd, 'Word.Document.12') # .docx
     
     cmd = f'{sys.executable} -m zhongwen.office_document --md2docx "%1"' 
     增加檔案右鍵選單功能('markdown2docx', cmd, '.md') # .docx
@@ -444,6 +448,28 @@ def markdown2docx(md):
     word_app.Quit()
     os.system(f'start {docx}')
 
+def 另存醒目文字(docx):
+    from docx import Document
+    from pathlib import Path
+    docx = Path(docx)
+    doc = Document(str(docx))
+
+    highlighted_texts = []
+
+    for para in doc.paragraphs:
+        本段落前累積高亮區塊數 = len(highlighted_texts)
+        for run in para.runs:
+            if run.font.highlight_color:  
+                highlighted_texts.append(run.text)
+        if len(highlighted_texts) > 本段落前累積高亮區塊數:
+            highlighted_texts.append('\n')
+
+    highlighted_texts = ''.join(highlighted_texts )
+    highlighted_texts = f'宣讀{highlighted_texts }'
+    print(highlighted_texts)
+    txt = docx.with_suffix('.txt')
+    txt.write_text(highlighted_texts, encoding='utf8')
+
 if __name__ == '__main__':
     import argparse
     import clipboard
@@ -458,6 +484,7 @@ if __name__ == '__main__':
     parser.add_argument("--to_text", type=str, help="轉文字檔", required=False)
     parser.add_argument("--copy_text", type=str, help="複製文字", required=False)
     parser.add_argument("--level_number_to_chinese_number", help="標題階層編號轉中文編號")
+    parser.add_argument("--save_highlight", help="另存醒目文字")
 
     args = parser.parse_args()
     if args.setup:
@@ -478,3 +505,5 @@ if __name__ == '__main__':
         複製文字(args.copy_text)
     elif args.level_number_to_chinese_number:
         print(標題階層編號轉中文編號(args.level_number_to_chinese_number))
+    elif args.save_highlight:
+        print(另存醒目文字(args.save_highlight))
