@@ -144,3 +144,11 @@ def 繪路程(起點, 終點, 地圖, 路網=None, 色彩='blue'):
         location=(G.nodes[route_center]['y'], G.nodes[route_center]['x']),
         icon=folium.DivIcon(html=f'<div style="text-align:center;width:48pt; font-size: 8pt; color: white; background:black">{km:.2f}公里</div>')
     ).add_to(m)
+
+@cache.memoize(tag='下載宜蘭縣寺廟圖徵')
+def 下載宜蘭縣寺廟圖徵():
+    import osmnx as ox
+    place_name = "Yilan County, Taiwan"
+    tags = {'amenity': 'place_of_worship', "religion": "buddhist"}
+    temples = ox.geometries_from_place(place_name, tags)
+    return temples
