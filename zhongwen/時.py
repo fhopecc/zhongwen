@@ -7,4 +7,3 @@ def 正式民國日期(d=None):
         d = 今日()
     return 民國日期(d, "%Y年%M月%D日")
 
-

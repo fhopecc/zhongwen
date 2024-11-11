@@ -198,6 +198,28 @@ def 序列缺項補零(序列:pd.Series):
     # 按索引順序重排
     return s.sort_index()
 
+def 繪季節解析圖(時序):
+    from statsmodels.tsa.seasonal import seasonal_decompose
+    ts = 時序 
+    r = seasonal_decompose(ts, period=12)
+    r.plot()
+    return r
+
+class 無法於一階差分內穩定(Exception):pass
+def 取穩定階數(時序):
+    '回傳是否穩定及穩定差分階數'
+    from 股票分析.股票基本資料分析 import 查股票代號
+    from statsmodels.tsa.stattools import adfuller
+    ts = 時序
+    _, pvalue, *_ = adfuller(ts)
+    if pvalue < 0.05:
+        return 0
+    else:
+        _, pvalue, *_ = adfuller(ts.diff().dropna())
+        if pvalue < 0.05:
+            return 1
+        raise 無法於一階差分內穩定()
+
 if __name__ == '__main__':
     pass
     from 股票分析.股票基本資料分析 import 查股票代號
