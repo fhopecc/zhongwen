@@ -11,13 +11,12 @@ import re
 
 # 取得數值
 def 轉數值(n, 傳回格式=False) -> int|float:  
+    import pandas as pd
     if isinstance(n, str):
         # 百分比
-        pat = r'(-?[\d](\.\d+)?)%'
+        pat = r'(-?[\d]+(\.\d+)?)[%％]'
         if m:=re.match(pat, n):
-            import pandas as pd
-            return pd.to_numeric(m[1])/100
-
+            return 轉數值(m[1])/100
         pat = f'^[{全型數字表}]+$'
         if re.match(pat, n):
             d = str.maketrans(全型數字表, 半型數字表)

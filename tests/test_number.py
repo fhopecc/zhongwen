@@ -17,6 +17,7 @@ class Test(unittest.TestCase):
         self.assertEqual(轉數值('5,000'), 5000)
         self.assertEqual(轉數值('8.1%'), 0.081)
         self.assertEqual(轉數值('-8.1%'), -0.081)
+        self.assertEqual(轉數值('48.89%'), 0.4889)
         self.assertEqual(轉數值('１２３'), 123)
         self.assertEqual(轉數值('3年'), 3)
         self.assertEqual(約數('55,302'), '5萬餘')

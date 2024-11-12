@@ -21,11 +21,17 @@ def 批次讀取(批號, 批號欄名, 表格, 資料庫, 日期欄位=None):
     import pandas as pd
     from zhongwen.date import 全是日期嗎
     # sql 相等運算子係單等號，而 Python 係雙等號，易彼此誤植
-    sql = f'select * from {表格} where {批號欄名}={批號}' 
-    if 全是日期嗎(批號):
-        sql = f'select * from {表格} where {批號欄名}="{轉日期字串(批號)}"' 
-    elif isinstance(批號, str):
+
+    if isinstance(批號, pd.Period):
+        批號 = str(批號)
+    elif 全是日期嗎(批號):
+        批號 = 轉日期字串(批號)
+
+    if isinstance(批號, str):
         sql = f'select * from {表格} where {批號欄名}="{批號}"' 
+    else:
+        sql = f'select * from {表格} where {批號欄名}={批號}' 
+
     df = pd.read_sql_query(sql, 資料庫, parse_dates=日期欄位)
     if df.empty: 
         raise 查無批號錯誤(f'查無【{批號}】批號！')
@@ -33,11 +39,14 @@ def 批次讀取(批號, 批號欄名, 表格, 資料庫, 日期欄位=None):
 
 def 批次刪除(批號, 批號欄名, 表格, 資料庫):
     from zhongwen.date import 全是日期嗎
+    import pandas as pd
     logger.debug(f'{表格}刪除{批號}整批紀錄……')
     c = 資料庫.cursor()
+    if isinstance(批號, pd.Period):
+        批號 = str(批號)
+    elif 全是日期嗎(批號):
+        批號 = 轉日期字串(批號)
     sql = f'delete from {表格} where {批號欄名}=="{批號}"'
-    if 全是日期嗎(批號):
-        sql = f'delete from {表格} where {批號欄名}="{轉日期字串(批號)}"' 
     c.execute(sql)
     資料庫.commit()
     logger.debug(f'成功')
@@ -49,6 +58,7 @@ def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 指定欄位=N
     import pandas as pd
     import sqlite3
     import re
+
     if 資料.empty:
         return 
     資料.loc[:, 批號欄名] = 批號
@@ -83,6 +93,8 @@ def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 指定欄位=N
         for c in 資料.columns:
             if 有日期嗎(資料[c]):
                 資料[c] = 資料[c].map(轉日期字串)
+            elif isinstance(資料[c].dtype, pd.PeriodDtype):
+                資料[c] = 資料[c].map(str)
         資料.to_sql(表格, 資料庫, if_exists='append')
         if 表格不存在:
             logger.debug(f'擬建立表格【{表格}】及其索引【{批號欄名}】……')
@@ -170,15 +182,18 @@ class 批號存在錯誤(Exception):
     def __str__(self):
         return f'批號【{self.批號}】已存在，請指定覆寫=True！'
 
-def 載入批次資料(資料庫檔, 表格, 批次欄名, 時間欄位=None):
+def 載入批次資料(資料庫檔, 表格, 批次欄名, 時間欄位=None, 期間欄位=None):
     '批次欄名'
     import pandas as pd
     import sqlite3
-    from zhongwen.date import 取日期
+    from zhongwen.時 import 取日期, 取期間
     from collections.abc import Iterable 
-    cs = 時間欄位
+    cs, ps = 時間欄位, 期間欄位
     if isinstance(cs, str) or not isinstance(cs, Iterable):
         cs = [cs]
+    if isinstance(ps, str) or not isinstance(ps, Iterable):
+        ps = [ps]
+    
     with sqlite3.connect(資料庫檔) as c:
         # sql = f"select distinct * from {表格}" # select distinct 將降低效能
         sql = f"select * from {表格}"
@@ -189,6 +204,8 @@ def 載入批次資料(資料庫檔, 表格, 批次欄名, 時間欄位=None):
             df = pd.read_sql_query(sql, c) 
         for c in cs:
             df[c] = df[c].map(取日期)
+        for p in ps:
+            df[p] = df[p].map(取期間) 
         return df
 
 def 應更新資料時期(更新頻率='次月十日前'):

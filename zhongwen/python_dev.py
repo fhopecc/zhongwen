@@ -53,7 +53,7 @@ def find_testfile(f:Path, debug=True):
             if 是否為中文字元(c): return True
         return False
     
-    測試檔前綴 = '測試' if 是否為中文檔名(f.name) else 'test_' 
+    測試檔前綴 = '測' if 是否為中文檔名(f.name) else 'test_' 
 
     test = f
     pat = 測試檔前綴

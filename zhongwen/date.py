@@ -66,6 +66,8 @@ def 取日期(d=None, 錯誤為空值=True, first=True, defaulttoday=True, defau
             return Timestamp(d).normalize()
         case Timestamp():
             return Timestamp(d).normalize()
+        case pd.Period():
+            return d.end_time
         case str(d):
             pat = r'^昨日?$'
             if m:=re.match(pat, d):
