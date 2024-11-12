@@ -132,13 +132,26 @@ def 刪除頁面(input_path, pages, output_path=None):
             writer.write(output_file)
         print(f"{input_path}刪除頁面{', '.join(map(str, pages))}，結果另存於{output_path}。")
 
-def 解鎖(pdfs):
+def to_excel(pdfs):
     from collections.abc import Iterable 
-    if not isinstance(pdfs, Iterable):
+    import pandas as pd
+    import pdfplumber
+    if isinstance(pdfs, str) or not isinstance(pdfs, Iterable):
         pdfs = [pdfs]
     
     for pdf in pdfs:
-        pdf
+        with pdfplumber.open(pdf) as _pdf:
+            all_data = []
+            for page in _pdf.pages:
+                table = page.extract_table()
+                if table:
+                    df = pd.DataFrame(table[1:], columns=table[0])  # 使用表格第一行作為標題
+                    all_data.append(df)
+            final_df = pd.concat(all_data)
+            xlsx = pdf.with_suffix('.xlsx')
+            final_df.to_excel(xlsx, index=False)
+            print(f'{pdf.name}->{xlsx.name}')
+
 
 def 設定環境():
     from zhongwen.winman import 建立傳送到項目

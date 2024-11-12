@@ -331,6 +331,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
     # df = df.fillna('')
     if 顯示筆數:
         df = df[:顯示筆數]
+    df.columns = df.columns.fillna('unnamed')
     columns = df.columns
     for c in df.columns:
         try:
