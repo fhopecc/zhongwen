@@ -192,7 +192,10 @@ def 載入批次資料(資料庫檔, 表格, 批次欄名, 時間欄位=None, �
     if isinstance(cs, str) or not isinstance(cs, Iterable):
         cs = [cs]
     if isinstance(ps, str) or not isinstance(ps, Iterable):
-        ps = [ps]
+        if ps is None:
+            ps = []
+        else:
+            ps = [ps]
     
     with sqlite3.connect(資料庫檔) as c:
         # sql = f"select distinct * from {表格}" # select distinct 將降低效能
