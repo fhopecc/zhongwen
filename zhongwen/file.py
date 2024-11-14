@@ -79,10 +79,11 @@ def 抓取(url:str
     '''「抓取」網頁內容，傳回字串，惟鍵結以 .xls 或 .xlsx 結尾，視同 Excel 檔，傳回位元組。
 另再就抓取網頁內容之鏈結再進行抓取者，稱「爬取」。
 抓取方式：'get' 指定使用 requests.get；'post' 係 requests.post；'selenium' 係 selenium 模組。
-回傳資料形態: 'str' 傳回字串、'json' 傳回 JSON 物件、'bytes' 傳回位元組。
+回傳資料形態: 'str' 傳回字串、'json' 傳回 JSON 物件、'bytes' 傳回位元組及'StringIO' 傳回io。
 '''
     from warnings import warn
     from faker import Faker
+    from io import StringIO
     import requests
     import logging
     import time
@@ -155,6 +156,8 @@ def 抓取(url:str
         return r.json()
     elif 回傳資料形態=='bytes':
         return r.content
+    elif 回傳資料形態=='StringIO':
+        return StringIO(r.text)
     else:
         return r.text
 

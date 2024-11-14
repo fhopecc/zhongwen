@@ -3,8 +3,15 @@ import unittest
 class Test(unittest.TestCase):
     def test(self):
         from zhongwen.數 import 取數值
+        from zhongwen.表 import show_html
+        import pandas as pd
 
         self.assertEqual(取數值('中間一二三數字'), 123)
+        self.assertEqual(取數值('中間一二三數字246'), 123)
+        self.assertEqual(取數值('中間一二三數字2.46', 全取=True), [123, 2.46])
+        df = pd.DataFrame(['中間一二三數字', '中間一二三數字246'])
+        df = df.map(取數值)
+        show_html(df)
 
 
 if __name__ == '__main__':
