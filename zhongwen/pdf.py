@@ -134,11 +134,14 @@ def 刪除頁面(input_path, pages, output_path=None):
 
 def to_excel(pdfs):
     from collections.abc import Iterable 
+    from pathlib import Path
     import pandas as pd
     import pdfplumber
     if isinstance(pdfs, str) or not isinstance(pdfs, Iterable):
         pdfs = [pdfs]
-    
+
+    pdfs = [Path(pdf) for pdf in pdfs]
+
     for pdf in pdfs:
         with pdfplumber.open(pdf) as _pdf:
             all_data = []
@@ -156,18 +159,24 @@ def to_excel(pdfs):
 def 設定環境():
     from zhongwen.winman import 建立傳送到項目
     import sys
+    logger.info('設定 pdf 功能')
     cmd =  f'"{sys.executable}" -m zhongwen.pdf --merge_pdfs %* && pause'
     建立傳送到項目('合併為PDF', cmd)
+
+    cmd =  f'"{sys.executable}" -m zhongwen.pdf --to_excel %* && pause'
+    建立傳送到項目('2excel', cmd)
 
 if __name__ == '__main__':
     import argparse
     logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser()
     parser.add_argument("--setup", help="設定環境", action='store_true')
+    parser.add_argument('--to_excel', nargs='+', type=str, help='2excel')
     parser.add_argument('--merge_pdfs', nargs='+', type=str, help='合併PDF')
     args = parser.parse_args()
     if args.setup:
         設定環境()
     elif pdfs := args.merge_pdfs:
         合併(pdfs)
-
+    elif pdfs := args.to_excel:
+        to_excel(pdfs)
