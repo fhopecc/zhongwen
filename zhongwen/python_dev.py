@@ -108,11 +108,11 @@ def escape_vim_special_chars(text):
 
 def 說明():
     import vim
+    import re
     r = 光標物件()
     if r:
         m = r.docstring()
         m = m.split("\n")
-        import re
         m = [_m.replace('"', '＂').replace("'", '＇') for _m in m]
         m = [f"'{_m}'" for _m in m]
         m = ','.join(m)

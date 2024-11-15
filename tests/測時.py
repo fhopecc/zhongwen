@@ -11,9 +11,11 @@ class Test(unittest.TestCase):
         self.assertEqual(取期間('2020-01'), Period('202001', 'M'))
 
     def test_period(self):
-        from zhongwen.時 import 上月
+        from zhongwen.時 import 上月, 上年度
         import pandas as pd
         self.assertIsInstance(上月(), pd.Period)
+        self.assertIsInstance(上年度(), pd.Period)
+        print(上年度())
 
     def test_iter_month(self):
         from zhongwen.時 import 自指定月份迄上月

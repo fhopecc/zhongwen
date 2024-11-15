@@ -13,6 +13,10 @@ def 上月():
     import pandas as pd
     return pd.Period(今日(), 'M') - 1
 
+def 上年度():
+    import pandas as pd
+    return pd.Period(今日(), 'Y') - 1
+
 def 自指定月份迄上月(月份):
     from pandas import Period
     月份 = 取期間(月份)
