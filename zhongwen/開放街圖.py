@@ -152,3 +152,13 @@ def 下載宜蘭縣寺廟圖徵():
     tags = {'amenity': 'place_of_worship', "religion": "buddhist"}
     temples = ox.geometries_from_place(place_name, tags)
     return temples
+
+@cache.memoize('下載道路網')
+def 下載道路網(縣市="Yilan County, Taiwan"):
+    import osmnx as ox
+    import geopandas as gpd
+    place_name = 縣市
+    G = ox.graph_from_place(place_name, network_type='drive')
+    nodes, edges = ox.graph_to_gdfs(G, nodes=True, edges=True)
+    return edges
+
