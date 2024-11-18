@@ -45,3 +45,34 @@ def 取期間(期間字串, 全取=False):
         return ps[0]
     except UnboundLocalError:
         raise UnboundLocalError(f"'{期間字串}'無法解析為期間字串！")
+
+class 無法於一階差分內穩定(Exception):pass
+def 取穩定階數(時序):
+    '回傳是否穩定及穩定差分階數'
+    from statsmodels.tools.sm_exceptions import ConvergenceWarning
+    from 股票分析.股票基本資料分析 import 查股票代號
+    from statsmodels.tsa.stattools import adfuller
+    import warnings
+
+    warnings.filterwarnings("ignore", category=UserWarning)
+    warnings.filterwarnings("ignore", category=ConvergenceWarning)
+
+    ts = 時序
+    try:
+        _, pvalue, *_ = adfuller(ts)
+        if pvalue < 0.05:
+            return 0
+        else:
+            _, pvalue, *_ = adfuller(ts.diff().dropna())
+            if pvalue < 0.05:
+                return 1
+            raise 無法於一階差分內穩定()
+    except ValueError:
+        raise 無法於一階差分內穩定('樣本數僅{len(ts)}太少。')
+
+def 自起日按日列舉迄今(起日):
+    from pandas import Timedelta
+    curdate = 取日期(起日)
+    while curdate <= 今日():
+        yield curdate
+        curdate += Timedelta(days=1)

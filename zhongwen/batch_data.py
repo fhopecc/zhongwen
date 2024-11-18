@@ -3,6 +3,10 @@ import logging
 import atexit
 logger = logging.getLogger(Path(__file__).stem)
 
+def 載入批次資料(資料庫檔, 表格, 批號欄名, 時間欄位=None, 期間欄位=None, 最小批號=None):
+    from zhongwen.庫 import 查無批號錯誤, 批次載入
+    return 批次載入(資料庫檔, 表格, 批號欄名, 時間欄位, 期間欄位, 最小批號)
+    
 def 通知執行時間(f):
     from functools import wraps
     from time import time
@@ -15,11 +19,10 @@ def 通知執行時間(f):
         return result
     return wrap
 
-class 查無批號錯誤(Exception): pass
-
 def 批次讀取(批號, 批號欄名, 表格, 資料庫, 日期欄位=None):
     import pandas as pd
     from zhongwen.date import 全是日期嗎
+    from zhongwen.庫 import 查無批號錯誤
     # sql 相等運算子係單等號，而 Python 係雙等號，易彼此誤植
 
     if isinstance(批號, pd.Period):
@@ -182,34 +185,6 @@ class 批號存在錯誤(Exception):
     def __str__(self):
         return f'批號【{self.批號}】已存在，請指定覆寫=True！'
 
-def 載入批次資料(資料庫檔, 表格, 批次欄名, 時間欄位=None, 期間欄位=None):
-    '批次欄名'
-    import pandas as pd
-    import sqlite3
-    from zhongwen.時 import 取日期, 取期間
-    from collections.abc import Iterable 
-    cs, ps = 時間欄位, 期間欄位
-    if isinstance(cs, str) or not isinstance(cs, Iterable):
-        cs = [cs]
-    if isinstance(ps, str) or not isinstance(ps, Iterable):
-        if ps is None:
-            ps = []
-        else:
-            ps = [ps]
-    
-    with sqlite3.connect(資料庫檔) as c:
-        # sql = f"select distinct * from {表格}" # select distinct 將降低效能
-        sql = f"select * from {表格}"
-        try:
-            df = pd.read_sql_query(sql, c, index_col='index') 
-        except KeyError as e:
-            logger.info(f'{表格}無 index 欄位！')
-            df = pd.read_sql_query(sql, c) 
-        for c in cs:
-            df[c] = df[c].map(取日期)
-        for p in ps:
-            df[p] = df[p].map(取期間) 
-        return df
 
 def 應更新資料時期(更新頻率='次月十日前'):
     from zhongwen.date import 今日, 上月
@@ -348,10 +323,9 @@ def 自原始資料庫重建(資料庫路徑:Path, 資料表, 批號及指定欄
 
 def 轉日期字串(日期):
     '日期轉換為格式如"1979-7-29"之字串，而無效日期為"無效日期"字串，俾將日期以字串儲存於 SQLite 資料庫。'
-    from zhongwen.date import 全是日期嗎
-    if 全是日期嗎(日期):
-        return f"{日期.year}-{日期.month}-{日期.day}"
-    return "無效日期"
+    from zhongwen.庫 import 轉儲存字串
+    return 轉儲存字串(日期)
+
 資料庫池 = {}
 def 取資料庫(資料庫檔路徑):
     import sqlite3

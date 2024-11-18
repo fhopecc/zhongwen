@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
     def test_date_converter(self):
         from zhongwen.date import 取日期
         from zhongwen.batch_data import 轉日期字串
-        self.assertEqual(轉日期字串(取日期('1979.7.29')), '1979-7-29')
+        self.assertEqual(轉日期字串(取日期('1979.7.29')), '1979-07-29')
 
     def test_sqlite_accessor(self):
         '測試讀寫SQLite功能'
@@ -64,11 +64,11 @@ class Test(unittest.TestCase):
 
         df = 取資料表內容(self.測試資料庫路徑, '損益表')
         self.assertEqual(df.shape, (2, 5))
-        self.assertEqual(df.iloc[-1].財報日期, ('2024-9-30'))
+        self.assertEqual(df.iloc[-1].財報日期, ('2024-09-30'))
 
         df = 取資料表內容(self.原始測試資料庫路徑, '損益表')
         self.assertEqual(df.shape, (2, 6))
-        self.assertEqual(df.iloc[-1].財報日期, ('2024-9-30'))
+        self.assertEqual(df.iloc[-1].財報日期, ('2024-09-30'))
         self.assertEqual(df.iloc[-1].其他, 'text')
 
         # 測試增加批次資料
@@ -98,12 +98,12 @@ class Test(unittest.TestCase):
                 ,取資料庫(self.測試資料庫路徑)
                 ,['股票代號', '財報種類', '毛利', '營利'])
         df = 取資料表內容(self.測試資料庫路徑, '損益表')
-        df = df.query('財報日期=="2024-9-30"')
+        df = df.query('財報日期=="2024-09-30"')
         self.assertEqual(df.shape, (3, 5))
 
         df = 取原始資料表內容(self.測試資料庫路徑, '損益表')
         self.assertEqual(df.shape, (5, 6))
-        df = df.query('財報日期=="2024-9-30"')
+        df = df.query('財報日期=="2024-09-30"')
         self.assertEqual(df.shape, (3, 6))
 
         df = 批次讀取(取日期('113.9.30')
