@@ -1,5 +1,5 @@
 from zhongwen.pandas_tools import read_docx, read_fwf, show_html
-from zhongwen.pandas_tools import 可顯示
+from zhongwen.pandas_tools import 可顯示, 重名加序
 
 def read_mhtml(mhtml:str):
     from pathlib import Path

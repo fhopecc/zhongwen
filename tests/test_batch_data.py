@@ -46,7 +46,8 @@ class Test(unittest.TestCase):
 
     def test_sqlite_accessor(self):
         '測試讀寫SQLite功能'
-        from zhongwen.batch_data import 取資料庫檔路徑, 批次寫入, 批次讀取
+        from zhongwen.庫 import 批次寫入
+        from zhongwen.batch_data import 取資料庫檔路徑, 批次讀取
         from zhongwen.batch_data import 取資料表內容, 取資料庫, 取原始資料表內容
         from zhongwen.batch_data import 自原始資料庫重建
         from zhongwen.date import 取日期

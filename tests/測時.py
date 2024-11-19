@@ -9,6 +9,7 @@ class Test(unittest.TestCase):
         self.assertEqual(取期間('113/1'), Period('202401', 'M'))
         self.assertEqual(取期間('2024-10'), Period('202410', 'M'))
         self.assertEqual(取期間('2020-01'), Period('202001', 'M'))
+        self.assertEqual(取期間('2024Q2'), Period('2024Q2', 'Q-DEC'))
 
     def test_period(self):
         from zhongwen.時 import 上月, 上年度

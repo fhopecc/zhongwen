@@ -7,8 +7,6 @@ class Test(unittest.TestCase):
         from zhongwen.時 import 取日期, 取期間
         import pandas as pd
         import tempfile
-
-
         data = [['1101', '合併',pd.NA, '110', 'text']
                ,['1101', '合併',pd.NA, '110', 'text']
                ,['1102', '合併','100', '110', 'text']
@@ -49,6 +47,16 @@ class Test(unittest.TestCase):
         self.assertEqual(df4.shape[0], self.損益表測例.shape[0])
 
         print(df4)
+
+    def test_batch_write(self):
+        from zhongwen.表 import show_html
+        from zhongwen.庫 import 批次寫入, 取資料庫
+        from pathlib import Path
+        import pandas as pd
+        df = pd.read_pickle(Path(__file__).parent / '批次寫入測例.pkl')
+        # df = df[['財報季別', '利息收入']] 
+        # show_html(df)
+        批次寫入(df, df.iloc[0].財報季別, '財報季別', '單季損益表', 取資料庫(self.測庫路徑))
         
 if __name__ == '__main__':
     import logging
@@ -58,5 +66,5 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test'))  # 指定測試
+    suite.addTest(Test('test_batch_write'))  # 指定測試
     unittest.TextTestRunner().run(suite)

@@ -1,4 +1,4 @@
-from zhongwen.date import 取日期
+from zhongwen.date import 取日期, 季末
 from zhongwen.date import 今日, 年底, 上年底
 from zhongwen.date import 民國日期, 民國年月
 from zhongwen.date import 自起日按日列舉迄今
@@ -13,6 +13,10 @@ def 上月():
     import pandas as pd
     return pd.Period(今日(), 'M') - 1
 
+def 上季():
+    import pandas as pd
+    return pd.Period(今日(), 'Q-DEC') - 1
+
 def 上年度():
     import pandas as pd
     return pd.Period(今日(), 'Y') - 1
@@ -25,14 +29,25 @@ def 自指定月份迄上月(月份):
         月份+=1
     return 上月()
 
+def 自指定季別迄上季(始季):
+    from pandas import Period
+    季別 = 取期間(始季)
+    while 季別 <= 上季():
+        yield 季別
+        季別+=1
+    return 上季()
+
 def 取期間(期間字串, 全取=False):
     '指定全取則回傳期間串列，否則傳為首個期間'
     from pandas import Period
     import re
-
+    if isinstance(期間字串, Period):
+        return 期間字串
     s = 期間字串
     if ms:=re.findall(r'(\d{4})-([01]?\d)', s):
         ps = [Period(f'{int(m[0])}{int(m[1]):02}', 'M') for m in ms]
+    elif qs:=re.findall(r'\d{4}Q[1234]', s):
+        ps = [Period(q) for q in qs]
     elif ms:=re.findall(r'(\d{3})[/]?([01]?\d)', s):
         try:
             ps = [Period(f'{int(m[0])+1911}{int(m[1]):02}', 'M') for m in ms]
