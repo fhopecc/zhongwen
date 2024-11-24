@@ -273,8 +273,8 @@ def show_html(df, 無格式=False
              ,顯示筆數=100, 採用民國日期格式=False, 標題=None
              ,傳回超文件內容=False
              ):
-    from pathlib import Path
     from warnings import warn
+    from pathlib import Path
     import pandas as pd
     import numpy as np
     import os
@@ -282,13 +282,15 @@ def show_html(df, 無格式=False
     if isinstance(df, set):
         df = pd.Series(list(df)).to_frame()
 
+    if isinstance(df, list):
+        df = pd.Series(df).to_frame()
+
     if isinstance(df, np.ndarray):
         df = pd.Series(df).to_frame()
 
     if isinstance(df, pd.Series):
         df = df.to_frame()
 
-    # df = df.fillna(' ')
     if isinstance(df, pd.DataFrame):
         df = df.dropna(axis='columns', how='all')
         if not df.index.is_unique:
@@ -316,7 +318,6 @@ def show_html(df, 無格式=False
     html = Path.home() / 'TEMP' / 'output.html'
     df.to_html(html)
     os.system(f'start {html}')
-
 
 def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
             ,日期欄位=[] ,隱藏欄位=[]
@@ -376,6 +377,7 @@ def 自動格式(df, 整數欄位=[] ,實數欄位=[], 百分比欄位=[]
                     日期欄位.append(c)
                 except AttributeError:
                     日期欄位 = [c]
+
     if 整數欄位: 整數欄位 = [*set(整數欄位)]
     if 實數欄位: 實數欄位 = [*set(實數欄位)]
     if 百分比欄位: 百分比欄位 = [*set(百分比欄位)]
@@ -561,4 +563,3 @@ def 重名加序(columns):
             seen[col] = 0
             new_columns.append(col)
     return new_columns
-

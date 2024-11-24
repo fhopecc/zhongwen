@@ -37,6 +37,14 @@ def 自指定季別迄上季(始季):
         季別+=1
     return 上季()
 
+def 去年同期(期間):
+    import pandas as pd
+    p = 期間
+    if 'Q' in p.freqstr:
+        return pd.Period(year=p.year-1, quarter=p.quarter, freq=p.freq)
+    elif 'M' in p.freqstr:
+        return pd.Period(year=p.year-1, month=p.month, freq=p.freq)
+    
 def 取期間(期間字串, 全取=False):
     '指定全取則回傳期間串列，否則傳為首個期間'
     from pandas import Period
@@ -91,3 +99,18 @@ def 自起日按日列舉迄今(起日):
     while curdate <= 今日():
         yield curdate
         curdate += Timedelta(days=1)
+
+def 全年期別分割(分割期別):
+    import pandas as pd
+    p = 分割期別
+    # p = pd.Period('2024Q3', freq='Q-DEC')
+    if p.freqstr == 'Q-DEC':
+        ps = pd.period_range(p-p.quarter+1, p, freq=p.freq)
+        rps = pd.period_range(p+1, p+(4-p.quarter), freq=p.freq)
+    elif p.freqstr == '6M':
+        ps = pd.period_range(p-(round(p.month/6))+1, p, freq=p.freq)
+        rps = pd.period_range(p+1, p+(2-round(p.month/6)), freq=p.freq)
+    elif p.freqstr == 'Y-DEC':
+        ps = [p]
+        rps = []
+    return ps, rps

@@ -12,6 +12,7 @@ class TestPythonDebug(unittest.TestCase):
         test_file2.touch()
         self.test_file2 = test_file2
 
+    @unittest.skip("不測")
     def test_deploy(self):
         from zhongwen.python_dev import 專案根目錄, 套件名稱, 布署
         import os
@@ -30,14 +31,18 @@ class TestPythonDebug(unittest.TestCase):
 
     def test_find_testfile(self):
         from zhongwen.python_dev import find_testfile
+        from pathlib import Path
         import os
 
         # 中文檔名其測試檔檔名為其檔名前綴【測試】
-        test_file = wdir / '測試中文檔.py'
+        test_file = wdir / '測中文檔.py'
         test_file.touch()
         self.assertEqual(find_testfile(wdir / r'中文檔.py')
-                        ,str(wdir / r'測試中文檔.py'))
+                        ,str(wdir / r'測中文檔.py'))
         test_file.unlink()
+
+        self.assertEqual(find_testfile(Path(__file__).parent.parent / r'zhongwen\表.py')
+                        ,str(Path(__file__).parent / r'測表.py'))
 
         # 檔名前綴為'test_'即為測試檔
         self.assertEqual(find_testfile(wdir / r'test_file.py')

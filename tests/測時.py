@@ -11,6 +11,23 @@ class Test(unittest.TestCase):
         self.assertEqual(取期間('2020-01'), Period('202001', 'M'))
         self.assertEqual(取期間('2024Q2'), Period('2024Q2', 'Q-DEC'))
 
+    def test_cut_period(self):
+        from zhongwen.時 import 全年期別分割, 取期間
+        from pandas import period_range
+        import pandas as pd
+        ps, rps = 全年期別分割(pd.Period('2024-06', freq='6M'))
+        print(ps)
+        print(rps)
+        # print(period_range('2024Q1', periods=3, freq='Q'))
+
+    def test_YOY(self):
+        from zhongwen.時 import 去年同期, 取期間
+        import pandas as pd
+        p = 取期間('2024Q3')
+        self.assertEqual(去年同期(p), 取期間('2023Q3'))
+        p = pd.Period('2024-06', freq='6M')
+        self.assertEqual(去年同期(p), pd.Period('2023-06', freq='6M'))
+
     def test_period(self):
         from zhongwen.時 import 上月, 上年度
         import pandas as pd
