@@ -132,6 +132,23 @@ def setgit():
     cmd = 'git config --global core.quotepath off'
     os.system(cmd)
 
+def 筆記本轉程式碼(ipynb):
+    import nbformat
+
+    ipynb = Path(ipynb)
+
+    # 讀取 .ipynb 檔案
+    with open(ipynb, 'r', encoding='utf-8') as f:
+        notebook = nbformat.read(f, as_version=4)
+
+    # 提取所有 code cells 的 Python 代碼
+    code_cells = [cell['source'] for cell in notebook['cells'] if cell['cell_type'] == 'code']
+
+    # 將代碼儲存到一個 .py 文件中
+    with open(ipynb.with_suffix('.py'), 'w', encoding='utf-8') as f:
+        for cell_code in code_cells:
+            f.write(cell_code + '\n\n')
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()

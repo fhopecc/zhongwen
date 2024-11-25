@@ -161,7 +161,7 @@ def 校正中文字(字串:str):
 
 def 刪空格(n):
     import re
-    try: return re.sub(r'\s+', '', n)
+    try: return re.sub(r'[\s　]+', '', n)
     except TypeError: return n
 
 class 萌典尚無定義之字詞(Exception):pass
