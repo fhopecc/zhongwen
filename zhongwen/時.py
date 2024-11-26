@@ -3,6 +3,9 @@ from zhongwen.date import 今日, 季末, 年底, 本年度, 上年底
 from zhongwen.date import 民國日期, 民國年月
 from zhongwen.date import 自起日按日列舉迄今
 
+def 本年數():
+    return 今日().year
+
 def 正式民國日期(d=None):
     '格式如：112年7月29日'
     if not d:
