@@ -113,10 +113,10 @@ def 顯示(df
     df.dropna(how='all')
     df.dropna(how='all', axis=1)
 
+    df = df.head(顯示筆數)
     if not 無格式:
         from zhongwen.pandas_tools import 標準格式
-        df = df.head(顯示筆數)
-
+        df.columns = 重名加序(df.columns)
         整數欄位 = set(整數欄位).union(df.select_dtypes(include=['int']).columns)
         百分比欄位 = set(百分比欄位)
         實數欄位 = set(實數欄位).union(df.select_dtypes(include=['float']).columns)
@@ -156,4 +156,4 @@ def 顯示(df
         html = os.path.join(tmpdirname, "tempfile.html")
         df.to_html(html)
         os.system(f'start {html}')
-        time.sleep(1)
+        time.sleep(2)
