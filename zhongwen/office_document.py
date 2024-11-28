@@ -419,6 +419,18 @@ def 標題階層編號轉中文編號(標題):
         return 編號 + 內容
     return s
 
+def html2docx(html):
+    from pathlib import Path
+    import win32com.client
+    import pypandoc
+    import os
+    output_path = "output.docx"
+    html = Path(html)
+    docx = html.with_suffix('.docx')
+    pypandoc.convert_text(html.read_text(encoding='utf8'), "docx", format="html", outputfile=docx)
+    logger.info(f'{html.name}已轉成{docx.name}！')
+    return docx
+
 def markdown2docx(md):
     from pathlib import Path
     import win32com.client
@@ -469,6 +481,8 @@ def 另存醒目文字(docx):
     print(highlighted_texts)
     txt = docx.with_suffix('.txt')
     txt.write_text(highlighted_texts, encoding='utf8')
+
+
 
 if __name__ == '__main__':
     import argparse

@@ -83,12 +83,22 @@ def 顯示(df
         ,無格式=False
         ,不顯示=False
         ):
+    '''字串視為超文件檔案直接顯示；序列、系列、集合、陣列及資料框以表格顯示。'''
     from pathlib import Path
     import pandas as pd
     import numpy as np
     import tempfile
     import time
     import os
+
+    if isinstance(df, str):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            html = os.path.join(tmpdirname, "tempfile.html")
+            with open(html, 'w', encoding='utf8') as f:
+                f.write(df)
+            os.system(f'start {html}')
+            time.sleep(2)
+        return 
 
     if isinstance(df, list):
         df = pd.Series(df).to_frame()
@@ -102,6 +112,7 @@ def 顯示(df
         df = df.dropna(axis='columns', how='all')
         if not df.index.is_unique:
             df = df.reset_index(drop=True)
+
     if df.empty:
         logger.error('空表')
         return 
