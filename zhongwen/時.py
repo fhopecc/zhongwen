@@ -3,6 +3,16 @@ from zhongwen.date import 今日, 季末, 年底, 本年度, 上年底
 from zhongwen.date import 民國日期, 民國年月
 from zhongwen.date import 自起日按日列舉迄今
 
+def 取季別名(季別):
+    try:
+        return f'{季別.year}年第{季別.quarter}季'
+    except Exception:
+        return 季別
+
+def 取本年度():
+    '取表示本年度之整數，如碼本函數時為 2024 年，即傳回整數 2024。'
+    return 今日().year
+
 def 本年數():
     return 今日().year
 

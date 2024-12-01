@@ -128,7 +128,10 @@ def 顯示(df
         日期欄位 = df.select_dtypes(include=['datetime']).columns
         期間欄位 = [c for c in df.columns if 'period' in df.dtypes[c].name]
         文字欄位 = df.select_dtypes(include=['object']).columns
-        
+
+        浮動提示 = df.copy()
+        for c in df.columns: 浮動提示[c] = c
+
         df = df.style.map(lambda _:'text-align:right')
         df = df.map_index(lambda _:'text-align:center', axis=1)
         df = df.format('{:,.0f}', subset=list(整數欄位), na_rep='')
@@ -148,6 +151,7 @@ def 顯示(df
             'props':[('background-color', '#ffffb3'), ('border-style', 'dotted')]
         }
         df = df.set_table_styles([tr_hover], overwrite=False)
+        df = df.set_tooltips(浮動提示)
 
     if 不顯示:
         return df
