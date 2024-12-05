@@ -125,44 +125,48 @@ def 顯示(df
     df.dropna(how='all', axis=1)
 
     df = df.head(顯示筆數)
+    odf = df
     if not 無格式:
-        from zhongwen.pandas_tools import 標準格式
-        df.columns = 重名加序(df.columns)
-        整數欄位 = set(整數欄位).union(df.select_dtypes(include=['int']).columns)
-        百分比欄位 = set(百分比欄位)
-        實數欄位 = set(實數欄位).union(df.select_dtypes(include=['float']).columns)
-        實數欄位 -= 整數欄位
-        實數欄位 -= 百分比欄位
-        百分比漸層欄位 = set(百分比漸層欄位).union(set(百分比欄位))
-        漸層欄位 = set(漸層欄位).union(整數欄位, 實數欄位)
-        漸層欄位 -= 百分比漸層欄位
-        日期欄位 = df.select_dtypes(include=['datetime']).columns
-        期間欄位 = [c for c in df.columns if 'period' in df.dtypes[c].name]
-        文字欄位 = df.select_dtypes(include=['object']).columns
+        try:
+            from zhongwen.pandas_tools import 標準格式
+            df.columns = 重名加序(df.columns)
+            整數欄位 = set(整數欄位).union(df.select_dtypes(include=['int']).columns)
+            百分比欄位 = set(百分比欄位)
+            實數欄位 = set(實數欄位).union(df.select_dtypes(include=['float']).columns)
+            實數欄位 -= 整數欄位
+            實數欄位 -= 百分比欄位
+            百分比漸層欄位 = set(百分比漸層欄位).union(set(百分比欄位))
+            漸層欄位 = set(漸層欄位).union(整數欄位, 實數欄位)
+            漸層欄位 -= 百分比漸層欄位
+            日期欄位 = df.select_dtypes(include=['datetime']).columns
+            期間欄位 = [c for c in df.columns if 'period' in df.dtypes[c].name]
+            文字欄位 = df.select_dtypes(include=['object']).columns
 
-        浮動提示 = df.copy()
-        for c in df.columns: 浮動提示[c] = c
+            浮動提示 = df.copy()
+            for c in df.columns: 浮動提示[c] = c
 
-        df = df.style.map(lambda _:'text-align:right')
-        df = df.map_index(lambda _:'text-align:center', axis=1)
-        df = df.format('{:,.0f}', subset=list(整數欄位), na_rep='')
-        df = df.format(lambda v: f"{v*100:.0f}", subset=list(百分比欄位), na_rep='')
-        df = df.format('{:,.2f}', subset=list(實數欄位), na_rep='')
-        df = df.format('{:%Y%m%d}', subset=日期欄位, na_rep='')
-        df = df.format(str, subset=期間欄位, na_rep='')
-        df = df.format(str, subset=文字欄位, na_rep='')
-        df = df.background_gradient(axis=0, cmap='RdYlGn', vmax=1, vmin=-1
-                                   ,subset=list(百分比漸層欄位)
-                                   )
-        df = df.background_gradient(axis=0, cmap='RdYlGn', subset=list(漸層欄位))
-        df = df.hide(隱藏欄位, axis=1) # hide index
- 
-        tr_hover = {
-            'selector': 'tr:hover',
-            'props':[('background-color', '#ffffb3'), ('border-style', 'dotted')]
-        }
-        df = df.set_table_styles([tr_hover], overwrite=False)
-        df = df.set_tooltips(浮動提示)
+            df = df.style.map(lambda _:'text-align:right')
+            df = df.map_index(lambda _:'text-align:center', axis=1)
+            df = df.format('{:,.0f}', subset=list(整數欄位), na_rep='')
+            df = df.format(lambda v: f"{v*100:.0f}", subset=list(百分比欄位), na_rep='')
+            df = df.format('{:,.2f}', subset=list(實數欄位), na_rep='')
+            df = df.format('{:%Y%m%d}', subset=日期欄位, na_rep='')
+            df = df.format(str, subset=期間欄位, na_rep='')
+            df = df.format(str, subset=文字欄位, na_rep='')
+            df = df.background_gradient(axis=0, cmap='RdYlGn', vmax=1, vmin=-1
+                                       ,subset=list(百分比漸層欄位)
+                                       )
+            df = df.background_gradient(axis=0, cmap='RdYlGn', subset=list(漸層欄位))
+            df = df.hide(隱藏欄位, axis=1) # hide index
+     
+            tr_hover = {
+                'selector': 'tr:hover',
+                'props':[('background-color', '#ffffb3'), ('border-style', 'dotted')]
+            }
+            df = df.set_table_styles([tr_hover], overwrite=False)
+            df = df.set_tooltips(浮動提示)
+        except Exception:
+            return 顯示(odf, 無格式=True)
 
     if 不顯示:
         return df

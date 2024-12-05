@@ -3,6 +3,9 @@ from zhongwen.date import 今日, 季末, 年底, 本年度, 上年底
 from zhongwen.date import 民國日期, 民國年月
 from zhongwen.date import 自起日按日列舉迄今
 
+def 取本月份():
+    return 今日().month
+
 def 取季別名(季別):
     try:
         return f'{季別.year}年第{季別.quarter}季'
