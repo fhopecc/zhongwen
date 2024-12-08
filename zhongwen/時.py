@@ -1,18 +1,76 @@
 from zhongwen.date import 取日期
 from zhongwen.date import 今日, 季末, 年底, 本年度, 上年底
-from zhongwen.date import 民國日期, 民國年月
+from zhongwen.date import 民國日期, 民國年月, 民國年底
 from zhongwen.date import 自起日按日列舉迄今
 
-def 取本月份():
-    return 今日().month
+def 取期間(期間字串, 全取=False):
+    '指定全取則回傳期間串列，否則傳為首個期間'
+    from pandas import Period
+    import re
 
-def 取一年前():
-    from pandas import Timedelta 
-    return 今日() - Timedelta(days=365)
+    if isinstance(期間字串, Period):
+        return 期間字串
+
+    if isinstance(期間字串, int):
+        s = str(期間字串)
+    else:
+        s = 期間字串
+
+    if ms:=re.findall(r'(\d{4})-([01]?\d)', s):
+        ps = [Period(f'{int(m[0])}{int(m[1]):02}', 'M') for m in ms]
+    elif qs:=re.findall(r'\d{4}Q[1234]', s):
+        ps = [Period(q) for q in qs]
+    elif ms:=re.findall(r'(?<=\A)(?P<Y1>\d{4})(?=(\D|\Z))|(?<=\D)(?P<Y2>\d{4})(?=(\D|\Z))', s):
+        取年數 = lambda t: next((s for s in t if isinstance(s, str) and s.strip()), None)
+        ps = [Period(f'{int(取年數(m))}', 'Y') for m in ms]
+    elif ms:=re.findall(r'(\d{3})[/]?([01]?\d)', s):
+        try:
+            ps = [Period(f'{int(m[0])+1911}{int(m[1]):02}', 'M') for m in ms]
+        except Exception:
+            raise Exception(f"'{期間字串}'無法解析為期間字串！")
+    elif ms:=re.findall(r'(\d{2,3})年第([1-4])季', s):
+        ps = [Period(f'{int(m[0])+1911}Q{m[1]}', 'Q') for m in ms]
+    elif ms:=re.findall(r'(\d{2,3})年([上下])半年', s):
+        取半年結束月數 = lambda 期間: 6 if 期間=='上' else 12
+        ps = [Period(f'{int(m[0])+1911}-{取半年結束月數(m[1])}', '6M') for m in ms]
+    elif ms:=re.findall(r'(\d{2,3})年年度', s):
+        ps = [Period(f'{int(m)+1911}', 'Y') for m in ms]
+    elif ms:=re.findall(r'(?<=\A)(?P<Y1>\d{3})(?=(\D|\Z))|(?<=\D)(?P<Y2>\d{3})(?=(\D|\Z))', s):
+        取年數 = lambda t: next((s for s in t if isinstance(s, str) and s.strip()), None)
+        ps = [Period(f'{int(取年數(m))+1911}', 'Y') for m in ms]
+
+ 
+    if 全取: return ps
+    
+    try:
+        return ps[0]
+    except UnboundLocalError:
+        raise UnboundLocalError(f"'{期間字串}'無法解析為期間字串！")
+
+def 取今日():
+    import pandas as pd
+    return pd.Timestamp.today().normalize()
+
+def 取年底():
+    return 取日期(f'{取今日().year}1231')
 
 def 取半年前():
     from pandas import Timedelta 
-    return 今日() - Timedelta(days=183)
+    return 取今日() - Timedelta(days=183)
+
+def 取上年底():
+    return 上年度().end_time.normalize()
+
+def 取一年前():
+    import pandas as pd
+    return 取今日() - pd.DateOffset(years=1)
+
+def 取二年前():
+    import pandas as pd
+    return 取今日() - pd.DateOffset(years=2)
+
+def 取本月份():
+    return 今日().month
 
 def 取季別名(季別):
     try:
@@ -24,24 +82,13 @@ def 取本年度():
     '取表示本年度之整數，如碼本函數時為 2024 年，即傳回整數 2024。'
     return 今日().year
 
-def 本年數():
-    return 今日().year
-
-def 正式民國日期(d=None):
+def 取正式民國日期(d=None):
     '格式如：112年7月29日'
     if not d:
         d = 今日()
     return 民國日期(d, "%Y年%M月%D日")
 
-def 上月():
-    import pandas as pd
-    return pd.Period(今日(), 'M') - 1
-
-def 上季():
-    import pandas as pd
-    return pd.Period(今日(), 'Q-DEC') - 1
-
-def 上年度():
+def 取上年度():
     import pandas as pd
     return pd.Period(今日(), 'Y') - 1
 
@@ -60,6 +107,7 @@ def 自指定季別迄上季(始季):
         yield 季別
         季別+=1
     return 上季()
+   
 
 def 去年同期(期間):
     import pandas as pd
@@ -68,31 +116,7 @@ def 去年同期(期間):
         return pd.Period(year=p.year-1, quarter=p.quarter, freq=p.freq)
     elif 'M' in p.freqstr:
         return pd.Period(year=p.year-1, month=p.month, freq=p.freq)
-    
-def 取期間(期間字串, 全取=False):
-    '指定全取則回傳期間串列，否則傳為首個期間'
-    from pandas import Period
-    import re
-    if isinstance(期間字串, Period):
-        return 期間字串
-    s = 期間字串
-    if ms:=re.findall(r'(\d{4})-([01]?\d)', s):
-        ps = [Period(f'{int(m[0])}{int(m[1]):02}', 'M') for m in ms]
-    elif qs:=re.findall(r'\d{4}Q[1234]', s):
-        ps = [Period(q) for q in qs]
-    elif ms:=re.findall(r'(\d{3})[/]?([01]?\d)', s):
-        try:
-            ps = [Period(f'{int(m[0])+1911}{int(m[1]):02}', 'M') for m in ms]
-        except Exception:
-            raise Exception(f"'{期間字串}'無法解析為期間字串！")
-   
-    if 全取: return ps
-    
-    try:
-        return ps[0]
-    except UnboundLocalError:
-        raise UnboundLocalError(f"'{期間字串}'無法解析為期間字串！")
-
+ 
 class 無法於一階差分內穩定(Exception):pass
 def 取穩定階數(時序):
     '回傳是否穩定及穩定差分階數'
@@ -124,6 +148,13 @@ def 自起日按日列舉迄今(起日):
         yield curdate
         curdate += Timedelta(days=1)
 
+def 自起始年底按年列舉至本年底(起始年度):
+    import pandas as pd
+    起始年度 = 取期間(起始年度).year
+    本年度 = 取本年度()
+    ps = pd.date_range(f'{起始年度}1231', f'{本年度}1231', freq='YE')
+    return list(ps)
+
 def 全年期別分割(分割期別):
     import pandas as pd
     p = 分割期別
@@ -138,3 +169,20 @@ def 全年期別分割(分割期別):
         ps = [p]
         rps = []
     return ps, rps
+
+def 本年數():
+    return 今日().year
+
+def 上年度():
+    return 取上年度()
+
+def 上月():
+    import pandas as pd
+    return pd.Period(今日(), 'M') - 1
+
+def 上季():
+    import pandas as pd
+    return pd.Period(今日(), 'Q-DEC') - 1
+
+def 正式民國日期(d=None):
+    return 取正式民國日期(d)

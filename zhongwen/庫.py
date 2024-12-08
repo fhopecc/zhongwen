@@ -132,4 +132,3 @@ def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 指定欄位=N
         資料.to_sql(表格, 資料庫, if_exists='append')
         logger.debug(f'寫入成功！')
 
-

@@ -1,15 +1,27 @@
 import unittest
 
 class Test(unittest.TestCase):
-    def test_take_periods(self):
+    def test_get_dates(self):
+        from zhongwen.時 import 取日期
+        from pandas import Timestamp
+        self.assertEqual(取日期('1121231'), Timestamp('2023-12-31'))
+
+    def test_get_periods(self):
         from zhongwen.時 import 取期間
         from pandas import Period, Timestamp
+        self.assertEqual(取期間('112'), Period('2023', 'Y-DEC'))
+        self.assertEqual(取期間('2024'), Period('2024', 'Y-DEC'))
         self.assertEqual(取期間('11310'), Period('202410', 'M'))
         self.assertEqual(取期間('113/10'), Period('202410', 'M'))
         self.assertEqual(取期間('113/1'), Period('202401', 'M'))
         self.assertEqual(取期間('2024-10'), Period('202410', 'M'))
         self.assertEqual(取期間('2020-01'), Period('202001', 'M'))
         self.assertEqual(取期間('2024Q2'), Period('2024Q2', 'Q-DEC'))
+        self.assertEqual(取期間('2024Q2'), Period('2024Q2', 'Q-DEC'))
+        self.assertEqual(取期間('99年年度'), Period('2010', 'Y-DEC'))
+        self.assertEqual(取期間('112年年度'), Period('2023', 'Y-DEC'))
+        self.assertEqual(取期間('112年第3季'), Period('2023Q3', 'Q-DEC'))
+        self.assertEqual(取期間('112年上半年'), Period('2023-6', '6M'))
 
     def test_cut_period(self):
         from zhongwen.時 import 全年期別分割, 取期間
@@ -35,12 +47,15 @@ class Test(unittest.TestCase):
         self.assertIsInstance(上年度(), pd.Period)
         print(上年度())
 
-    def test_iter_month(self):
-        from zhongwen.時 import 自指定月份迄上月
+    def test_iter_yearly(self):
+        from zhongwen.時 import 自起始年底按年列舉至本年底
+        from zhongwen.時 import 取日期
         import pandas as pd
-        self.assertEqual(list(自指定月份迄上月('11301')), 
-                         list(pd.period_range('2024-01', '2024-10', freq='M'))
-                        )
+        ds = 自起始年底按年列舉至本年底(111)
+        ys = pd.date_range(取日期('1111231'), 取日期('1131231'), freq='YE')
+        self.assertEqual(ds
+                        ,list(pd.date_range(取日期('1111231'), 取日期('1131231'), freq='YE')))
+
 
 if __name__ == '__main__':
     import logging

@@ -80,6 +80,7 @@ def 顯示(df
         ,百分比漸層欄位=[]
         ,顯示筆數=100, 採用民國日期格式=False, 標題=None
         ,傳回超文件內容=False
+        ,顯示索引=False
         ,無格式=False
         ,不顯示=False
         ):
@@ -116,8 +117,10 @@ def 顯示(df
     if df.empty:
         logger.error('空表')
         return 
-
-    df.reset_index(drop=True, inplace=True)
+    if 顯示索引:
+        df.reset_index(inplace=True)
+    else:
+        df.reset_index(drop=True, inplace=True)
     df.columns.name = '編號'
     df.index = df.index+1
 
@@ -126,6 +129,8 @@ def 顯示(df
 
     df = df.head(顯示筆數)
     odf = df
+    for c in 實數欄位+百分比欄位+整數欄位:
+        df[c] = pd.to_numeric(df[c])
     if not 無格式:
         try:
             from zhongwen.pandas_tools import 標準格式
