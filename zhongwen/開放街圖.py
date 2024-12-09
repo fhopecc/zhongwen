@@ -2,6 +2,24 @@ from pathlib import Path
 from diskcache import Cache
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 
+def 取地點座標(地點):
+    '地點格式如次：宜蘭縣審計室, 宜蘭縣, 台灣，座標系是4326。'
+    import osmnx as ox
+    return ox.geocode(地點)
+
+def 取地點最近車程網節點(地點):
+    '地點格式如次：宜蘭縣審計室, 宜蘭縣, 台灣。'
+    import osmnx as ox
+    import networkx as nx
+
+    loc = 取地點座標(地點)
+
+    # 下載該地區的路網（例如駕車路網）
+    G = ox.graph_from_point(loc, dist=1000, network_type="drive")
+
+    # 找到最近的節點
+    return ox.distance.nearest_nodes(G, loc[1], loc[0])
+
 def show_map(gdf):
     '運用 folium 顯示 geopandas 資料框'
     from shapely.geometry import mapping
@@ -163,3 +181,10 @@ def 下載道路網(縣市="Yilan County, Taiwan"):
     nodes, edges = ox.graph_to_gdfs(G, nodes=True, edges=True)
     return edges
 
+def 查詢最近路程節點(地點, 路網=None):
+    '地點如次：宜蘭縣審計室, 宜蘭縣, 台灣'
+    import osmnx as ox
+    
+    # 使用 geocode 查詢地理位置
+    location = ox.geocode(地點)
+    print("位置座標：", location)
