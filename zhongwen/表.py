@@ -84,7 +84,9 @@ def 顯示(df
         ,無格式=False
         ,不顯示=False
         ):
-    '''字串視為超文件檔案直接顯示；序列、系列、集合、陣列及資料框以表格顯示。'''
+    '''字串視為超文件檔案直接顯示；序列、系列、集合、陣列及資料框以表格顯示。
+如設不顯示，傳回樣式及可顯示資料框，可顯示資料框用來設定工具提示。
+    '''
     from pathlib import Path
     import pandas as pd
     import numpy as np
@@ -148,6 +150,7 @@ def 顯示(df
             文字欄位 = df.select_dtypes(include=['object']).columns
 
             浮動提示 = df.copy()
+            可顯示資料框 = df.copy()
             for c in df.columns: 浮動提示[c] = c
 
             df = df.style.map(lambda _:'text-align:right')
@@ -174,7 +177,7 @@ def 顯示(df
             return 顯示(odf, 無格式=True)
 
     if 不顯示:
-        return df
+        return df, 可顯示資料框
 
     with tempfile.TemporaryDirectory() as tmpdirname:
         html = os.path.join(tmpdirname, "tempfile.html")
