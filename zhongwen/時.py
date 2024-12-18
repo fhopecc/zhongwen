@@ -74,6 +74,11 @@ def 取二年前():
 def 取本月份():
     return 今日().month
 
+def 取上月份():
+    t = 取今日()
+    m = 取期間(f'{t.year}-{t.month}')
+    return m-1
+
 def 取季別名(季別):
     try:
         return f'{季別.year}年第{季別.quarter}季'
