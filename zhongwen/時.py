@@ -16,7 +16,9 @@ def 取期間(期間字串, 全取=False):
     else:
         s = 期間字串
 
-    if ms:=re.findall(r'(\d{4})-([01]?\d)', s):
+    if ms:=re.findall(r'(\d{4})([01]\d)', s):
+        ps = [Period(f'{int(m[0])}{int(m[1]):02}', 'M') for m in ms]
+    elif ms:=re.findall(r'(\d{4})-([01]?\d)', s):
         ps = [Period(f'{int(m[0])}{int(m[1]):02}', 'M') for m in ms]
     elif qs:=re.findall(r'\d{4}Q[1234]', s):
         ps = [Period(q) for q in qs]
@@ -82,6 +84,44 @@ def 取本年度():
     '取表示本年度之整數，如碼本函數時為 2024 年，即傳回整數 2024。'
     return 今日().year
 
+def 取民國日期(日期=None, 格式='%Y%m%d', 昨今明表達=False):
+    '%Y表年數、%m表月數前置0、%d表日數前置0、%M表月數不前置0'
+    import pandas as pd
+    d = 取日期(日期)
+    fmt = 格式
+
+    if not d: d = 今日()
+    if pd.isnull(d):
+        return ''
+    if 昨今明表達:
+        if d == 今日()-Timedelta(days=1):
+            return '昨'
+        if d == 今日():
+            return '今'
+        if d == 今日()+Timedelta(days=1):
+            return '明'
+        if d == 今日()+Timedelta(days=2):
+            return '後天'
+
+    fmt = fmt.replace(
+            '%Y', '%(year)03d'
+            ).replace(
+            '%m', '%(month)02d'
+            ).replace(
+            '%M', '%(month)d'
+            ).replace(
+            '%d', '%(date)02d'
+            ).replace(
+            '%D', '%(date)d'
+            )
+
+    year = d.year-1911
+    return fmt % {"year":year, "month":d.month, "date":d.day}
+
+def 取民國年月(年月):
+    '取如民國113年11月之表達字串11311'
+    return 取民國日期(年月, 格式='%Y%m')
+
 def 取正式民國日期(d=None):
     '格式如：112年7月29日'
     if not d:
@@ -107,7 +147,6 @@ def 自指定季別迄上季(始季):
         yield 季別
         季別+=1
     return 上季()
-   
 
 def 去年同期(期間):
     import pandas as pd

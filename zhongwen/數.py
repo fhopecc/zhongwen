@@ -1,6 +1,6 @@
 from zhongwen.number import 半型數字表, 全型數字表, 小寫數字表, 小寫位名表
 from zhongwen.number import 大寫數字表, 大写数字表, 大寫位名表, 組名表, 组名表
-from zhongwen.number import 最簡約數
+from zhongwen.number import 最簡約數, 增減百分點, 百分比
 全數字表  = 半型數字表 + 全型數字表 + 小寫數字表 + 小寫位名表 + ','
 全數字表 += 大寫數字表 + 大写数字表 + 大寫位名表 + 組名表 + 组名表
 

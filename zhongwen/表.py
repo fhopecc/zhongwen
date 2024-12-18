@@ -78,6 +78,7 @@ def 顯示(df
         ,日期欄位=[], 隱藏欄位=[]
         ,漸層欄位=[]
         ,百分比漸層欄位=[]
+        ,百分比漸層按值區間欄位=[]
         ,顯示筆數=100, 採用民國日期格式=False, 標題=None
         ,傳回超文件內容=False
         ,顯示索引=False
@@ -142,9 +143,12 @@ def 顯示(df
             實數欄位 = set(實數欄位).union(df.select_dtypes(include=['float']).columns)
             實數欄位 -= 整數欄位
             實數欄位 -= 百分比欄位
+            百分比漸層按值區間欄位 = set(百分比漸層按值區間欄位)
             百分比漸層欄位 = set(百分比漸層欄位).union(set(百分比欄位))
+            百分比漸層欄位 -= 百分比漸層按值區間欄位 
             漸層欄位 = set(漸層欄位).union(整數欄位, 實數欄位)
             漸層欄位 -= 百分比漸層欄位
+            漸層欄位 = 漸層欄位.union(百分比漸層按值區間欄位)
             日期欄位 = df.select_dtypes(include=['datetime']).columns
             期間欄位 = [c for c in df.columns if 'period' in df.dtypes[c].name]
             文字欄位 = df.select_dtypes(include=['object']).columns

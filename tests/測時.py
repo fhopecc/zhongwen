@@ -15,6 +15,7 @@ class Test(unittest.TestCase):
         self.assertEqual(取期間('113/10'), Period('202410', 'M'))
         self.assertEqual(取期間('113/1'), Period('202401', 'M'))
         self.assertEqual(取期間('2024-10'), Period('202410', 'M'))
+        self.assertEqual(取期間('202411'), Period('202411', 'M'))
         self.assertEqual(取期間('2020-01'), Period('202001', 'M'))
         self.assertEqual(取期間('2024Q2'), Period('2024Q2', 'Q-DEC'))
         self.assertEqual(取期間('2024Q2'), Period('2024Q2', 'Q-DEC'))
@@ -55,7 +56,9 @@ class Test(unittest.TestCase):
         ys = pd.date_range(取日期('1111231'), 取日期('1131231'), freq='YE')
         self.assertEqual(ds
                         ,list(pd.date_range(取日期('1111231'), 取日期('1131231'), freq='YE')))
-
+    def test_roc_date(self):
+        from zhongwen.時 import 取民國年月
+        self.assertEqual(取民國年月('11311'), '11311')
 
 if __name__ == '__main__':
     import logging
