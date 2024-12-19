@@ -1,10 +1,20 @@
+from unittest.mock import patch
 import unittest
 
 class Test(unittest.TestCase):
+
     def test_get_dates(self):
         from zhongwen.時 import 取日期
         from pandas import Timestamp
         self.assertEqual(取日期('1121231'), Timestamp('2023-12-31'))
+
+    @patch('zhongwen.時.取今日')
+    def test_get_past_date(self, 仿取今日):
+        from zhongwen.時 import 取日期
+        from zhongwen.時 import 取五年又一個月前
+
+        仿取今日.return_value = 取日期('2024-12-19')
+        self.assertEqual(取五年又一個月前(), 取日期('2019-11-19')) 
 
     def test_get_periods(self):
         from zhongwen.時 import 取期間
@@ -56,6 +66,7 @@ class Test(unittest.TestCase):
         ys = pd.date_range(取日期('1111231'), 取日期('1131231'), freq='YE')
         self.assertEqual(ds
                         ,list(pd.date_range(取日期('1111231'), 取日期('1131231'), freq='YE')))
+
     def test_roc_date(self):
         from zhongwen.時 import 取民國年月
         self.assertEqual(取民國年月('11311'), '11311')

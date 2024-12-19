@@ -24,12 +24,16 @@ def 載入上批資料(資料庫檔, 表格, 批號欄名, 時間欄位=None, �
     '載入最大批號之紀錄'
     return 批次載入(資料庫檔, 表格, 批號欄名, 時間欄位, 期間欄位, 最小批號=float('inf'))
 
-def 批次載入(資料庫檔, 表格, 批號欄名, 時間欄位=None, 期間欄位=None, 最小批號=None):
-    '指定最小批號則載入批號大於或等於最小批號之紀錄，如不指定則載入最大批號之紀錄'
+def 批次載入(資料庫檔, 表格, 批號欄名, 時間欄位=None, 期間欄位=None, 起始批號=None, 最小批號=None):
+    '指定起始批號則載入批號大於或等於其批號之紀錄，如不指定則載入最末批號之紀錄'
     from zhongwen.時 import 取日期, 取期間
     from collections.abc import Iterable 
     import pandas as pd
     import sqlite3
+
+    if not 起始批號 is None:
+        最小批號 = 起始批號
+
     cs, ps = 時間欄位, 期間欄位
     if isinstance(cs, str) or not isinstance(cs, Iterable):
         if cs is None:

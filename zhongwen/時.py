@@ -71,6 +71,14 @@ def 取二年前():
     import pandas as pd
     return 取今日() - pd.DateOffset(years=2)
 
+def 取五年前():
+    import pandas as pd
+    return 取今日() - pd.DateOffset(years=5)
+
+def 取五年又一個月前():
+    import pandas as pd
+    return 取今日() - pd.DateOffset(months=61)
+
 def 取本月份():
     return 今日().month
 
