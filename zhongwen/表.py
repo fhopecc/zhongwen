@@ -106,12 +106,16 @@ def 顯示(df
 
     if isinstance(df, list):
         df = pd.Series(df).to_frame()
+        顯示索引 = True
     elif isinstance(df, set):
         df = pd.Series(list(df)).to_frame()
+        顯示索引 = True
     elif isinstance(df, np.ndarray):
         df = pd.Series(df).to_frame()
+        顯示索引 = True
     elif isinstance(df, pd.Series):
         df = df.to_frame()
+        顯示索引 = True
     elif isinstance(df, pd.DataFrame):
         df = df.dropna(axis='columns', how='all')
         if not df.index.is_unique:

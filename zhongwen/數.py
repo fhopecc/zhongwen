@@ -23,5 +23,7 @@ def 取數值(n, 全取=False, 無法解析時產生例外=False):
     except UnboundLocalError:
         if 無法解析時產生例外:
             raise UnboundLocalError(f"'{n}'無法解析為數值字串！")
-
     return 轉數值(n)
+
+def 取最簡約數(n):
+    return 最簡約數(n)
