@@ -155,7 +155,6 @@ def to_excel(pdfs):
             final_df.to_excel(xlsx, index=False)
             print(f'{pdf.name}->{xlsx.name}')
 
-
 def 設定環境():
     from zhongwen.winman import 建立傳送到項目
     import sys
