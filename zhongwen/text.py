@@ -32,6 +32,7 @@ def 中文詞界(curpos, line):
 
 def 臚列(項目):
     "['甲', '乙', '丙'] -> '甲、乙及丙'"
+    項目 = list(項目)
     if type(項目) == list:
         if len(項目) > 1:
             return f"{'、'.join(項目[:-1])}及{項目[-1]}" if len(項目) else ''

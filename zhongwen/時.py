@@ -84,12 +84,20 @@ def 取五年又一個月前():
     return 取今日() - pd.DateOffset(months=61)
 
 def 取本月份():
-    return 今日().month
+    t = 取今日()
+    return 取期間(f'{t.year}-{t.month}')
 
 def 取上月份():
-    t = 取今日()
-    m = 取期間(f'{t.year}-{t.month}')
-    return m-1
+    本月份 = 取本月份()
+    return 本月份 - 1
+
+def 取前年至次年間(取樣頻率='ME'):
+    '取樣頻率預設為 ME 即期間內各月底，另可設為 QE 即各季末、YE 即各年底、MS 即各月初等。'
+    import pandas as pd
+    今年數 = 取今日().year
+    前年數 = 今年數-1
+    次年數 = 今年數+1
+    return pd.date_range(f'{前年數}0131', f'{次年數}1231', freq=取樣頻率)
 
 def 取季別名(季別):
     try:
@@ -100,6 +108,10 @@ def 取季別名(季別):
 def 取本年度():
     '取表示本年度之整數，如碼本函數時為 2024 年，即傳回整數 2024。'
     return 今日().year
+
+def 取上年度():
+    import pandas as pd
+    return pd.Period(今日(), 'Y') - 1
 
 def 取民國日期(日期=None, 格式='%Y%m%d', 昨今明表達=False):
     '%Y表年數、%m表月數前置0、%d表日數前置0、%M表月數不前置0'
@@ -151,10 +163,6 @@ def 取正式民國日期(d=None):
     if isinstance(d, pd.Period):
         d = d.end_time.normalize()
     return 民國日期(d, "%Y年%M月%D日")
-
-def 取上年度():
-    import pandas as pd
-    return pd.Period(今日(), 'Y') - 1
 
 def 自指定月份迄上月(月份):
     from pandas import Period
