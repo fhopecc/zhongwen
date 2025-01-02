@@ -2,19 +2,25 @@ from zhongwen.date import 取日期
 from zhongwen.date import 今日, 季末, 年底, 本年度, 上年底
 from zhongwen.date import 民國日期, 民國年月, 民國年底
 from zhongwen.date import 自起日按日列舉迄今
+from pathlib import Path
+import logging
+logger = logging.getLogger(Path(__file__).stem)
 
-def 取期間(期間字串, 全取=False):
+def 取期間(期間, 全取=False):
     '指定全取則回傳期間串列，否則傳為首個期間'
     from pandas import Period
+    import pandas as pd
     import re
 
-    if isinstance(期間字串, Period):
-        return 期間字串
-
-    if isinstance(期間字串, int):
-        s = str(期間字串)
+    if isinstance(期間, Period):
+        return 期間
+    elif isinstance(期間, int):
+        s = str(期間)
+    elif isinstance(期間, str):
+        s = 期間
     else:
-        s = 期間字串
+        logger.error(f'期間型態必須為字串、期間或整數，而非{type(期間)}！')
+        return pd.NaT
 
     if ms:=re.findall(r'(\d{4})([01]\d)', s):
         ps = [Period(f'{int(m[0])}{int(m[1]):02}', 'M') for m in ms]
@@ -32,6 +38,9 @@ def 取期間(期間字串, 全取=False):
             raise Exception(f"'{期間字串}'無法解析為期間字串！")
     elif ms:=re.findall(r'(\d{2,3})年第([1-4])季', s):
         ps = [Period(f'{int(m[0])+1911}Q{m[1]}', 'Q') for m in ms]
+    elif ms:=re.findall(r'(\d{2,3})年([前後])半年度', s):
+        取半年結束月數 = lambda 期間: 6 if 期間=='前' else 12
+        ps = [Period(f'{int(m[0])+1911}-{取半年結束月數(m[1])}', '6M') for m in ms]
     elif ms:=re.findall(r'(\d{2,3})年([上下])半年', s):
         取半年結束月數 = lambda 期間: 6 if 期間=='上' else 12
         ps = [Period(f'{int(m[0])+1911}-{取半年結束月數(m[1])}', '6M') for m in ms]
@@ -40,14 +49,25 @@ def 取期間(期間字串, 全取=False):
     elif ms:=re.findall(r'(?<=\A)(?P<Y1>\d{3})(?=(\D|\Z))|(?<=\D)(?P<Y2>\d{3})(?=(\D|\Z))', s):
         取年數 = lambda t: next((s for s in t if isinstance(s, str) and s.strip()), None)
         ps = [Period(f'{int(取年數(m))+1911}', 'Y') for m in ms]
-
  
     if 全取: return ps
     
     try:
         return ps[0]
     except UnboundLocalError:
-        raise UnboundLocalError(f"'{期間字串}'無法解析為期間字串！")
+        logger.error(f"'{期間}'無法解析為期間！")
+        return pd.NaT
+
+def 取民國期間(期間):
+    p = 取期間(期間)
+    if 'Y' in p.freqstr: 
+        return f'{p.year-1911}年度'
+    elif 'Q' in p.freqstr: 
+        return f'{p.year-1911}年第{p.quarter}季'
+    elif '6M' in p.freqstr: 
+        return f'{p.year-1911}年前半年度' if p.month==6 else f'{p.year-1911}年後半年度'
+    return str(期間)
+
 
 def 取今日():
     import pandas as pd
