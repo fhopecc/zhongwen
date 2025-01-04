@@ -72,6 +72,11 @@ def 取今日():
     import pandas as pd
     return pd.Timestamp.today().normalize()
 
+def 取最近工作日():
+    import pandas as pd
+    今日 = 取今日()
+    return pd.offsets.BDay().rollback(今日)
+
 def 取前一週():
     from pandas import Timedelta 
     return 取今日() - Timedelta(days=7)
