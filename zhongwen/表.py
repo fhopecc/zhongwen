@@ -94,7 +94,6 @@ def 顯示(df
     import tempfile
     import time
     import os
-
     if isinstance(df, str):
         with tempfile.TemporaryDirectory() as tmpdirname:
             html = os.path.join(tmpdirname, "tempfile.html")

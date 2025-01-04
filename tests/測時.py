@@ -33,9 +33,9 @@ class Test(unittest.TestCase):
         self.assertEqual(取期間('112年'), Period('2023', 'Y-DEC'))
         self.assertEqual(取期間('112年年度'), Period('2023', 'Y-DEC'))
         self.assertEqual(取期間('112年第3季'), Period('2023Q3', 'Q-DEC'))
-        self.assertEqual(取期間('112年上半年'), Period('2023-6', '6M'))
-        self.assertEqual(取期間('112年前半年度'), Period('2023-6', '6M'))
-        self.assertEqual(取期間('112年後半年度'), Period('2023-12', '6M'))
+        self.assertEqual(取期間('112年上半年'), Period('2023-1', '6M'))
+        self.assertEqual(取期間('112年前半年度'), Period('2023-1', '6M'))
+        self.assertEqual(取期間('112年後半年度'), Period('2023-7', '6M'))
 
         self.assertEqual(取民國期間('112年'), '112年度')
         self.assertEqual(取民國期間('2024Q3'), '113年第3季')
@@ -78,6 +78,12 @@ class Test(unittest.TestCase):
         from zhongwen.時 import 取民國年月
         self.assertEqual(取民國年月('11311'), '11311')
 
+    def test_workaround(self):
+        import pandas as pd
+        p = pd.Period('2024Q4', '2Q-DEC')
+        # print(p.start_time)
+        # print(p.end_time)
+
 if __name__ == '__main__':
     import logging
     logging.basicConfig(level=logging.INFO)
@@ -86,5 +92,5 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test_take_period'))  # 指定測試
+    suite.addTest(Test('test_workaround'))  # 指定測試
     unittest.TextTestRunner().run(suite)
