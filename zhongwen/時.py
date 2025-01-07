@@ -39,11 +39,11 @@ def 取期間(期間, 全取=False):
     elif ms:=re.findall(r'(\d{2,3})年第([1-4])季', s):
         ps = [Period(f'{int(m[0])+1911}Q{m[1]}', 'Q') for m in ms]
     elif ms:=re.findall(r'(\d{2,3})年([前後])半年度', s):
-        取半年結束月數 = lambda 期間: 6 if 期間=='前' else 12
-        ps = [Period(f'{int(m[0])+1911}-{取半年結束月數(m[1])}', '6M') for m in ms]
+        取半年開始月數 = lambda 期間: 1 if 期間=='前' else 7
+        ps = [Period(f'{int(m[0])+1911}-{取半年開始月數(m[1])}', '6M') for m in ms]
     elif ms:=re.findall(r'(\d{2,3})年([上下])半年', s):
-        取半年結束月數 = lambda 期間: 6 if 期間=='上' else 12
-        ps = [Period(f'{int(m[0])+1911}-{取半年結束月數(m[1])}', '6M') for m in ms]
+        取半年開始月數 = lambda 期間: 1 if 期間=='上' else 7
+        ps = [Period(f'{int(m[0])+1911}-{取半年開始月數(m[1])}', '6M') for m in ms]
     elif ms:=re.findall(r'(\d{2,3})年年度', s):
         ps = [Period(f'{int(m)+1911}', 'Y') for m in ms]
     elif ms:=re.findall(r'(?<=\A)(?P<Y1>\d{3})(?=(\D|\Z))|(?<=\D)(?P<Y2>\d{3})(?=(\D|\Z))', s):
@@ -65,13 +65,17 @@ def 取民國期間(期間):
     elif 'Q' in p.freqstr: 
         return f'{p.year-1911}年第{p.quarter}季'
     elif '6M' in p.freqstr: 
-        return f'{p.year-1911}年前半年度' if p.month==6 else f'{p.year-1911}年後半年度'
+        return f'{p.year-1911}年前半年度' if 1 <= p.month <= 6 else f'{p.year-1911}年後半年度'
     return str(期間)
-
 
 def 取今日():
     import pandas as pd
     return pd.Timestamp.today().normalize()
+
+def 取最近工作日():
+    import pandas as pd
+    今日 = 取今日()
+    return pd.offsets.BDay().rollback(今日)
 
 def 取前一週():
     from pandas import Timedelta 
@@ -171,7 +175,8 @@ def 取民國年月(年月):
     '取如民國113年11月之表達字串11311'
     return 取民國日期(年月, 格式='%Y%m')
 
-def 取民國年數(日期):
+def 取民國年數(日期=None):
+    '日期民國113年1月1日取表達整數113，預設為今日'
     d = 取日期(日期)
     return d.year - 1911
 
