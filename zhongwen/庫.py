@@ -126,7 +126,8 @@ def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 指定欄位=N
         寫入資料欄位 = 資料.columns.to_list()
         資料庫欄位 = df.columns.to_list()
         差異欄位 = set(寫入資料欄位) - set(資料庫欄位)
-        logger.debug(f'寫入資料之{臚列(差異欄位)}等欄位，資料庫尚未建立……')
+        # logger.debug(f'寫入資料之{臚列(差異欄位)}等欄位，資料庫尚未建立……')
+        logger.debug(差異欄位)
         cursor = 資料庫.cursor()
         for c in 差異欄位:
             alter_query = f'ALTER TABLE {表格} ADD COLUMN "{c}" INT'

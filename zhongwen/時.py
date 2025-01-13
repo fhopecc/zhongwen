@@ -1,10 +1,16 @@
-from zhongwen.date import 取日期
 from zhongwen.date import 今日, 季末, 年底, 本年度, 上年底
 from zhongwen.date import 民國日期, 民國年月, 民國年底
 from zhongwen.date import 自起日按日列舉迄今
 from pathlib import Path
 import logging
 logger = logging.getLogger(Path(__file__).stem)
+
+def 取日期(日期=None):
+    from zhongwen.date import 取日期
+    import pandas as pd
+    if not 日期:
+        return pd.Timestamp.today().normalize()
+    return 取日期(日期)
 
 def 取期間(期間, 全取=False):
     '指定全取則回傳期間串列，否則傳為首個期間'
@@ -68,25 +74,8 @@ def 取民國期間(期間):
         return f'{p.year-1911}年前半年度' if 1 <= p.month <= 6 else f'{p.year-1911}年後半年度'
     return str(期間)
 
-def 取今日():
-    import pandas as pd
-    return pd.Timestamp.today().normalize()
-
-def 取最近工作日():
-    import pandas as pd
-    今日 = 取今日()
-    return pd.offsets.BDay().rollback(今日)
-
-def 取前一週():
-    from pandas import Timedelta 
-    return 取今日() - Timedelta(days=7)
-
 def 取年底():
     return 取日期(f'{取今日().year}1231')
-
-def 取半年前():
-    from pandas import Timedelta 
-    return 取今日() - Timedelta(days=183)
 
 def 取上年底():
     return 上年度().end_time.normalize()
@@ -103,22 +92,10 @@ def 取五年前():
     import pandas as pd
     return 取今日() - pd.DateOffset(years=5)
 
-def 取五年又一個月前():
-    import pandas as pd
-    return 取今日() - pd.DateOffset(months=61)
-
-def 取本月份():
-    t = 取今日()
-    return 取期間(f'{t.year}-{t.month}')
-
-def 取上月份():
-    本月份 = 取本月份()
-    return 本月份 - 1
-
 def 取前年至次年間(取樣頻率='ME'):
     '取樣頻率預設為 ME 即期間內各月底，另可設為 QE 即各季末、YE 即各年底、MS 即各月初等。'
     import pandas as pd
-    今年數 = 取今日().year
+    今年數 = 今日.year
     前年數 = 今年數-1
     次年數 = 今年數+1
     return pd.date_range(f'{前年數}0131', f'{次年數}1231', freq=取樣頻率)
@@ -131,11 +108,11 @@ def 取季別名(季別):
 
 def 取本年度():
     '取表示本年度之整數，如碼本函數時為 2024 年，即傳回整數 2024。'
-    return 今日().year
+    return 今日.year
 
 def 取上年度():
     import pandas as pd
-    return pd.Period(今日(), 'Y') - 1
+    return pd.Period(今日, 'Y') - 1
 
 def 取民國日期(日期=None, 格式='%Y%m%d', 昨今明表達=False):
     '%Y表年數、%m表月數前置0、%d表日數前置0、%M表月數不前置0'
@@ -269,18 +246,61 @@ def 全年期別分割(分割期別):
 def 本年數():
     return 今日().year
 
-def 上年度():
-    return 取上年度()
-
-def 上月():
-    import pandas as pd
-    return pd.Period(今日(), 'M') - 1
-
-def 上季():
-    import pandas as pd
-    return pd.Period(今日(), 'Q-DEC') - 1
-
 def 正式民國日期(d=None):
     return 取正式民國日期(d)
 
+class 動態模組變數底層實作物件類別:
+    @property
+    def 今日(self):
+        return 取日期()
 
+    @property
+    def 最近工作日(self):
+        import pandas as pd
+        return pd.offsets.BDay().rollback(self.今日)
+
+    @property
+    def 一週前(self):
+        from pandas import Timedelta 
+        return self.今日 - Timedelta(days=7)
+
+    @property
+    def 半年前(self):
+        import pandas as pd
+        return self.今日 - pd.DateOffset(months=6)
+
+    @property
+    def 五年又一個月前(self):
+        import pandas as pd
+        return self.今日 - pd.DateOffset(months=61)
+
+    @property
+    def 本月(self):
+        import pandas as pd
+        return pd.Period(self.今日, 'M')
+
+    @property
+    def 上月(self):
+        import pandas as pd
+        return self.本月 - 1
+
+    @property
+    def 上季(self):
+        import pandas as pd
+        return pd.Period(self.今日, 'Q-DEC') - 1
+
+    @property
+    def 上年度(self):
+        import pandas as pd
+        return pd.Period(self.今日, 'Y') - 1
+
+動態模組變數底層實作物件 = 動態模組變數底層實作物件類別()
+今日 = 動態模組變數底層實作物件.今日
+最近工作日 = 動態模組變數底層實作物件.最近工作日
+一週前 = 動態模組變數底層實作物件.一週前
+半年前 = 動態模組變數底層實作物件.半年前
+五年又一個月前 = 動態模組變數底層實作物件.五年又一個月前
+本月 = 動態模組變數底層實作物件.本月
+上月 = 動態模組變數底層實作物件.上月
+上季 = 動態模組變數底層實作物件.上季
+上年度 = 動態模組變數底層實作物件.上年度
