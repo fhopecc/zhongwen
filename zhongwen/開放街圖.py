@@ -165,6 +165,7 @@ def 繪路程(起點, 終點, 地圖, 路網=None, 色彩='blue'):
 
 @cache.memoize(tag='下載宜蘭縣寺廟圖徵')
 def 下載宜蘭縣寺廟圖徵():
+    '座標系為EPSG4326'
     import osmnx as ox
     place_name = "Yilan County, Taiwan"
     tags = {'amenity': 'place_of_worship', "religion": "buddhist"}
