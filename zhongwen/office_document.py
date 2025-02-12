@@ -59,7 +59,7 @@ def 游標模式替換(模式, 替換函式):
 
 微軟辦公室軟體共用範本路徑 = [
         'AppData/Roaming/Microsoft/Templates/Normal.dotm' # Word
-       ,'AppData/Roaming/Microsoft/Excel/XLSTART/fhopecc.xlsb' # Excel
+       ,'AppData/Roaming/Microsoft/AddIns/fhopecc.xlam' # Excel
        ]
 
 def 設定微軟辦公室軟體共用範本():
