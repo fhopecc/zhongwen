@@ -14,7 +14,7 @@ def 列印(docs):
         docs = [docs]
     word = win32.Dispatch("Word.Application")
     for docfile in docs:
-        print(f'列印{docfile }')
+        print(f'列印{docfile}')
         doc = word.Documents.Open(docfile)
         doc.PrintOut()
         doc.Close(False)

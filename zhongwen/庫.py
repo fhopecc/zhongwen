@@ -137,3 +137,19 @@ def 批次寫入(資料, 批號, 批號欄名, 表格, 資料庫, 指定欄位=N
         資料.to_sql(表格, 資料庫, if_exists='append')
         logger.debug(f'寫入成功！')
 
+def 釐正時間欄位(資料庫檔, 表格, 時間欄位=None, 期間欄位=None):
+    from zhongwen.表 import 顯示
+    import sqlite3
+    import pandas as pd
+    from zhongwen.時 import 取日期, 取期間
+    with sqlite3.connect(資料庫檔) as c:
+        sql = f"select * from {表格}"
+        df = pd.read_sql_query(sql, c, index_col='index') 
+        if 時間欄位:
+            for c in 時間欄位:
+                df[c] = df[c].map(取日期).map(轉儲存字串)
+        if 期間欄位:
+            for p in 期間欄位:
+                df[p] = df[p].map(取期間).map(轉儲存字串)
+        顯示(df)
+        df.to_sql(表格, c, if_exists='replace')

@@ -1,4 +1,3 @@
-from unittest.mock import patch, Mock
 import unittest
 
 class Test(unittest.TestCase):
@@ -42,20 +41,7 @@ class Test(unittest.TestCase):
 
         self.assertEqual(今日, Timestamp.today().normalize())
 
-    @patch('zhongwen.時.動態模組變數底層實作物件類別.今日'
-          ,new_callable=unittest.mock.PropertyMock)
-
-    def test_get_past_date(self, 仿今日):
-        from zhongwen.時 import 動態模組變數底層實作物件類別
-        from zhongwen.時 import 取日期
-        from zhongwen.時 import 五年又一個月前
-        import pandas as pd
-
-        仿今日.return_value = 取日期('2024-12-19')
-
-        self.assertEqual(動態模組變數底層實作物件類別().五年又一個月前, 取日期('2019-11-19')) 
-
-    def test_get_periods(self):
+    def test取期間(self):
         from zhongwen.時 import 取期間, 取民國期間
         from zhongwen.時 import 上月, 上年度
         from pandas import Period, Timestamp
@@ -120,6 +106,7 @@ class Test(unittest.TestCase):
         # print(p.start_time)
         # print(p.end_time)
 
+
 if __name__ == '__main__':
     import logging
     logging.basicConfig(level=logging.INFO)
@@ -128,5 +115,4 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test_workaround'))  # 指定測試
     unittest.TextTestRunner().run(suite)

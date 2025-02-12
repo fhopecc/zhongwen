@@ -57,6 +57,11 @@ class Test(unittest.TestCase):
         # df = df[['財報季別', '利息收入']] 
         # show_html(df)
         批次寫入(df, df.iloc[0].財報季別, '財報季別', '單季損益表', 取資料庫(self.測庫路徑))
+
+    def test釐正時間欄位(self):
+        from zhongwen.庫 import 釐正時間欄位
+        from 股票分析.重大訊息分析 import 重大訊息庫
+        釐正時間欄位(重大訊息庫, '重大訊息表', ['發言日期', '歸屬日期'])
         
 if __name__ == '__main__':
     import logging
@@ -64,7 +69,8 @@ if __name__ == '__main__':
     logging.getLogger('googleclient').setLevel(logging.CRITICAL)
     logging.getLogger('matplotlib').setLevel(logging.CRITICAL)
     logging.getLogger('faker').setLevel(logging.CRITICAL)
-    unittest.main()
+    # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test_batch_write'))  # 指定測試
+    # suite.addTest(Test('test_batch_write'))  # 指定測試
+    suite.addTest(Test('test釐正時間欄位'))  # 指定測試
     unittest.TextTestRunner().run(suite)
