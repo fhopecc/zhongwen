@@ -162,7 +162,7 @@ def 取正式民國日期(d=None):
     '格式如：112年7月29日'
     import pandas as pd
     if not d:
-        d = 今日()
+        d = 今日
     if isinstance(d, pd.Period):
         d = d.end_time.normalize()
     return 取民國日期(d, "%Y年%M月%D日")
