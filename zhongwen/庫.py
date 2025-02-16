@@ -1,4 +1,4 @@
-from zhongwen.batch_data import 通知執行時間, 取資料庫, 結果批次寫入
+from zhongwen.batch_data import 取資料庫, 結果批次寫入
 from zhongwen.batch_data import 增加定期更新, 批次刪除
 from pathlib import Path
 import logging
@@ -153,3 +153,15 @@ def 釐正時間欄位(資料庫檔, 表格, 時間欄位=None, 期間欄位=Non
                 df[p] = df[p].map(取期間).map(轉儲存字串)
         顯示(df)
         df.to_sql(表格, c, if_exists='replace')
+
+def 通知執行時間(f):
+    from functools import wraps
+    from time import time
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = time()
+        result = f(*args, **kw)
+        te = time()
+        logger.info(f'{f.__name__}費時{time()-ts:.2f}秒。')
+        return result
+    return wrap
