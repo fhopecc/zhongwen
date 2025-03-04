@@ -59,7 +59,7 @@ def 游標模式替換(模式, 替換函式):
 
 微軟辦公室軟體共用範本路徑 = [
         'AppData/Roaming/Microsoft/Templates/Normal.dotm' # Word
-       ,'AppData/Roaming/Microsoft/AddIns/fhopecc.xlam' # Excel
+       # ,'AppData/Roaming/Microsoft/AddIns/fhopecc.xlam' # Excel
        ]
 
 def 設定微軟辦公室軟體共用範本():
@@ -123,6 +123,9 @@ def 設定環境():
     
     cmd = f'{sys.executable} -m zhongwen.office_document --md2docx "%1"' 
     增加檔案右鍵選單功能('markdown2docx', cmd, '.md') # .docx
+
+    cmd = rf'"C:\Users\lgzhangjian\scoop\apps\vim-nightly\9.1.0411\gvim.exe" "%1"' 
+    增加檔案右鍵選單功能('open', cmd, '.md') # .docx
 
 def 更新微軟辦公室軟體共用範本():
     from shutil import copy
