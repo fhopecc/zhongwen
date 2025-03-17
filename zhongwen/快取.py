@@ -47,8 +47,8 @@ def 增加快取最近時序分析結果(快取, 分析項目名稱欄位, 分�
                             print(分析項目時戳)
                             print(快取分析項目時戳)
                             from zhongwen.表 import 顯示
-                            顯示(快取分析結果, 顯示索引=True)
-                            breakpoint()
+                            # 顯示(快取分析結果, 顯示索引=True)
+                            # breakpoint()
 
                     msg  = f'因{分析項目名稱}{分析時序名稱}'
                     msg += f'尚無較{取正式民國日期(快取分析項目時戳)}更新之資料'
