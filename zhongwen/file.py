@@ -61,14 +61,15 @@ def chrome():
     from selenium import webdriver
     return webdriver.Chrome()
 
-# @cache.memoize(expire=100, tag='抓取')
+@cache.memoize(expire=100, tag='抓取')
 def 抓取(url:str
         ,抓取方式='get'
         ,headers=None
         ,回傳資料形態='str'
-        ,參數={}
+        ,參數=None
         ,除錯=False
-        ,資料={}
+        ,資料=None
+        ,會話識別網址=None
         ,encoding="utf-8"
         ,等待秒數=5
         ,return_json=False
@@ -78,9 +79,11 @@ def 抓取(url:str
         ):
     '''「抓取」網頁內容，傳回字串，惟鍵結以 .xls 或 .xlsx 結尾，視同 Excel 檔，傳回位元組。
 另再就抓取網頁內容之鏈結再進行抓取者，稱「爬取」。
+會話識別網址：針對以會話識別防止爬蟲之網站，可指定本網址以連結取得會話識別後賡續爬取；如指定「網站網址」字串即網址中網站網址部分。
 抓取方式：'get' 指定使用 requests.get；'post' 係 requests.post；'selenium' 係 selenium 模組。
 回傳資料形態: 'str' 傳回字串、'json' 傳回 JSON 物件、'bytes' 傳回位元組及'StringIO' 傳回io。
 '''
+    from urllib.parse import urlparse
     from warnings import warn
     from faker import Faker
     from io import StringIO
@@ -100,10 +103,10 @@ def 抓取(url:str
             ,DeprecationWarning, stacklevel=2)
         抓取方式='get'
 
-    if 參數:
-        warn(f'為強化命名，【參數】參數項將廢棄，請以【資料】替代。'
+    if 資料:
+        warn(f'為強化命名，【資料】參數項將廢棄，請以【參數】替代。'
             ,DeprecationWarning, stacklevel=2)
-        資料=參數
+        參數=資料
 
     if return_bytes:
         warn(f'【return_bytes】參數項將廢棄，請將【回傳資料形態】參數設定【bytes】值替代。'
@@ -137,13 +140,25 @@ def 抓取(url:str
         headers = {'user-agent': fake.user_agent()
                   ,"accept-language": "zh-TW,zh;q=0.9,en;q=0.8,zh-CN;q=0.7"
                   }
-        if 抓取方式=='post':
-            headers["content-type"] = "application/x-www-form-urlencoded"
+    r = requests.session()
+    if 會話識別網址=='網站網址':
+        p = urlparse(url)
+        會話識別網址 = f"{p.scheme}://{p.netloc}"
+
+    if 會話識別網址:
+        r = requests.get(會話識別網址, headers=headers)
+
     if 抓取方式=='post':
-        logging.debug(f'「資料」內容：{資料!r}')
-        r = requests.post(url, headers=headers, data=資料)
+        headers["content-type"] = "application/x-www-form-urlencoded"
+    if 回傳資料形態=='json':
+        headers["content-type"] = "application/json"
+
+    if 'post' in 抓取方式:
+        logging.debug(f'參數：{資料!r}')
+        r = requests.post(url, headers=headers, data=參數)
     else:
         r = requests.get(url, headers=headers)
+
     r.encoding = encoding
     r.raise_for_status()  # 確保請求成功
 
