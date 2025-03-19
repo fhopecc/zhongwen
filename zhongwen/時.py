@@ -266,6 +266,7 @@ def 取民國年月(年月):
 上月 = 本月 - 1
 本季 = pd.Period(今日, 'Q-DEC')
 上季 = 本季 - 1
+上季末 = 上季.end_time.normalize()
 季初 = 本季.start_time.normalize()
 季末 = 本季.end_time.normalize()
 本年度 = pd.Period(今日, 'Y')
