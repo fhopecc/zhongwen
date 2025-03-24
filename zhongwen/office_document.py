@@ -90,7 +90,7 @@ def 複製文字(filepath):
     print(clipboard.paste())
 
 def 設定環境():
-    from zhongwen.winman import 增加檔案右鍵選單功能, 建立傳送到項目
+    from zhongwen.winman import 增加檔案右鍵選單功能, 建立傳送到項目, where
     from zhongwen.office_document import 設定微軟辦公室軟體共用範本
     from shutil import copy
     import sys
@@ -121,10 +121,11 @@ def 設定環境():
     增加檔案右鍵選單功能('另存醒目文字', cmd, 'Word.Document.8') # .docx
     增加檔案右鍵選單功能('另存醒目文字', cmd, 'Word.Document.12') # .docx
     
-    cmd = f'{sys.executable} -m zhongwen.office_document --md2docx "%1"' 
-    增加檔案右鍵選單功能('markdown2docx', cmd, '.md') # .docx
+    cmd = f'{sys.executable} -m zhongwen.office_document --md2docx "%1" && pause' 
 
-    cmd = rf'"C:\Users\lgzhangjian\scoop\apps\vim-nightly\9.1.0411\gvim.exe" "%1"' 
+    增加檔案右鍵選單功能('markdown2docx', cmd, '.md') # .docx
+    gvim = where('gvim')[-1]
+    cmd = rf'"{gvim}" "%1"' 
     增加檔案右鍵選單功能('open', cmd, '.md') # .docx
 
 def 更新微軟辦公室軟體共用範本():
@@ -260,8 +261,10 @@ def html2docx(html):
 def markdown2docx(md):
     from pathlib import Path
     import win32com.client
+    import pythoncom
     import pypandoc
     import os
+    import gc
     md = Path(md)
     docx = Path(__file__).parent / md.with_suffix('.docx')
     temp = r'd:\GitHub\zhongwen\zhongwen\resource\審核報告範本.docx'
@@ -275,15 +278,26 @@ def markdown2docx(md):
                          )
 
     word_app = win32com.client.Dispatch("Word.Application")
+    word_app.DisplayAlerts = 0
     doc = word_app.Documents.Open(str(docx))
     word_app.Visible = True
     try:
         word_app.Run('標題階層編號轉中文編號')
     except Exception as e:
         print(f"執行 VBA 宏時出現錯誤: {e}")
+
     doc.Save()
-    doc.Close()
+
+    try:
+        doc.Close()
+    except Exception as e:
+        print(f"關閉文件時發生錯誤: {e}")
+
     word_app.Quit()
+    doc = None
+    word = None
+    gc.collect()
+    pythoncom.CoUninitialize()
     os.system(f'start {docx}')
 
 def 另存醒目文字(docx):

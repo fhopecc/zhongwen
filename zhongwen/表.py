@@ -190,10 +190,21 @@ def 顯示(df
         html = os.path.join(tmpdirname, "tempfile.html")
         df.to_html(html)
         os.system(f'start {html}')
-        time.sleep(5)
+        time.sleep(10)
 
 def 檢核欄位資料型態是否為字串(表, 欄位名稱): 
     df = 表
     column_name = 欄位名稱
     return df[column_name].dtype == 'object' and df[column_name].map(type).eq(str).all()
 
+def 重名加序(columns):
+    seen = {}
+    new_columns = []
+    for col in columns:
+        if col in seen:
+            seen[col] += 1
+            new_columns.append(f"{col}.{seen[col]}")
+        else:
+            seen[col] = 0
+            new_columns.append(col)
+    return new_columns

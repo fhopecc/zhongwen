@@ -50,12 +50,13 @@ def 合併(pdfs, 合併檔名='合併檔案.pdf'):
             doc2pdf(src, pdfdir)
             pdf = pdfdir / src.with_suffix('.pdf').name
         if src.suffix == '.pdf':
-            copy(src, pdfdir)
+            pdf = src
         try:
             merger.append(pdf)
         except Exception as e:
-           breakpoint() 
-           pass
+            print(e)
+            breakpoint() 
+            pass
     output = filedir / 合併檔名
     merger.write(output)
     merger.close()
@@ -155,8 +156,49 @@ def to_excel(pdfs):
             final_df.to_excel(xlsx, index=False)
             print(f'{pdf.name}->{xlsx.name}')
 
+def 平分(文件路徑, 平分文件數=2, 平分文件大小=None):
+    '''平分文件，預設分半，即將文件平分為2個文件；
+    如指定平分文件數，即平分為該數個文件(尚未實現)；
+    如指定平分文件大小，即依該大小平分文件(尚未實現)。
+    '''
+    import fitz
+
+    pdf_path = Path(文件路徑)
+
+    # 打開 PDF 文件
+    pdf_document = fitz.open(pdf_path)
+
+    # 計算中間頁
+    total_pages = len(pdf_document)
+    half = total_pages // 2
+    output_part1 = pdf_path.with_stem(f'{pdf_path.stem}_1')
+    output_part2 = pdf_path.with_stem(f'{pdf_path.stem}_2')
+
+    # 創建兩個新的 PDF 文件
+    part1 = fitz.open()
+    part2 = fitz.open()
+
+    # 將前半部分加入 part1
+    for page_num in range(half):
+        part1.insert_pdf(pdf_document, from_page=page_num, to_page=page_num)
+
+    # 將後半部分加入 part2
+    for page_num in range(half, total_pages):
+        part2.insert_pdf(pdf_document, from_page=page_num, to_page=page_num)
+
+    # 保存分割後的 PDF 文件
+    part1.save(output_part1, deflate=True)
+    part2.save(output_part2, deflate=True)
+
+    # 關閉文件
+    part1.close()
+    part2.close()
+    pdf_document.close()
+
+    logger.info(f'{pdf_path.name} -\\\\-> [{output_part1}, {output_part2}]')
+
 def 設定環境():
-    from zhongwen.winman import 建立傳送到項目
+    from zhongwen.winman import 建立傳送到項目, 增加檔案右鍵選單功能
     import sys
     logger.info('設定 pdf 功能')
     cmd =  f'"{sys.executable}" -m zhongwen.pdf --merge_pdfs %* && pause'
@@ -165,6 +207,10 @@ def 設定環境():
     cmd =  f'"{sys.executable}" -m zhongwen.pdf --to_excel %* && pause'
     建立傳送到項目('2excel', cmd)
 
+    cmd = f'{sys.executable} -m zhongwen.pdf --split "%1"' 
+    增加檔案右鍵選單功能('平分', cmd, 'pdf')
+    增加檔案右鍵選單功能('平分', cmd, 'FoxitReader.Document')
+
 if __name__ == '__main__':
     import argparse
     logging.basicConfig(level=logging.INFO)
@@ -172,9 +218,12 @@ if __name__ == '__main__':
     parser.add_argument("--setup", help="設定環境", action='store_true')
     parser.add_argument('--to_excel', nargs='+', type=str, help='2excel')
     parser.add_argument('--merge_pdfs', nargs='+', type=str, help='合併PDF')
+    parser.add_argument("--split", type=str, help="平分", required=False)
     args = parser.parse_args()
     if args.setup:
         設定環境()
+    elif pdf := args.split:
+        平分(pdf)
     elif pdfs := args.merge_pdfs:
         合併(pdfs)
     elif pdfs := args.to_excel:
