@@ -13,6 +13,7 @@ def 增加快取最近時序分析結果(快取, 分析項目名稱欄位, 分�
     from zhongwen.時 import 取正式民國日期
     from collections.abc import Iterable 
     from functools import wraps
+    import pandas as pd
 
     if isinstance(分析項目依賴時戳欄位, str) or not isinstance(分析項目依賴時戳欄位, Iterable):
         分析項目依賴時戳欄位 = [分析項目依賴時戳欄位]
@@ -34,21 +35,36 @@ def 增加快取最近時序分析結果(快取, 分析項目名稱欄位, 分�
             if not 重新分析:
                 try:
                     快取分析結果 = 快取[分析項目名稱]
+                    # if not 分析時序名稱 in ['自結損益', '損益'] and 快取分析結果['股票代號'] in ['1341']: 
+                        # raise KeyError('股票代號1341')
                     for 依賴時戳欄位 in 分析項目依賴時戳欄位:
                         快取分析項目時戳 = 快取分析結果[依賴時戳欄位]
                         分析項目時戳 = 最近時間序列[依賴時戳欄位] 
+                        # if not 分析時序名稱 in ['自結損益', '損益'] and 快取分析結果['股票代號'] in ['1341']:
+                        #     print(分析時序名稱)
+                        #     print(依賴時戳欄位)
+                        #     print(快取分析項目時戳)
+                        #     print(分析項目時戳)
+                        #     breakpoint()
                         try:
                             if 分析項目時戳 > 快取分析項目時戳:
                                 msg = f'快取{依賴時戳欄位}為{取正式民國日期(快取分析項目時戳)}'
                                 msg += f'較現行{取正式民國日期(分析項目時戳)}落後，應予更新'
                                 logger.info(msg)
                                 raise 快取結果已過時(msg)
-                        except ValueError:
-                            print(分析項目時戳)
-                            print(快取分析項目時戳)
+                        except pd._libs.tslibs.period.IncompatibleFrequency:
+                            原因 = (f'{最近時間序列["股票代號"]}{依賴時戳欄位}頻率不合，'
+                                    f'當前時戳為{分析項目時戳}，快取為{快取分析項目時戳}'
+                                    f'，爰比較期間結束時間'
+                                    )
+                            logger.info(原因)
                             from zhongwen.表 import 顯示
-                            # 顯示(快取分析結果, 顯示索引=True)
-                            # breakpoint()
+                            # 顯示(最近時間序列, 顯示索引=True)
+                            if 分析項目時戳.end_time.normalize() > 快取分析項目時戳.end_time.normalize():
+                                msg = f'快取{依賴時戳欄位}為{取正式民國日期(快取分析項目時戳)}'
+                                msg += f'較現行{取正式民國日期(分析項目時戳)}落後，應予更新'
+                                logger.info(msg)
+                                raise 快取結果已過時(msg)
 
                     msg  = f'因{分析項目名稱}{分析時序名稱}'
                     msg += f'尚無較{取正式民國日期(快取分析項目時戳)}更新之資料'

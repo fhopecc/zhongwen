@@ -60,6 +60,7 @@ class Test(unittest.TestCase):
         self.assertEqual(取期間('112年年度'), Period('2023', 'Y-DEC'))
         self.assertEqual(取期間('112年第3季'), Period('2023Q3', 'Q-DEC'))
         self.assertEqual(取期間('112年上半年'), Period('2023-1', '6M'))
+        self.assertEqual(取期間('112年\r\n上半年'), Period('2023-1', '6M'))
         self.assertEqual(取期間('112年前半年度'), Period('2023-1', '6M'))
         self.assertEqual(取期間('112年後半年度'), Period('2023-7', '6M'))
 

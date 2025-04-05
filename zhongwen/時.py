@@ -1,6 +1,7 @@
 from pathlib import Path
 import pandas as pd
 import logging
+from zhongwen.date import 全是日期嗎
 
 logger = logging.getLogger(Path(__file__).stem)
 
@@ -12,6 +13,7 @@ def 取日期(日期=None):
 
 def 取期間(期間, 全取=False):
     '指定全取則回傳期間串列，否則傳為首個期間'
+    from zhongwen.文 import 刪空格
     from pandas import Period
     import re
 
@@ -20,7 +22,7 @@ def 取期間(期間, 全取=False):
     elif isinstance(期間, int):
         s = str(期間)
     elif isinstance(期間, str):
-        s = 期間
+        s = 刪空格(期間)
     else:
         logger.error(f'期間型態必須為字串、期間或整數，而非{type(期間)}！')
         return pd.NaT
