@@ -1,7 +1,8 @@
 'windows 系統管理工具'
 from pathlib import Path
-import os
 import logging
+import os
+
 logger = logging.getLogger(Path(__file__).stem)
 
 def setx(var, value):
@@ -109,6 +110,3 @@ def 設定預設右鍵選單():
     增加檔案右鍵選單功能('複製檔案文字', cmd, '*')
     cmd = f'"{sys.executable}" -m zhongwen.file --file2text "%1"' 
     增加檔案右鍵選單功能('轉文字檔', cmd, '*')
- 
-if __name__ == '__main__':
-    設定預設右鍵選單()
