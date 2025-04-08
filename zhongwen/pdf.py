@@ -2,6 +2,20 @@ from pathlib import Path
 import logging
 logger = logging.getLogger(Path(__file__).stem)
 
+def 轉文字檔(pdf_path, output_txt_path=None):
+    """從 PDF 提取文字並存成文字檔"""
+    import fitz  # PyMuPDF
+    pdf_path = Path(pdf_path)
+    if not output_txt_path:
+        output_txt_path = pdf_path.with_suffix(".txt")
+
+    doc = fitz.open(pdf_path)
+    with open(output_txt_path, "w", encoding="utf-8") as txt_file:
+        for page in doc:
+            text = page.get_text("text")
+            txt_file.write(text + "\n")
+    print(f"文字已存入 {output_txt_path}")
+
 def 解鎖(pdfs, 覆蓋原檔=False):
     import PyPDF2
     from collections.abc import Iterable 
