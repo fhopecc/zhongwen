@@ -57,10 +57,7 @@ def 游標模式替換(模式, 替換函式):
         i = m.end()+1
     raise ValueError(f'游標處無此模式，模式:{模式}，游標:{c}，行:{line}')
 
-微軟辦公室軟體共用範本路徑 = [
-        'AppData/Roaming/Microsoft/Templates/Normal.dotm' # Word
-       # ,'AppData/Roaming/Microsoft/AddIns/fhopecc.xlam' # Excel
-       ]
+微軟辦公室軟體共用範本路徑 = ['AppData/Roaming/Microsoft/Templates/Normal.dotm' # Word]
 
 def 設定微軟辦公室軟體共用範本():
     from shutil import copy
@@ -350,7 +347,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--setup", help="設定環境", action="store_true")
     parser.add_argument('--print', nargs='+', type=str, help='列印微軟文件')
-    parser.add_argument("--update_temp", help="更新微軟辦公室軟體共用範本", action="store_true")
+    parser.add_argument("--update_temp", help="將目前Word範本更新至GitHub", action="store_true")
     parser.add_argument("--doc2pdf", type=str, help="轉 PDF 格式。", required=False)
     parser.add_argument("--doc2docx", type=str, help="doc 轉 docx 格式。", required=False)
     parser.add_argument("--to_xlsx", type=str, help="ods 或 pdf 轉 xlsx 格式。", required=False)
