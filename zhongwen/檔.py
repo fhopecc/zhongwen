@@ -3,9 +3,11 @@ from pathlib import Path
 import logging
 logger = logging.getLogger(Path(__file__).stem)
 
-def 同步目錄(甲, 乙):
+def 同步目錄(源, 終):
+    '從源目錄備至終目錄'
     import shutil
-    source_dir, dest_dir = 甲, 乙
+    import os
+    source_dir, dest_dir = 源, 終
     for root, dirs, files in os.walk(source_dir):
         relative_path = os.path.relpath(root, source_dir)
         dest_root = os.path.join(dest_dir, relative_path)
@@ -21,24 +23,6 @@ def 同步目錄(甲, 乙):
                     shutil.copy2(src_file, dest_file)
                 except PermissionError as e:
                     logger.error(e)
-
-    source_dir, dest_dir = dest_dir, source_dir
-    for root, dirs, files in os.walk(source_dir):
-        relative_path = os.path.relpath(root, source_dir)
-        dest_root = os.path.join(dest_dir, relative_path)
-        if not os.path.exists(dest_root):
-            os.makedirs(dest_root, exist_ok=True)
-        # 同步文件
-        for file in files:
-            src_file = os.path.join(root, file)
-            dest_file = os.path.join(dest_root, file)
-            if not os.path.exists(dest_file) or \
-               (os.path.getmtime(src_file) > os.path.getmtime(dest_file)):
-                try:
-                    shutil.copy2(src_file, dest_file)
-                except PermissionError as e:
-                    logger.error(e)
-
 
 def 同步檔案(目錄甲, 目錄乙, 檔):
     """同步单个文件，基于最后修改时间"""
