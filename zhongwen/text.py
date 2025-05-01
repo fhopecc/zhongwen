@@ -204,12 +204,11 @@ def 公司正名(公司名稱):
 
 def 轉樣式表字串(字串):
     '以將Unicode字串以CSS跳脫字元方式轉成ASCII字串，'
+    import re
     try:
         original_string = 字串
         unicode_escaped_string = original_string.encode('unicode_escape').decode()
         # print(unicode_escaped_string)
-        r'[\u9577\u7a7a]\uff1a\u4e0a\u5e74\u5ea6\u80a1\u5229\u4f30\u8a08\u76f8\u5c0d\u8aa4\u5dee\u905420.40%\uff1b[\u77ed\u591a]\uff1a\u6bdb\u5229\u7387\u905454.27%\uff0c\u71df\u5229\u7387\u905423.48%\uff0c\u71df\u5229\u7387\u8f03\u53bb\u5e74\u540c\u671f\u589e\u52a024.60%\uff0c\u6de8\u5229\u7387\u8f03\u53bb\u5e74\u540c\u671f\u589e\u52a023.19%\uff1b[\u77ed\u7a7a]\uff1a\u672a\u6d41\u901a\u6bd4\u4f8b\u9ad8\u905432.43%\uff0c\u4f30\u8a08\u80a1\u5229\u8870\u6e1b17.47%'
-        import re
         pat = r'\\u(\w{4})'
         css_escaped_string = re.sub(pat, r'\\00\1', unicode_escaped_string)
         # print(css_escaped_string)
