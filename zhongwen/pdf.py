@@ -85,7 +85,7 @@ def 旋轉(源檔, 角度=180, 旋轉頁=None, 目標檔=None):
         pdf_writer = PyPDF2.PdfWriter()
         for pagenum in range(len(pdf_reader.pages)):
             page = pdf_reader.pages[pagenum]
-            if pagenum in 旋轉頁:
+            if 旋轉頁 is None or pagenum in 旋轉頁:
                 page.rotate(角度)
             pdf_writer.add_page(page)
         pdf_writer.write(pdf_out)
