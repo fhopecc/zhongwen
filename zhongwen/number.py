@@ -41,6 +41,9 @@ def 轉數值(n, 傳回格式=False) -> int|float:
             return 中文數字轉數值(m.group(0))
         try:
             n = re.sub(r'[ ,，]', '', n)
+            pat = r'^\((\d+\.?\d+)\)$'
+            if m:=re.match(pat, n):
+                return -1*轉數值(m.group(1))
             pat = r'^-?\d+$'
             if m:=re.match(pat, n):
                 return int(n)

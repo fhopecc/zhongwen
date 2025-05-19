@@ -11,9 +11,10 @@ def 取數值(n, 全取=False, 無法解析時產生例外=False):
     import re
     if n == '--': return np.nan
 
-    pat = f'[{全數字表}]+[點.]?[{全數字表}]*[%]?'
     if not isinstance(n, str):
         return 轉數值(n)
+
+    pat = f'\(?-?[{全數字表}]+[點.]?[{全數字表}]*[%]?\)?'
     if ms:=re.findall(pat, n):
         ps = [轉數值(m) for m in ms]
    

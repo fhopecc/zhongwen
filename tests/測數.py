@@ -7,13 +7,14 @@ class Test(unittest.TestCase):
         import pandas as pd
         import numpy as np
 
+        self.assertEqual(取數值('-3,689'), -3689)
+        self.assertEqual(取數值('(13,826)'), -13826)
         self.assertEqual(取數值('中間一二三數字'), 123)
         self.assertEqual(取數值('中間一二三數字246'), 123)
         self.assertEqual(取數值('中間一二三數字2.46', 全取=True), [123, 2.46])
         self.assertTrue(pd.isna(取數值('--')))
         df = pd.DataFrame(['中間一二三數字', '中間一二三數字246'])
         df = df.map(取數值)
-        show_html(df)
 
 
 if __name__ == '__main__':
