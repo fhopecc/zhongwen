@@ -8,8 +8,14 @@ def 取歸屬市縣(名稱, 排除市縣='宜蘭縣'):
     for n in list(應彙整市縣):
         if n in 名稱:
             return n
+    if '新北' in 名稱:
+        if not '新北市' in 排除市縣: return '新北市'
     if '桃' in 名稱:
         if not '桃園市' in 排除市縣: return '桃園市'
+    if '中' in 名稱:
+        if not '臺中市' in 排除市縣: return '臺中市'
+    if '南' in 名稱:
+        if not '臺南市' in 排除市縣: return '臺南市'
     if '高雄' in 名稱:
         if not '高雄市' in 排除市縣: return '高雄市'
     if '基' in 名稱:
@@ -22,6 +28,8 @@ def 取歸屬市縣(名稱, 排除市縣='宜蘭縣'):
         if not '苗栗縣' in 排除市縣: return '苗栗縣'
     if '彰' in 名稱:
         if not '彰化縣' in 排除市縣: return '彰化縣'
+    if '投' in 名稱:
+        if not '南投縣' in 排除市縣: return '南投縣'
     if '雲林' in 名稱:
         if not '雲林縣' in 排除市縣: return '雲林縣'
     if '嘉市' in 名稱:
@@ -30,6 +38,8 @@ def 取歸屬市縣(名稱, 排除市縣='宜蘭縣'):
         if not '花蓮縣' in 排除市縣: return '花蓮縣'
     if '澎' in 名稱:
         if not '澎湖縣' in 排除市縣: return '澎湖縣'
+    if '金' in 名稱:
+        if not '金門縣' in 排除市縣: return '金門縣'
 
 def 未回覆市縣(回覆文件目錄, 排除市縣='宜蘭縣'):
     from collections.abc import Iterable 
