@@ -149,6 +149,28 @@ def 筆記本轉程式碼(ipynb):
         for cell_code in code_cells:
             f.write(cell_code + '\n\n')
 
+
+def 安裝套件(套件名稱):
+    "安裝套件名稱指定之 Python 套件。"
+    import subprocess
+    import sys
+    try:
+        result = subprocess.run(
+            [sys.executable, "-m", "pip", "install", 套件名稱],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        print(f"成功安裝 {套件名稱}！")
+        print("標準輸出:\n", result.stdout)
+    except subprocess.CalledProcessError as e:
+        print(f"安裝 {套件名稱} 失敗！")
+        print("錯誤輸出:\n", e.stderr)
+    except FileNotFoundError:
+        print("錯誤: 找不到 'pip' 命令。請確認 Python 和 pip 已正確安裝並配置到 PATH。")
+    except Exception as e:
+        print(f"安裝 {套件名稱} 時發生未知錯誤: {e}")
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
