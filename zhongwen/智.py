@@ -1,3 +1,8 @@
+def 設定環境():
+    from zhongwen.python_dev import 安裝套件
+    for 套件 in ['zhipuai']:
+        安裝套件(套件)
+
 def deepseek():
     from openai import OpenAI
 
@@ -10,15 +15,20 @@ def deepseek():
         ],
         stream=False
     )
-
     print(response.choices[0].message.content)
 
-from zhipuai import ZhipuAI
-client = ZhipuAI(api_key="7b337bd4c21e4ec5af06cd1e013cc7fd.TrI6SFhI6gcC1wp3")
-response = client.chat.completions.create(
-    model="glm-4-plus",  
-    messages=[
-        {"role": "user", "content": "台積電營收組成及市佔率"},
-    ],
-)
-print(response)
+def 詢智譜():
+    '需連入中國網域'
+    from zhipuai import ZhipuAI
+    client = ZhipuAI(
+            api_key="7b337bd4c21e4ec5af06cd1e013cc7fd.TrI6SFhI6gcC1wp3")
+    response = client.chat.completions.create(
+        model="glm-4-plus",  
+        messages=[
+            {"role": "user", "content": "台積電營收組成及市佔率"},
+        ],
+    )
+    print(response)
+
+if __name__ == '__main__':
+    詢智譜()
