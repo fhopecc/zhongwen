@@ -71,6 +71,10 @@ class Test(unittest.TestCase):
         self.assertIsInstance(上月, Period)
         self.assertIsInstance(上年度, Period)
 
+    def test取季別年數季數(self):
+        from zhongwen.時 import 取季別年數季數
+        self.assertEqual(取季別年數季數('2023Q2'), (2023, 2))
+
     def test_cut_period(self):
         from zhongwen.時 import 全年期別分割, 取期間
         from pandas import period_range
