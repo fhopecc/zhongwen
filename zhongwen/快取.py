@@ -8,13 +8,15 @@ def 刪除指定名稱快取(快取, 名稱):
     for key in keys_to_delete:
         c.delete(key)
 
-def 增加快取最近時序分析結果(快取, 分析項目名稱欄位, 分析項目依賴時戳欄位, 分析時序名稱=''):
-    '分析項目依賴時戳欄位可為多個'
+def 增加快取最近時序分析結果(快取, 分析項目名稱欄位, 分析項目依賴時戳欄位, 分析時序名稱=''
+                            ):
+    '''分析項目名稱欄位即快取唯一主鍵，通常為股票名稱或公司名稱。
+分析項目依賴時戳欄位可為多個，其中一個時戳落後即予更新。
+'''
     from zhongwen.時 import 取正式民國日期
     from collections.abc import Iterable 
     from functools import wraps
     import pandas as pd
-
     if isinstance(分析項目依賴時戳欄位, str) or not isinstance(分析項目依賴時戳欄位, Iterable):
         分析項目依賴時戳欄位 = [分析項目依賴時戳欄位]
 
@@ -23,7 +25,9 @@ def 增加快取最近時序分析結果(快取, 分析項目名稱欄位, 分�
     class 快取結果已過時(Exception):pass
     def 取可快取最新結果分析時序函數(分析時序函數):
         @wraps(分析時序函數)
-        def 可快取最新結果分析時序函數(時間序列, 重新分析=False):
+        def 可快取最新結果分析時序函數(時間序列, 重新分析=False, 指定重新分析項目=None):
+            '''指定重新分析項目係指定要重分析之項目名稱串列，如指定一組股票名稱必需更新。'''
+            from collections.abc import Iterable 
             最久時間序列 = 時間序列.iloc[0]
             最久分析項目時戳 = 最久時間序列[主要依賴時戳欄位]
             最近時間序列 = 時間序列.iloc[-1]
@@ -32,6 +36,11 @@ def 增加快取最近時序分析結果(快取, 分析項目名稱欄位, 分�
             msg  = f'分析{分析項目名稱}自{取正式民國日期(最久分析項目時戳)}'
             msg += f'至{取正式民國日期(分析項目時戳)}期間{分析時序名稱}數據……'
             logger.info(msg)
+            if 指定重新分析項目:
+                if isinstance(指定重新分析項目, str) or not isinstance(指定重新分析項目, Iterable):
+                    指定重新分析項目 = [指定重新分析項目]
+                if 分析項目名稱 in 指定重新分析項目:
+                    重新分析 = True
             if not 重新分析:
                 try:
                     快取分析結果 = 快取[分析項目名稱]
@@ -65,6 +74,12 @@ def 增加快取最近時序分析結果(快取, 分析項目名稱欄位, 分�
                                 msg += f'較現行{取正式民國日期(分析項目時戳)}落後，應予更新'
                                 logger.info(msg)
                                 raise 快取結果已過時(msg)
+                        except TypeError:
+                            print(分析項目時戳)
+                            print(type(分析項目時戳))
+                            print(快取分析項目時戳)
+                            print(type(快取分析項目時戳))
+
 
                     msg  = f'因{分析項目名稱}{分析時序名稱}'
                     msg += f'尚無較{取正式民國日期(快取分析項目時戳)}更新之資料'

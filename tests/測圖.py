@@ -7,10 +7,9 @@ class Test(unittest.TestCase):
         from zhongwen.圖 import 取圖內文
         from pathlib import Path
         圖檔 = Path(__file__).parent / '賜岳飛敕.jpg'
-        圖內文 = 取圖內文(圖檔)
-        print(圖內文 )
-        self.assertEqual(圖內文, "")
-        
+        圖內文 = r = 取圖內文(圖檔)
+        print(圖內文[0]['rec_texts'])
+        self.assertEqual(圖內文[0]['rec_texts'][0], "乾隆尚題")
  
 if __name__ == '__main__':
     import logging
@@ -19,6 +18,6 @@ if __name__ == '__main__':
     logging.getLogger('matplotlib').setLevel(logging.CRITICAL)
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     unittest.main()
-    suite = unittest.TestSuite()
-    suite.addTest(Test('test'))  # 指定測試
-    unittest.TextTestRunner().run(suite)
+    # suite = unittest.TestSuite()
+    # suite.addTest(Test('test'))  # 指定測試
+    # unittest.TextTestRunner().run(suite)

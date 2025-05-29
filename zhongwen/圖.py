@@ -1,7 +1,46 @@
+
+def has_NVIDIA_GPU():
+    from pynvml import nvmlInit, nvmlDeviceGetCount
+    from pynvml import nvmlDeviceGetHandleByIndex, nvmlDeviceGetName
+    from pynvml import nvmlDeviceGetMemoryInfo, nvmlShutdown
+    try:
+        nvmlInit()
+        deviceCount = nvmlDeviceGetCount()
+        if deviceCount > 0:
+            print(f"检测到 {deviceCount} 个 NVIDIA GPU！")
+            for i in range(deviceCount):
+                handle = nvmlDeviceGetHandleByIndex(i)
+                print(f"GPU {i}: {nvmlDeviceGetName(handle)}")
+                # 可以获取更多信息，例如内存使用
+                # info = nvmlDeviceGetMemoryInfo(handle)
+                # print(f"  总内存: {info.total / (1024**3):.2f} GB")
+                # print(f"  已使用内存: {info.used / (1024**3):.2f} GB")
+                return True
+        else:
+            print("未检测到 NVIDIA GPU。")
+        nvmlShutdown()
+        return False
+    except NVMLError as error:
+        print(f"NVML 初始化失败或未检测到 NVIDIA 驱动: {error}")
+        print("请确保已安装 NVIDIA 驱动程序。")
+    except ImportError:
+        print("pynvml 模块未安装。请运行 'pip install pynvml' 安装。")
+        print("未检测到 GPU。")
+    return False
+
 def 安裝必要套件():
     from zhongwen.python_dev import 安裝套件
-    for p in ['paddlepaddle', 'paddleocr']:
-        安裝套件(p)
+    import torch
+    import os
+    import paddle
+    # if has_NVIDIA_GPU():
+        # cmd = 'python -m pip install paddlepaddle-gpu==3.0.0 -i https://www.paddlepaddle.org.cn/packages/stable/cu126/'
+        # os.system(cmd) 
+        # 安裝套件('paddlepaddle-gpu')
+    # else:
+    安裝套件('paddlepaddle')
+    paddle.utils.run_check()
+    安裝套件('paddleocr')   
 
 def 取圖陣列(圖):
     '取圖的 ndarray 表示'
@@ -54,6 +93,7 @@ def 取圖內文(圖):
     if not isinstance(圖, np.ndarray):
         # 不是陣列就是圖檔路徑，但只接受路徑字串表示
         圖 = 取圖陣列(str(圖))
+    print(圖)
     ocr = PaddleOCR(
         use_doc_orientation_classify=False, 
         use_doc_unwarping=False, 

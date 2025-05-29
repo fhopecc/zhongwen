@@ -86,8 +86,7 @@ def 顯示(df
         ,不顯示=False
         ):
     '''字串視為超文件檔案直接顯示；序列、系列、集合、陣列及資料框以表格顯示。
-如設不顯示，傳回樣式及可顯示資料框，可顯示資料框用來設定工具提示。
-    '''
+如設不顯示，傳回樣式及可顯示資料框，可顯示資料框用來設定工具提示。'''
     from pathlib import Path
     import pandas as pd
     import numpy as np
@@ -139,7 +138,6 @@ def 顯示(df
         df[c] = pd.to_numeric(df[c])
     if not 無格式:
         try:
-            from zhongwen.pandas_tools import 標準格式
             df.columns = 重名加序(df.columns)
             整數欄位 = set(整數欄位).union(df.select_dtypes(include=['int']).columns)
             百分比欄位 = set(百分比欄位)
@@ -159,9 +157,12 @@ def 顯示(df
             浮動提示 = df.copy()
             可顯示資料框 = df.copy()
             for c in df.columns: 浮動提示[c] = c
-
-            df = df.style.map(lambda _:'text-align:right')
-            df = df.map_index(lambda _:'text-align:center', axis=1)
+            if pd.__version__.startswith('2.'):
+                df = df.style.map(lambda _:'text-align:right')
+                df = df.map_index(lambda _:'text-align:center', axis=1)
+            else:
+                df = df.style.applymap(lambda _:'text-align:right')
+                df = df.applymap_index(lambda _:'text-align:center', axis=1)
             df = df.format('{:,.0f}', subset=list(整數欄位), na_rep='')
             df = df.format(lambda v: f"{v*100:.0f}", subset=list(百分比欄位), na_rep='')
             df = df.format('{:,.2f}', subset=list(實數欄位), na_rep='')
@@ -180,14 +181,20 @@ def 顯示(df
             }
             df = df.set_table_styles([tr_hover], overwrite=False)
             df = df.set_tooltips(浮動提示)
-        except Exception:
+        except Exception as e:
+            logger.error(e)
+            breakpoint()
             return 顯示(odf, 無格式=True)
 
     if 不顯示:
+        print(df)
+        print(可顯示資料框)
+        breakpoint()
         return df, 可顯示資料框
 
     with tempfile.TemporaryDirectory() as tmpdirname:
         html = os.path.join(tmpdirname, "tempfile.html")
+        print(type(df))
         df.to_html(html)
         os.system(f'start {html}')
         time.sleep(10)
