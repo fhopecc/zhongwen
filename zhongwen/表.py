@@ -187,9 +187,6 @@ def 顯示(df
             return 顯示(odf, 無格式=True)
 
     if 不顯示:
-        print(df)
-        print(可顯示資料框)
-        breakpoint()
         return df, 可顯示資料框
 
     with tempfile.TemporaryDirectory() as tmpdirname:
