@@ -95,3 +95,20 @@ def 取大寫中文數字(數):
 
 def 取大写中文数字(数):
     return 取中文數字(数, 大寫=True, 簡體=True)
+
+def 計算增減率(上期數, 本期數):
+    import pandas as pd
+    import numpy as np
+    try:
+        if 本期數 > 0 and 上期數 <=0:
+            return np.inf
+        elif 本期數 <= 0 and 上期數 > 0:
+            return -np.inf
+        return (本期數 - 上期數) / abs(上期數)
+    except ZeroDivisionError:
+        if 本期數>0:
+            return np.inf
+        else:
+            return -np.inf
+    except Exception as e:
+        raise ValueError(f'上期數{上期數}及本期數{本期數}發生錯誤如次：{e}!')
