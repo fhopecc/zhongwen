@@ -1,46 +1,10 @@
-
-def has_NVIDIA_GPU():
-    from pynvml import nvmlInit, nvmlDeviceGetCount
-    from pynvml import nvmlDeviceGetHandleByIndex, nvmlDeviceGetName
-    from pynvml import nvmlDeviceGetMemoryInfo, nvmlShutdown
-    try:
-        nvmlInit()
-        deviceCount = nvmlDeviceGetCount()
-        if deviceCount > 0:
-            print(f"检测到 {deviceCount} 个 NVIDIA GPU！")
-            for i in range(deviceCount):
-                handle = nvmlDeviceGetHandleByIndex(i)
-                print(f"GPU {i}: {nvmlDeviceGetName(handle)}")
-                # 可以获取更多信息，例如内存使用
-                # info = nvmlDeviceGetMemoryInfo(handle)
-                # print(f"  总内存: {info.total / (1024**3):.2f} GB")
-                # print(f"  已使用内存: {info.used / (1024**3):.2f} GB")
-                return True
-        else:
-            print("未检测到 NVIDIA GPU。")
-        nvmlShutdown()
-        return False
-    except NVMLError as error:
-        print(f"NVML 初始化失败或未检测到 NVIDIA 驱动: {error}")
-        print("请确保已安装 NVIDIA 驱动程序。")
-    except ImportError:
-        print("pynvml 模块未安装。请运行 'pip install pynvml' 安装。")
-        print("未检测到 GPU。")
-    return False
-
-def 安裝必要套件():
+def 安裝依賴套件及程式():
     from zhongwen.python_dev import 安裝套件
-    import torch
     import os
-    import paddle
-    # if has_NVIDIA_GPU():
-        # cmd = 'python -m pip install paddlepaddle-gpu==3.0.0 -i https://www.paddlepaddle.org.cn/packages/stable/cu126/'
-        # os.system(cmd) 
-        # 安裝套件('paddlepaddle-gpu')
-    # else:
-    安裝套件('paddlepaddle')
-    paddle.utils.run_check()
-    安裝套件('paddleocr')   
+    for 應用程式 in ['tesseract', 'tesseract-languages']:
+        os.system(f'scoop install {app}')
+    安裝套件('tesseract')
+    安裝套件('tesseract-languages')   
 
 def 取圖陣列(圖):
     '取圖的 ndarray 表示'
@@ -76,9 +40,6 @@ def 取圖陣列(圖):
     # PIL 預設是 RGB 格式 (Red, Green, Blue)
     img_np = np.array(img_pil)
 
-    # 如果需要，將 RGB 轉換為 BGR (OpenCV 和某些深度學習框架的預設)
-    # PaddleOCR 的 `ocr()` 方法可以直接處理 RGB 陣列，但有些其他函式或庫可能需要 BGR
-    # 如果確定 PaddleOCR 可以直接處理 RGB，這一步可以省略。
     # 通常為了相容性，尤其當與 OpenCV 協作時，會轉換為 BGR。
     # 如果 img_np 只有2個維度 (灰度圖)，則不需要轉換
     if len(img_np.shape) == 3 and img_np.shape[2] == 3: # 確保是彩色圖片
@@ -86,20 +47,15 @@ def 取圖陣列(圖):
     
     return img_np
 
-def 取圖內文(圖):
-    '圖可為 numpy.ndarray 或圖檔路徑'
-    from paddleocr import PaddleOCR
-    import numpy as np
-    if not isinstance(圖, np.ndarray):
-        # 不是陣列就是圖檔路徑，但只接受路徑字串表示
-        圖 = 取圖陣列(str(圖))
-    print(圖)
-    ocr = PaddleOCR(
-        use_doc_orientation_classify=False, 
-        use_doc_unwarping=False, 
-        use_textline_orientation=False) # 文本检测+文本识别
-    result = ocr.predict(圖)
-    return result
+def tesseract(png):
+    '採用 google tesseract 辨識圖內文，目前最精準快速之OCR。'
+    from PIL import Image
+    import pytesseract
+    image = Image.open(str(png))
+    text = pytesseract.image_to_string(image, lang='chi_tra')
+    text = ''.join(text)
+    text = text.replace('\n','')
+    return text
 
-if __name__ == '__main__':
-    安裝必要套件()
+def 取圖內文(圖檔):
+    return tesseract(圖檔)
