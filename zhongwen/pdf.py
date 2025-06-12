@@ -1,7 +1,27 @@
 from pathlib import Path
 import logging
+from diskcache import Cache
+from pathlib import Path
+
 logger = logging.getLogger(Path(__file__).stem)
 
+cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
+
+def 設定環境():
+    from zhongwen.winman import 建立傳送到項目, 增加檔案右鍵選單功能
+    import sys
+    logger.info('設定 pdf 功能')
+    cmd =  f'"{sys.executable}" -m zhongwen.pdf --merge_pdfs %* && pause'
+    建立傳送到項目('合併為PDF', cmd)
+
+    cmd =  f'"{sys.executable}" -m zhongwen.pdf --to_excel %* && pause'
+    建立傳送到項目('2excel', cmd)
+
+    cmd = f'{sys.executable} -m zhongwen.pdf --split "%1"' 
+    增加檔案右鍵選單功能('平分', cmd, 'pdf')
+    增加檔案右鍵選單功能('平分', cmd, 'FoxitReader.Document')
+
+@cache.memoize('轉文字檔')
 def 轉文字檔(pdf_path, output_txt_path=None):
     """從 PDF 提取文字並存成文字檔"""
     import fitz  # PyMuPDF
@@ -33,7 +53,6 @@ def 解鎖(pdfs, 覆蓋原檔=False):
                 writer.write(output_file)
             if 覆蓋原檔:
                 desecured_pdf.replace(pdf)
-
 
 def 合併(pdfs, 合併檔名='合併檔案.pdf'):
     from zhongwen.office_document import doc2docx, doc2pdf
@@ -211,19 +230,136 @@ def 平分(文件路徑, 平分文件數=2, 平分文件大小=None):
 
     logger.info(f'{pdf_path.name} -\\\\-> [{output_part1}, {output_part2}]')
 
-def 設定環境():
-    from zhongwen.winman import 建立傳送到項目, 增加檔案右鍵選單功能
-    import sys
-    logger.info('設定 pdf 功能')
-    cmd =  f'"{sys.executable}" -m zhongwen.pdf --merge_pdfs %* && pause'
-    建立傳送到項目('合併為PDF', cmd)
+@cache.memoize('取文字')
+def 取文字(pdf):
+    """
+    從指定 PDF 中提取文字並辨識圖內文字。
+    """
+    from zhongwen.圖 import 取圖內文
+    import fitz  # PyMuPDF
+    from PIL import Image
+    import io
+    import os
+    pdf_path = str(pdf)
+    if not os.path.exists(pdf_path):
+        print(f"錯誤：找不到 PDF 檔案 '{pdf_path}'")
+        return
 
-    cmd =  f'"{sys.executable}" -m zhongwen.pdf --to_excel %* && pause'
-    建立傳送到項目('2excel', cmd)
+    full_text_content = []
+    ocr_results_by_page = []
 
-    cmd = f'{sys.executable} -m zhongwen.pdf --split "%1"' 
-    增加檔案右鍵選單功能('平分', cmd, 'pdf')
-    增加檔案右鍵選單功能('平分', cmd, 'FoxitReader.Document')
+    try:
+        doc = fitz.open(pdf_path)
+        total_pages = doc.page_count
+        print(f"正在處理 PDF 檔案：'{pdf_path}'，共 {total_pages} 頁...")
+
+        for page_num in range(total_pages):
+            page = doc[page_num]
+            page_text = f"\n--- Page {page_num + 1} (Direct Text Extraction) ---\n"
+            page_ocr_text = f"\n--- Page {page_num + 1} (OCR from Images) ---\n"
+            current_page_has_direct_text = False
+            current_page_has_ocr_text = False
+
+            # 1. 嘗試直接提取頁面文字 (可選取的文字)
+            text = page.get_text()
+            if text.strip():
+                page_text += text
+                current_page_has_direct_text = True
+            else:
+                page_text += "[此頁沒有直接可提取的文字內容。]\n"
+
+            # 2. 提取頁面中的圖片並進行 OCR
+            image_list = page.get_images(full=True) # full=True 獲取完整圖片資訊
+            if image_list:
+                image_count_on_page = 0
+                for img_index, img in enumerate(image_list):
+                    xref = img[0]  # 圖片的 xref (交叉引用編號)
+                    base_image = doc.extract_image(xref)
+                    image_bytes = base_image["image"]
+                    image_ext = base_image["ext"]
+
+                    # 檢查圖片是否有有效的數據
+                    if image_bytes:
+                        try:
+                            # 使用 Pillow 開啟圖片
+                            image = Image.open(io.BytesIO(image_bytes))
+                            
+                            # 執行 OCR
+                            ocr_text = 取圖內文(image)
+                            if ocr_text.strip():
+                                page_ocr_text += f"\n--- Image {img_index + 1} (xref: {xref}) OCR Result ---\n"
+                                page_ocr_text += ocr_text
+                                page_ocr_text += "\n----------------------------------------\n"
+                                current_page_has_ocr_text = True
+                                image_count_on_page += 1
+                        except Exception as img_err:
+                            page_ocr_text += f"警告：無法處理頁面 {page_num + 1} 的圖片 {img_index + 1} (xref: {xref})：{img_err}\n"
+                if image_count_on_page == 0:
+                     page_ocr_text += "[此頁圖片中沒有識別出文字。]\n"
+            else:
+                page_ocr_text += "[此頁沒有嵌入圖片。]\n"
+
+            full_text_content.append(page_text)
+            ocr_results_by_page.append(page_ocr_text)
+
+            print(f"頁面 {page_num + 1} 處理完成。")
+        return '\n'.join(full_text_content) + '\n'.join(ocr_results_by_page)
+    except Exception as e:
+        raise Exception(f"處理 PDF 時發生錯誤：{e}")
+
+def 取輸出圖面文字(pdf):
+    from PIL import Image
+    from zhongwen.圖 import 取圖內文
+    import fitz  # PyMuPDF
+    import io
+    import os
+    """
+    將 PDF 的每一頁渲染成圖片，然後對每張圖片進行 OCR。
+    """
+    pdf_path = str(pdf)
+    if not os.path.exists(pdf_path):
+        print(f"錯誤：找不到 PDF 檔案 '{pdf_path}'")
+        return
+
+    full_ocr_content = []
+
+    dpi = 72
+
+    doc = fitz.open(pdf_path)
+    total_pages = doc.page_count
+    print(f"正在處理 PDF 檔案：'{pdf_path}'，共 {total_pages} 頁...")
+    print(f"將每頁渲染為 {dpi} DPI 的圖片進行 OCR...")
+
+    for page_num in range(total_pages):
+        page = doc[page_num]
+        ocr_text_on_page = f"\n--- Page {page_num + 1} (OCR from Rendered Image) ---\n"
+
+        # 渲染頁面為圖片
+        # matrix = fitz.Matrix(scale_x, scale_y) 控制渲染解析度
+        # 例如，預設 DPI 是 72，要渲染 300 DPI，scale = 300 / 72 ≈ 4.16
+        zoom = dpi / 72
+        mat = fitz.Matrix(zoom, zoom)
+        
+        pix = page.get_pixmap(matrix=mat) # 獲取頁面的像素圖
+
+        # 將像素圖轉換為 Pillow 圖像對象
+        img_bytes = pix.tobytes("png") # 獲取 PNG 格式的圖片數據
+        image = Image.open(io.BytesIO(img_bytes))
+
+        # 執行 OCR
+        try:
+            text = 取圖內文(image)
+            if text.strip():
+                ocr_text_on_page += text
+            else:
+                ocr_text_on_page += "[此頁圖片中沒有識別出文字。]\n"
+        except Exception as ocr_err:
+            ocr_text_on_page += f"[執行 OCR 時發生錯誤：{ocr_err}]\n"
+            print(f"頁面 {page_num + 1} 執行 OCR 時發生錯誤：{ocr_err}")
+
+        full_ocr_content.append(ocr_text_on_page)
+        print(f"頁面 {page_num + 1} 處理完成。")
+    return '\n'.join(full_ocr_content)
 
 if __name__ == '__main__':
     import argparse

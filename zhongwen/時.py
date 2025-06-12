@@ -246,8 +246,6 @@ def 全年期別分割(分割期別):
         rps = []
     return ps, rps
 
-def 本年數():
-    return 今日().year
 
 def 正式民國日期(d=None):
     return 取正式民國日期(d)
@@ -261,8 +259,10 @@ def 取季別年數季數(季別):
     return 季別.year, 季別.quarter
 
 今日 = 取日期()
+今年數 = 今日.year
 年底 = 取日期("{今日.year}.12.31")
 最近工作日 = pd.offsets.BDay().rollback(今日)
+昨日 = 今日 - pd.Timedelta(days=1)
 一週前 = 今日 - pd.Timedelta(days=7)
 半月前 = 今日 - pd.Timedelta(days=14)
 一季前 = 今日 - pd.DateOffset(months=3)

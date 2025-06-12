@@ -8,11 +8,10 @@ def 刪除指定名稱快取(快取, 名稱):
     for key in keys_to_delete:
         c.delete(key)
 
-def 增加快取最近時序分析結果(快取, 分析項目名稱欄位, 分析項目依賴時戳欄位, 分析時序名稱=''
-                            ):
+def 增加快取最近時序分析結果(快取, 分析項目名稱欄位, 分析項目依賴時戳欄位, 分析時序名稱=''):
     '''分析項目名稱欄位即快取唯一主鍵，通常為股票名稱或公司名稱。
-分析項目依賴時戳欄位可為多個，其中一個時戳落後即予更新。
-'''
+    分析項目依賴時戳欄位可為多個，其中一個時戳落後即予更新。
+    '''
     from zhongwen.時 import 取正式民國日期
     from collections.abc import Iterable 
     from functools import wraps

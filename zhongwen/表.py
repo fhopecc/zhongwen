@@ -192,7 +192,6 @@ def 顯示(df
 
     with tempfile.TemporaryDirectory() as tmpdirname:
         html = os.path.join(tmpdirname, "tempfile.html")
-        print(type(df))
         df.to_html(html)
         os.system(f'start {html}')
         time.sleep(10)

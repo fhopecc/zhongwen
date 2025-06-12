@@ -2,9 +2,8 @@ def 安裝依賴套件及程式():
     from zhongwen.python_dev import 安裝套件
     import os
     for 應用程式 in ['tesseract', 'tesseract-languages']:
-        os.system(f'scoop install {app}')
-    安裝套件('tesseract')
-    安裝套件('tesseract-languages')   
+        os.system(f'scoop install {應用程式}')
+    安裝套件('pytesseract')
 
 def 取圖陣列(圖):
     '取圖的 ndarray 表示'

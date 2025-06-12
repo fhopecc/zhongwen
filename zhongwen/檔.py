@@ -1,7 +1,13 @@
-from zhongwen.file import 抓取, 下載
+from zhongwen.file import 下載
 from pathlib import Path
+from diskcache import Cache
 import logging
+
 logger = logging.getLogger(Path(__file__).stem)
+
+cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
+
+@cache.memoize()
 
 def 同步目錄(源, 終):
     '從源目錄備至終目錄'
@@ -58,3 +64,120 @@ def 同步檔案(目錄甲, 目錄乙, 檔):
             print(f"更新源文件: {filename} (目标文件较新)")
         else:
             print(f"文件已同步: {filename}")
+
+
+@cache.memoize(expire=100, tag='抓取')
+def 抓取(url:str
+        ,抓取方式='get'
+        ,headers=None
+        ,回傳資料形態='str'
+        ,參數=None
+        ,除錯=False
+        ,資料=None
+        ,會話識別網址=None
+        ,encoding="utf-8"
+        ,等待秒數=5
+        ,return_json=False
+        ,return_content=False
+        ,return_bytes=False
+        ,use_requests=None
+        ):
+    '''「抓取」網頁內容，傳回字串，惟鍵結以 .xls 或 .xlsx 結尾，視同 Excel 檔，傳回位元組。
+另再就抓取網頁內容之鏈結再進行抓取者，稱「爬取」。
+會話識別網址：針對以會話識別防止爬蟲之網站，可指定本網址以連結取得會話識別後賡續爬取；如指定「網站網址」字串即網址中網站網址部分。
+抓取方式：'get' 指定使用 requests.get；'post' 係 requests.post；'selenium' 係 selenium 模組。
+回傳資料形態: 'str' 傳回字串、'json' 傳回 JSON 物件、'bytes' 傳回位元組及'StringIO' 傳回io。
+'''
+    from urllib.parse import urlparse
+    from warnings import warn
+    from faker import Faker
+    from io import StringIO
+    import requests
+    import logging
+    import time
+
+    # 鍵結以 .xls 或 .xlsx 結尾，視同 Excel 檔，傳回位元組。
+    if not return_content:
+        for suffix in ['.xls', '.xlsx']:
+            if url.endswith(suffix):
+                return_content=True
+                break
+
+    if 抓取方式=='request':
+        warn(f'為強化命名，抓取方式參數之【request】選項將廢棄，請以【get】 替代。'
+            ,DeprecationWarning, stacklevel=2)
+        抓取方式='get'
+
+    if 資料:
+        warn(f'為強化命名，【資料】參數項將廢棄，請以【參數】替代。'
+            ,DeprecationWarning, stacklevel=2)
+        參數=資料
+
+    if return_bytes:
+        warn(f'【return_bytes】參數項將廢棄，請將【回傳資料形態】參數設定【bytes】值替代。'
+            ,DeprecationWarning, stacklevel=2)
+        回傳資料形態 = 'bytes'
+
+    if return_content:
+        warn(f'【return_content】參數項將廢棄，請將【回傳資料形態】參數設定【bytes】值替代。'
+            ,DeprecationWarning, stacklevel=2)
+        回傳資料形態 = 'bytes'
+
+    if return_json:
+        warn(f'【return_json】參數項將廢棄，請將【回傳資料形態】參數設定【json】值替代。'
+            ,DeprecationWarning, stacklevel=2)
+        回傳資料形態 = 'json'
+
+    if use_requests: 
+        warn(f'預設使用【requests】模組，【use_request】參數項已無作用並將廢棄。'
+            ,DeprecationWarning, stacklevel=2)
+
+    if 抓取方式 == 'selenium':
+        c = chrome()
+        c.get(url)
+        time.sleep(等待秒數)
+        if '使用支援JavaScript' in c.page_source:
+            c.get(url)
+            time.sleep(等待秒數)
+        return c.page_source
+    if not headers:
+        fake = Faker()
+        headers = {'user-agent': fake.user_agent()
+                  ,"accept-language": "zh-TW,zh;q=0.9,en;q=0.8,zh-CN;q=0.7"
+                  }
+    r = requests.session()
+    if 會話識別網址=='網站網址':
+        p = urlparse(url)
+        會話識別網址 = f"{p.scheme}://{p.netloc}"
+
+    if 會話識別網址:
+        r = requests.get(會話識別網址, headers=headers)
+
+    if 抓取方式=='post':
+        headers["content-type"] = "application/x-www-form-urlencoded"
+    if 回傳資料形態=='json':
+        headers["content-type"] = "application/json"
+
+    if 'post' in 抓取方式:
+        logging.debug(f'參數：{資料!r}')
+        r = requests.post(url, headers=headers, data=參數)
+    else:
+        r = requests.get(url, headers=headers)
+
+    r.encoding = encoding
+    r.raise_for_status()  # 確保請求成功
+
+    除錯訊息 = (f'回復內容為「{r!r}」：\n'
+                f'{r.text!r}'
+               )
+    logging.debug(除錯訊息)
+
+    if 回傳資料形態=='json':
+        return r.json()
+    elif 回傳資料形態=='bytes':
+        return r.content
+    elif 回傳資料形態=='StringIO':
+        return StringIO(r.text)
+    else:
+        return r.text
+
