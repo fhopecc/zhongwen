@@ -44,9 +44,17 @@ def 取年報摘要(年報內容):
     )
     return response.choices[0].message.content
 
-if __name__ == '__main__':
-    from zhongwen.pdf import 取文字
-    from pathlib import Path
-    pdf = Path(__file__).parent.parent / r'tests\數字2024年報.pdf'
-    內容 = 取文字(str(pdf))
-    r = 取年報摘要(內容)
+def 詢問(問題):
+    '需連入中國網域'
+    from zhipuai import ZhipuAI
+    client = ZhipuAI(api_key=__zhipuai_api_key__)
+    response = client.chat.completions.create(
+        model="glm-4-plus",  
+        messages=[
+            {"role": "system", "content": "你是一個繁體中文資訊助理"},
+            {"role": "user", "content": f"請用繁體中文回答以下問題：{問題}"}
+        ],
+    )
+    return response.choices[0].message.content
+
+
