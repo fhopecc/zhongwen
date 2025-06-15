@@ -39,7 +39,7 @@ def 取年報摘要(年報內容):
         model="glm-4-plus",  
         messages=[
             {"role": "system", "content": "你是一個專業財報分析師"},
-            {"role": "user", "content": f"請依據以下公司公布年報內容，用中文摘要公司收入組成、市占率及利潤率：{年報內容}"}
+            {"role": "user", "content": f"請依據以下公司公布年報內容【{年報內容}】，用中文摘要公司收入組成、市占率及利潤率。"}
         ],
     )
     return response.choices[0].message.content
@@ -53,8 +53,6 @@ def 詢問(問題):
         messages=[
             {"role": "system", "content": "你是一個繁體中文資訊助理"},
             {"role": "user", "content": f"請用繁體中文回答以下問題：{問題}"}
-        ],
+        ]
     )
     return response.choices[0].message.content
-
-

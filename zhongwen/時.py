@@ -41,6 +41,8 @@ def 取期間(期間, 全取=False):
             ps = [Period(f'{int(m[0])+1911}{int(m[1]):02}', 'M') for m in ms]
         except Exception:
             raise Exception(f"'{期間字串}'無法解析為期間字串！")
+    elif ms:=re.findall(r'(\d{2,3})年度', s):
+        ps = [Period(f'{int(m)+1911}', 'Y') for m in ms]
     elif ms:=re.findall(r'(\d{2,3})年第([1-4])季', s):
         ps = [Period(f'{int(m[0])+1911}Q{m[1]}', 'Q') for m in ms]
     elif ms:=re.findall(r'(\d{2,3})年([前後])半年度', s):
@@ -260,6 +262,7 @@ def 取季別年數季數(季別):
 
 今日 = 取日期()
 今年數 = 今日.year
+民國年數 = 今年數-1911
 年底 = 取日期("{今日.year}.12.31")
 最近工作日 = pd.offsets.BDay().rollback(今日)
 昨日 = 今日 - pd.Timedelta(days=1)

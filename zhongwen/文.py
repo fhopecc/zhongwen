@@ -1,5 +1,13 @@
 from zhongwen.text import 刪空格, 轉樣式表字串
 
+def 刪除空行(文):
+    return "\n".join(line for line in 文.splitlines() if line.strip())
+
+def 刪除中文字間空白(文):
+    import re
+    new_text = re.sub(r'(?<=[\u4e00-\u9fff])\s+(?=[\u4e00-\u9fff])', '', 文)
+    return new_text
+
 def 臚列(項目):
     "['甲', '乙', '丙'] -> '甲、乙及丙'"
     項目 = [str(i) for i in 項目]
@@ -69,3 +77,5 @@ if __name__ == "__main__":
         print(result)
     except Exception as e:
         print(f"错误: {e}")
+
+
