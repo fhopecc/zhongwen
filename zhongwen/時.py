@@ -182,10 +182,10 @@ def 自指定月份迄上月(月份):
 def 自指定季別迄上季(始季):
     from pandas import Period
     季別 = 取期間(始季)
-    while 季別 <= 上季():
+    while 季別 <= 上季:
         yield 季別
         季別+=1
-    return 上季()
+    return 上季
 
 def 去年同期(期間):
     import pandas as pd
