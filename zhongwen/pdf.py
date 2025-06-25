@@ -36,6 +36,43 @@ def 轉文字檔(pdf_path, output_txt_path=None):
             txt_file.write(text + "\n")
     print(f"文字已存入 {output_txt_path}")
 
+def ocr_pdf(input_pdf, output_pdf, lang='chi_tra'):
+    import pytesseract
+    from pdf2image import convert_from_path
+    from PIL import Image
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import letter
+    import io
+    from PyPDF2 import PdfMerger
+
+    # 設定 Tesseract 執行檔路徑（Windows 才需要）
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+    # 1. 將 PDF 每頁轉成影像（DPI 可調整）
+    images = convert_from_path(input_pdf, dpi=300)
+
+    # 用來儲存每頁 OCR 的 PDF 檔
+    ocr_pdfs = []
+
+    for i, img in enumerate(images):
+        # 2. 用 Tesseract OCR 取得該頁文字（使用 hocr 方式）
+        pdf_bytes = pytesseract.image_to_pdf_or_hocr(img, extension='pdf', lang=lang)
+
+        # 3. 儲存臨時 PDF
+        pdf_io = io.BytesIO(pdf_bytes)
+        ocr_pdfs.append(pdf_io)
+
+    # 4. 合併所有頁面成一個 PDF
+    merger = PdfMerger()
+    for pdf in ocr_pdfs:
+        pdf.seek(0)
+        merger.append(pdf)
+    merger.write(output_pdf)
+    merger.close()
+
+# 範例使用：將掃描 PDF 加入繁體中文 OCR，產生可選文字的 PDF
+ocr_pdf("原始掃描.pdf", "ocr_結果.pdf", lang='chi_tra')
+
 def 解鎖(pdfs, 覆蓋原檔=False):
     import PyPDF2
     from collections.abc import Iterable 

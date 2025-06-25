@@ -3,7 +3,6 @@ def 設定環境():
     from zhongwen.python_dev import 安裝套件
     for 套件 in ['zhipuai']:
         安裝套件(套件)
-
 def deepseek():
     from openai import OpenAI
 
@@ -46,13 +45,57 @@ def 取年報摘要(年報內容):
 
 def 詢問(問題):
     '需連入中國網域'
+    from zhongwen.時 import 今日
     from zhipuai import ZhipuAI
     client = ZhipuAI(api_key=__zhipuai_api_key__)
-    response = client.chat.completions.create(
-        model="glm-4-plus",  
-        messages=[
-            {"role": "system", "content": "你是一個繁體中文資訊助理"},
-            {"role": "user", "content": f"請用繁體中文回答以下問題：{問題}"}
-        ]
-    )
-    return response.choices[0].message.content
+
+    # 獲取當前日期，可以用於 System Prompt，幫助模型理解時間上下文
+    current_date = str(今日)
+
+    # 設定 System Prompt，引導模型具備網路搜尋能力
+    # 這部分非常重要，它會告訴模型它的角色和如何使用網路資訊
+    system_prompt = f"""
+    你是一個具備網路搜尋能力的智能助手。
+    在適當的時候，優先使用網路資訊（參考資訊）及繁體中文來回答，確保用戶獲得最新和最準確的幫助。
+    當前日期是 {current_date}。
+    """
+
+    # 設定 Tools 參數，啟用網路搜尋功能
+    # 具體的結構請參考智譜AI的 Web Search API 文件
+    tools = [
+        {
+            "type": "web_search",
+            "web_search": {
+                "enable": True  # 設置為 True 表示啟用網路搜尋
+                # 您也可以在這裡添加其他搜尋參數，例如：
+                # "search_query": "自定義搜尋關鍵字"
+                # "count": 5 # 返回的搜尋結果數量
+            }
+        }
+    ]
+
+    # 用戶提問
+    user_question = 問題
+
+    try:
+        response = client.chat.completions.create(
+            model="glm-4-plus",  # 使用支援搜尋功能的模型，例如 GLM-4
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_question}
+            ],
+            tools=tools, # 將啟用的 tools 傳遞給 API
+            stream=False # 如果需要流式輸出，可以設為 True
+        )
+
+        # 如果模型使用了工具，響應中可能會包含 tool_calls 信息，
+        # 具體如何解析可能需要參考智譜AI的文檔
+        if response.choices[0].message.tool_calls:
+            print("\n模型使用了工具：")
+            for tool_call in response.choices[0].message.tool_calls:
+                print(f"- 工具類型: {tool_call.type}")
+                print(f"  調用詳細: {tool_call.function.name}({tool_call.function.arguments})")
+
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"發生錯誤: {e}")

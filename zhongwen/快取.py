@@ -2,6 +2,15 @@ from pathlib import Path
 import logging
 logger = logging.getLogger(Path(__file__).stem)
 
+def 快取至記憶體(func):
+    '確保原始函數描述資料數據複製至裝飾器'
+    import functools
+    @functools.wraps(func)
+    @functools.cache
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    return wrapper
+
 def 刪除指定名稱快取(快取, 名稱):
     c, n = 快取, 名稱
     keys_to_delete = [key for key in c if isinstance(key, tuple) and key[0] == n]

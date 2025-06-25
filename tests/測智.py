@@ -23,7 +23,7 @@ class Test(unittest.TestCase):
 
     def test取詢問(self):
         from zhongwen.智 import 詢問
-        r = 詢問('匯率的繁體中文表達方式')
+        r = 詢問('最近假期')
         print(r)
  
 if __name__ == '__main__':
@@ -34,6 +34,6 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test取年報摘要'))
-    # suite.addTest(Test('test取詢問'))
+    # suite.addTest(Test('test取年報摘要'))
+    suite.addTest(Test('test取詢問'))
     unittest.TextTestRunner().run(suite)
