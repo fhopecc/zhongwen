@@ -120,9 +120,14 @@ def 顯示(df
         if not df.index.is_unique:
             df = df.reset_index(drop=True)
 
-    if df.empty:
-        logger.error('空表')
+    try:
+        if df.empty:
+            logger.error('空表')
+            return 
+    except AttributeError:
+        logger.error(f'非資料框物件，係{type(df)}')
         return 
+
     if 顯示索引:
         df.reset_index(inplace=True)
     else:
