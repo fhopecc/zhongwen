@@ -270,6 +270,7 @@ def 取季別年數季數(季別):
 半月前 = 今日 - pd.Timedelta(days=14)
 一季前 = 今日 - pd.DateOffset(months=3)
 半年前 = 今日 - pd.DateOffset(months=6)
+一年前 = 今日 - pd.DateOffset(years=1)
 五年又一個月前 = 今日 - pd.DateOffset(months=61)
 本月 = pd.Period(今日, 'M')
 上月 = 本月 - 1
