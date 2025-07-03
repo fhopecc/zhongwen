@@ -9,7 +9,12 @@ cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 
 def 設定環境():
     from zhongwen.winman import 建立傳送到項目, 增加檔案右鍵選單功能
+    from zhongwen.python_dev import 安裝套件
     import sys
+    安裝套件('pytesseract')
+    安裝套件('pdf2image')
+    安裝套件('PyMuPDF')
+    安裝套件('pillow')
     logger.info('設定 pdf 功能')
     cmd =  f'"{sys.executable}" -m zhongwen.pdf --merge_pdfs %* && pause'
     建立傳送到項目('合併為PDF', cmd)
@@ -29,21 +34,17 @@ def 轉文字檔(pdf_path, output_txt_path=None):
     if not output_txt_path:
         output_txt_path = pdf_path.with_suffix(".txt")
 
-    doc = fitz.open(pdf_path)
+    text = 取文字(pdf_path)
     with open(output_txt_path, "w", encoding="utf-8") as txt_file:
-        for page in doc:
-            text = page.get_text("text")
-            txt_file.write(text + "\n")
+        txt_file.write(text)
     print(f"文字已存入 {output_txt_path}")
 
 def ocr_pdf(input_pdf, output_pdf, lang='chi_tra'):
-    import pytesseract
     from pdf2image import convert_from_path
     from PIL import Image
-    from reportlab.pdfgen import canvas
-    from reportlab.lib.pagesizes import letter
-    import io
     from PyPDF2 import PdfMerger
+    import pytesseract
+    import io
 
     # 設定 Tesseract 執行檔路徑（Windows 才需要）
     pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -69,9 +70,6 @@ def ocr_pdf(input_pdf, output_pdf, lang='chi_tra'):
         merger.append(pdf)
     merger.write(output_pdf)
     merger.close()
-
-# 範例使用：將掃描 PDF 加入繁體中文 OCR，產生可選文字的 PDF
-ocr_pdf("原始掃描.pdf", "ocr_結果.pdf", lang='chi_tra')
 
 def 解鎖(pdfs, 覆蓋原檔=False):
     import PyPDF2
@@ -267,82 +265,47 @@ def 平分(文件路徑, 平分文件數=2, 平分文件大小=None):
 
     logger.info(f'{pdf_path.name} -\\\\-> [{output_part1}, {output_part2}]')
 
-@cache.memoize('取文字')
-def 取文字(pdf):
+def 取文字(pdf, 圖內文語言='chi_tra'):
     """
     從指定 PDF 中提取文字並辨識圖內文字。
     """
     from zhongwen.圖 import 取圖內文
-    import fitz  # PyMuPDF
+    from pdf2image import convert_from_path
     from PIL import Image
+    import pytesseract
+    import fitz
     import io
     import os
+
     pdf_path = str(pdf)
     if not os.path.exists(pdf_path):
-        print(f"錯誤：找不到 PDF 檔案 '{pdf_path}'")
-        return
+        raise FileNotFoundError(f"錯誤：找不到 PDF 檔案 '{pdf_path}'")
 
-    full_text_content = []
-    ocr_results_by_page = []
+    OCR_LANG = 圖內文語言
 
-    try:
-        doc = fitz.open(pdf_path)
-        total_pages = doc.page_count
-        print(f"正在處理 PDF 檔案：'{pdf_path}'，共 {total_pages} 頁...")
+    doc = fitz.open(pdf_path)
+    results = []
 
-        for page_num in range(total_pages):
-            page = doc[page_num]
-            page_text = f"\n--- Page {page_num + 1} (Direct Text Extraction) ---\n"
-            page_ocr_text = f"\n--- Page {page_num + 1} (OCR from Images) ---\n"
-            current_page_has_direct_text = False
-            current_page_has_ocr_text = False
+    for page_num in range(len(doc)):
+        page = doc.load_page(page_num)
+        text = page.get_text().strip()
 
-            # 1. 嘗試直接提取頁面文字 (可選取的文字)
-            text = page.get_text()
-            if text.strip():
-                page_text += text
-                current_page_has_direct_text = True
+        if text:
+            results.append(f"第 {page_num+1} 頁（文字擷取）:\n{text}")
+        else:
+            # 將該頁轉為圖片，再進行 OCR
+            images = convert_from_path(pdf_path, first_page=page_num+1, last_page=page_num+1
+                                       ,dpi=300
+                                       ,poppler_path=r'C:\Program Files\poppler-24.08.0\Library\bin'
+                                       )
+            if images:
+                image = images[0]
+                ocr_text = pytesseract.image_to_string(image, lang=OCR_LANG).strip()
+                results.append(f"第 {page_num+1} 頁（OCR 擷取）:\n{ocr_text}")
             else:
-                page_text += "[此頁沒有直接可提取的文字內容。]\n"
+                results.append(f"第 {page_num+1} 頁：無法載入圖片")
 
-            # 2. 提取頁面中的圖片並進行 OCR
-            image_list = page.get_images(full=True) # full=True 獲取完整圖片資訊
-            if image_list:
-                image_count_on_page = 0
-                for img_index, img in enumerate(image_list):
-                    xref = img[0]  # 圖片的 xref (交叉引用編號)
-                    base_image = doc.extract_image(xref)
-                    image_bytes = base_image["image"]
-                    image_ext = base_image["ext"]
-
-                    # 檢查圖片是否有有效的數據
-                    if image_bytes:
-                        try:
-                            # 使用 Pillow 開啟圖片
-                            image = Image.open(io.BytesIO(image_bytes))
-                            
-                            # 執行 OCR
-                            ocr_text = 取圖內文(image)
-                            if ocr_text.strip():
-                                page_ocr_text += f"\n--- Image {img_index + 1} (xref: {xref}) OCR Result ---\n"
-                                page_ocr_text += ocr_text
-                                page_ocr_text += "\n----------------------------------------\n"
-                                current_page_has_ocr_text = True
-                                image_count_on_page += 1
-                        except Exception as img_err:
-                            page_ocr_text += f"警告：無法處理頁面 {page_num + 1} 的圖片 {img_index + 1} (xref: {xref})：{img_err}\n"
-                if image_count_on_page == 0:
-                     page_ocr_text += "[此頁圖片中沒有識別出文字。]\n"
-            else:
-                page_ocr_text += "[此頁沒有嵌入圖片。]\n"
-
-            full_text_content.append(page_text)
-            ocr_results_by_page.append(page_ocr_text)
-
-            print(f"頁面 {page_num + 1} 處理完成。")
-        return '\n'.join(full_text_content) + '\n'.join(ocr_results_by_page)
-    except Exception as e:
-        raise Exception(f"處理 PDF 時發生錯誤：{e}")
+    return "\n\n".join(results)
 
 def 取輸出圖面文字(pdf):
     from PIL import Image
@@ -415,3 +378,5 @@ if __name__ == '__main__':
         合併(pdfs)
     elif pdfs := args.to_excel:
         to_excel(pdfs)
+    elif pdfs := args.to_txt:
+        轉文字檔(pdfs)
