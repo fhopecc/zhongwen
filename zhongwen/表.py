@@ -217,3 +217,17 @@ def 重名加序(columns):
             seen[col] = 0
             new_columns.append(col)
     return new_columns
+
+class 數據不足(Exception):
+
+    def __init__(self, 名稱: str, 實際筆數: int, 至少筆數: int, 目的=''):
+        self.名稱 = 名稱
+        self.實際筆數 = 實際筆數
+        self.至少筆數 = 至少筆數
+        self.目的 = 目的
+        super().__init__(self.__str__())
+
+    def __str__(self):
+        if len(self.目的) > 0:
+            return f"{self.名稱}僅有{self.實際筆數}筆，至少需要{self.至少筆數}筆，以{self.目的}！"
+        return f"{self.名稱}僅有{self.實際筆數}筆，至少需要{self.至少筆數}筆！"
