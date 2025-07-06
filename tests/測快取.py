@@ -6,19 +6,11 @@ class Test(unittest.TestCase):
     # @patch('股票分析.營收分析.營收分析結果快取檔', \
             # Index(tempfile.TemporaryFile(delete=True).name))
     def test(self):
-        from diskcache import Index
         from zhongwen.快取 import 增加快取最近時序分析結果
-        import tempfile
-
-        快取 = Index(tempfile.TemporaryFile(delete=True).name)
-
-        @增加快取最近時序分析結果(快取, '公司代號', '營收月份')
-        def 分析函式測例():
-            return pd.DataFrame({"公司代號":["1101", "1102"]
-                                 
-                                 })
-
-
+        from 股票分析.行情分析 import 預測報酬率
+        from zhongwen.表 import 數據不足
+        self.assertRaises(數據不足, 預測報酬率,'雄順')
+        預測報酬率('崑鼎')
 
 if __name__ == '__main__':
     import logging
