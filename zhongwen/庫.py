@@ -155,13 +155,5 @@ def 釐正時間欄位(資料庫檔, 表格, 時間欄位=None, 期間欄位=Non
         df.to_sql(表格, c, if_exists='replace')
 
 def 通知執行時間(f):
-    from functools import wraps
-    from time import time
-    @wraps(f)
-    def wrap(*args, **kw):
-        ts = time()
-        result = f(*args, **kw)
-        te = time()
-        logger.info(f'{f.__name__}費時{time()-ts:.2f}秒。')
-        return result
-    return wrap
+    from zhongwen.程式 import 通知執行時間 as 程式通知執行時間 
+    return 程式通知執行時間(f)
