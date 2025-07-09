@@ -22,9 +22,14 @@ def 設定環境():
     cmd =  f'"{sys.executable}" -m zhongwen.pdf --to_excel %* && pause'
     建立傳送到項目('2excel', cmd)
 
+    cmd = f'{sys.executable} -m zhongwen.pdf --2txt "%1"' 
+    增加檔案右鍵選單功能('2txt', cmd, 'pdf')
+    增加檔案右鍵選單功能('2txt', cmd, 'FoxitReader.Document')
+
     cmd = f'{sys.executable} -m zhongwen.pdf --split "%1"' 
     增加檔案右鍵選單功能('平分', cmd, 'pdf')
     增加檔案右鍵選單功能('平分', cmd, 'FoxitReader.Document')
+
 
 @cache.memoize('轉文字檔')
 def 轉文字檔(pdf_path, output_txt_path=None):
@@ -369,6 +374,7 @@ if __name__ == '__main__':
     parser.add_argument('--to_excel', nargs='+', type=str, help='2excel')
     parser.add_argument('--merge_pdfs', nargs='+', type=str, help='合併PDF')
     parser.add_argument("--split", type=str, help="平分", required=False)
+    parser.add_argument('--to_txt', type=str, help='轉文字檔')
     args = parser.parse_args()
     if args.setup:
         設定環境()
@@ -378,5 +384,5 @@ if __name__ == '__main__':
         合併(pdfs)
     elif pdfs := args.to_excel:
         to_excel(pdfs)
-    elif pdfs := args.to_txt:
-        轉文字檔(pdfs)
+    elif pdf := args.to_txt:
+        轉文字檔(pdf)
