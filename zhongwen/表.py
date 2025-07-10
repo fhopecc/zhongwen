@@ -229,5 +229,12 @@ class 數據不足(Exception):
 
     def __str__(self):
         if len(self.目的) > 0:
-            return f"{self.名稱}僅有{self.實際筆數}筆，至少需要{self.至少筆數}筆，以{self.目的}！"
-        return f"{self.名稱}僅有{self.實際筆數}筆，至少需要{self.至少筆數}筆！"
+            if self.實際筆數 > 0:
+                return f"{self.名稱}僅有{self.實際筆數}筆，至少需要{self.至少筆數}筆，以{self.目的}！"
+            else:
+                return f"尚無{self.名稱}以{self.目的}！"
+
+        if self.實際筆數 > 0:
+            return f"{self.名稱}僅有{self.實際筆數}筆，至少需要{self.至少筆數}筆！"
+        else:
+            return f"尚無{self.名稱}！"
