@@ -9,8 +9,9 @@ class Test(unittest.TestCase):
         from zhongwen.快取 import 增加快取最近時序分析結果
         from 股票分析.行情分析 import 預測報酬率
         from zhongwen.表 import 數據不足
-        self.assertRaises(數據不足, 預測報酬率,'雄順')
+        預測報酬率('FB台50')
         預測報酬率('崑鼎')
+        self.assertRaises(數據不足, 預測報酬率,'二信股票')
 
 if __name__ == '__main__':
     import logging
