@@ -127,14 +127,20 @@ def 增加快取時序分析結果(取時序函數, 名稱欄位, 時間欄位, 
     import pandas as pd
     class 使用者指定重新分析(Exception):pass
     class 快取結果已過時(Exception):pass
+    class 取時序出現例外(Exception):pass
     def 取可快取最新結果分析時序函數(分析時序函數):
         @wraps(分析時序函數)
         def 可快取最新結果分析時序函數(名稱, 重新分析=False, 重新分析項目=None):
             '''重新分析項目係指定要重分析之項目名稱串列，如指定一組股票名稱必需更新。'''
             from collections.abc import Iterable 
+            import pandas as pd
             時序名稱 = 取時序函數.__name__.replace("取", "")
             logger.info(f'分析{名稱}之{時序名稱}數據')
-            時間序列 = 取時序函數(名稱)
+            try:
+                時間序列 = 取時序函數(名稱)
+            except Exception as e:
+                logger.error(str(e))
+                時間序列 = pd.DataFrame()
             if 時間序列.empty:
                 logger.info(f'{名稱}無{時序名稱}數據！')
             else:   
