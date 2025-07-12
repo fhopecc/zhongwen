@@ -6,10 +6,9 @@ class Test(unittest.TestCase):
     # @patch('股票分析.營收分析.營收分析結果快取檔', \
             # Index(tempfile.TemporaryFile(delete=True).name))
     def test(self):
-        from zhongwen.快取 import 增加快取最近時序分析結果
         from 股票分析.行情分析 import 預測報酬率
         from zhongwen.表 import 數據不足
-        預測報酬率('FB台50')
+        self.assertRaises(數據不足, 預測報酬率,'FB台50')
         預測報酬率('崑鼎')
         self.assertRaises(數據不足, 預測報酬率,'二信股票')
 
