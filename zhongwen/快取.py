@@ -72,11 +72,9 @@ def 增加快取時序分析結果(取時序函數, 名稱欄位, 時間欄位, 
                 msg += '較新，本次無須更新。'
                 logger.info(msg)
                 return 快取分析結果
-            except (快取結果已過時, 使用者指定重新分析, 數據不足, KeyError) as e:
+            except (快取結果已過時, 使用者指定重新分析, 數據不足, KeyError, IndexError) as e:
                 logger.info(
                     f'取{名稱}之{時序名稱}，發生{str(e).replace("！", "例外")}，爰重新分析！')
-            # except Exception as e:
-                # logger.info(f'因取{名稱}之{時序名稱}快取產生非預期錯誤：{type(e).__name__}({e})，爰重新分析！')
             分析時序結果 = 分析時序函數(名稱)
             快取檔案[分析時序結果[名稱欄位]] = 分析時序結果
             return 分析時序結果 
