@@ -22,20 +22,19 @@ def 設定環境():
     cmd =  f'"{sys.executable}" -m zhongwen.pdf --to_excel %* && pause'
     建立傳送到項目('2excel', cmd)
 
-    cmd = f'{sys.executable} -m zhongwen.pdf --2txt "%1"' 
+    cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --to_txt %1 || pause"' 
     增加檔案右鍵選單功能('2txt', cmd, 'pdf')
     增加檔案右鍵選單功能('2txt', cmd, 'FoxitReader.Document')
 
-    cmd = f'{sys.executable} -m zhongwen.pdf --split "%1"' 
+    cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --split %1 || pause"'
     增加檔案右鍵選單功能('平分', cmd, 'pdf')
     增加檔案右鍵選單功能('平分', cmd, 'FoxitReader.Document')
 
-
-@cache.memoize('轉文字檔')
+# @cache.memoize('轉文字檔')
 def 轉文字檔(pdf_path, output_txt_path=None):
     """從 PDF 提取文字並存成文字檔"""
     import fitz  # PyMuPDF
-    pdf_path = Path(pdf_path)
+    pdf_path = Path(pdf_path.strip('"'))
     if not output_txt_path:
         output_txt_path = pdf_path.with_suffix(".txt")
 
@@ -46,8 +45,8 @@ def 轉文字檔(pdf_path, output_txt_path=None):
 
 def ocr_pdf(input_pdf, output_pdf, lang='chi_tra'):
     from pdf2image import convert_from_path
-    from PIL import Image
     from PyPDF2 import PdfMerger
+    from PIL import Image
     import pytesseract
     import io
 
@@ -236,7 +235,7 @@ def 平分(文件路徑, 平分文件數=2, 平分文件大小=None):
     '''
     import fitz
 
-    pdf_path = Path(文件路徑)
+    pdf_path = Path(文件路徑.strip('"'))
 
     # 打開 PDF 文件
     pdf_document = fitz.open(pdf_path)
@@ -385,4 +384,7 @@ if __name__ == '__main__':
     elif pdfs := args.to_excel:
         to_excel(pdfs)
     elif pdf := args.to_txt:
+        # print(pdf)
+        # import time
+        # time.sleep(10)
         轉文字檔(pdf)
