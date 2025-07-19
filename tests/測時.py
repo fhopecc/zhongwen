@@ -72,7 +72,8 @@ class Test(unittest.TestCase):
         self.assertIsInstance(上年度, Period)
 
     def test取季別年數季數(self):
-        from zhongwen.時 import 取季別年數季數
+        from zhongwen.時 import 取季別年數季數, 取日期
+        self.assertEqual(取季別年數季數(取日期('20231101')), (2023, 4))
         self.assertEqual(取季別年數季數('2023Q2'), (2023, 2))
 
     def test_cut_period(self):
@@ -118,6 +119,7 @@ if __name__ == '__main__':
     logging.getLogger('googleclient').setLevel(logging.CRITICAL)
     logging.getLogger('matplotlib').setLevel(logging.CRITICAL)
     logging.getLogger('faker').setLevel(logging.CRITICAL)
-    unittest.main()
+    # unittest.main()
     suite = unittest.TestSuite()
+    suite.addTest(Test('test取季別年數季數'))  # 指定測試
     unittest.TextTestRunner().run(suite)
