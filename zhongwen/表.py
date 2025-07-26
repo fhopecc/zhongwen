@@ -77,6 +77,9 @@ def 顯示(df
         ,整數欄位=[], 實數欄位=[], 百分比欄位=[]
         ,日期欄位=[], 隱藏欄位=[]
         ,漸層欄位=[]
+        ,指定漸層上下限欄位=[]
+        ,漸層上限=None
+        ,漸層下限=None
         ,百分比漸層欄位=[]
         ,百分比漸層按值區間欄位=[]
         ,顯示筆數=100, 採用民國日期格式=False, 標題=None
@@ -85,8 +88,10 @@ def 顯示(df
         ,無格式=False
         ,不顯示=False
         ):
-    '''字串視為超文件檔案直接顯示；序列、系列、集合、陣列及資料框以表格顯示。
-如設不顯示，傳回樣式及可顯示資料框，可顯示資料框用來設定工具提示。'''
+    '''
+    一、字串視為超文件檔案直接顯示；序列、系列、集合、陣列及資料框以表格顯示。
+    二、如設不顯示，傳回樣式及可顯示資料框，可顯示資料框用來設定工具提示。
+    '''
     from pathlib import Path
     import pandas as pd
     import numpy as np
@@ -156,6 +161,7 @@ def 顯示(df
             漸層欄位 = set(漸層欄位).union(整數欄位, 實數欄位)
             漸層欄位 -= 百分比漸層欄位
             漸層欄位 = 漸層欄位.union(百分比漸層按值區間欄位)
+            漸層欄位 -= set(指定漸層上下限欄位)
             日期欄位 = df.select_dtypes(include=['datetime']).columns
             期間欄位 = [c for c in df.columns if 'period' in df.dtypes[c].name]
             文字欄位 = df.select_dtypes(include=['object']).columns
@@ -178,6 +184,9 @@ def 顯示(df
             df = df.background_gradient(axis=0, cmap='RdYlGn', vmax=1, vmin=-1
                                        ,subset=list(百分比漸層欄位)
                                        )
+            if 指定漸層上下限欄位 and 漸層上限 and 漸層下限:
+                df = df.background_gradient(axis=0, cmap='RdYlGn', subset=list(指定漸層上下限欄位)
+                                           ,vmax=漸層上限, vmin=漸層下限)
             df = df.background_gradient(axis=0, cmap='RdYlGn', subset=list(漸層欄位))
             df = df.hide(隱藏欄位, axis=1) # hide index
      
