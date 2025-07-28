@@ -5,6 +5,11 @@ from zhongwen.date import 全是日期嗎
 
 logger = logging.getLogger(Path(__file__).stem)
 
+def 是工作日(日期):
+    import datetime
+    import holidays
+    return 日期.weekday() < 5 and 日期 not in holidays.Taiwan()
+
 def 取日期(日期=None):
     from zhongwen.date import 取日期
     if not 日期:
