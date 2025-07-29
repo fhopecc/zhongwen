@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zhongwen"
-version = "5.33"
+version = "5.35.3"
 authors = [
   { name="fhopecc", email="fhopecc@gmail.com" },
 ]
 description = "中文數轉換、字元切換、翻譯、民國紀年處理、文檔轉換及臺灣地址等中文工具"
 readme = "README.md"
-license = { file="LICENSE" }
+license = {text = "GPL-3.0-only"} 
 requires-python = ">=3.7"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -24,6 +24,11 @@ dependencies = ["diskcache"
                ,"winshell", "pywin32", "comtypes"
                ,"python-docx", "lark"
                ,"clipboard"
+               ,"pytesseract"
+               ,"pdf2image"
+               ,"PyMuPDF"
+               ,"PyPDF2"
+               ,"pillow"
 ]
 [project.urls]
 "Homepage" = "https://github.com/fhopecc/zhongwen"

@@ -2,9 +2,9 @@
 
 本程式庫設計哲學就是函數以中文命名且能簡明表達功能，
 另以簡體名稱表示處理簡體中文情形，繁體名稱表示處理繁體中文情形，
-舉如中文數字處理模組(zhongwen.number)用法示例： 
+舉如中文數字處理模組(zhongwen.數)用法示例： 
 
-    from zhongwen.number import 中文數字, 中文数字, 大寫中文數字
+    from zhongwen.數 import 中文數字, 中文数字, 大寫中文數字
     中文數字(10600)
     >>> '一萬零六百'
     中文数字(10600)
@@ -18,22 +18,22 @@
 【取日期】函數可將民國日期字串轉成時間資料(pd.Timestamp)，
 而【民國日期】可將時間資料轉成表達民國紀年日期之字串，示例如次：
 
-    from zhongwen.date import 取日期
+    from zhongwen.時 import 取日期
     from pandas import Timestamp
     取日期('111.9.23')
     >>> Timestamp(2022,9,23,0,0)
     取日期('110/12/27')
     >>> Timestamp(2021,12,27,0,0)
 
-    from zhongwen.date import 民國日期
-    民國日期(datetime(2021,12,27,0,0), '%Y年%M月%d日')
+    from zhongwen.時 import 取民國日期
+    取民國日期(datetime(2021,12,27,0,0), '%Y年%M月%d日')
     >>> '110年12月27日'
 
 ## 中文字元判斷
 
 中文字元判斷功能示例如次：
 
-    from zhongwen.text import 是否為中文字元
+    from zhongwen.文 import 是否為中文字元
 
     是否為中文字元('繁')
     >>> True
@@ -69,7 +69,7 @@
 
 【翻譯】可將外國文字譯為中文，示例如次：
 
-    from zhongwen.text import 翻譯
+    from zhongwen.文 import 翻譯
     翻譯('test')
     >>> '測試'
     翻譯('取り')
