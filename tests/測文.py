@@ -3,6 +3,12 @@ import unittest
 
 class Test(unittest.TestCase):
     '依方法名稱字母順序測試'
+    def test轉樣式表字串(self):
+        from zhongwen.text import 轉樣式表字串
+        t = "1abcd\n2abcd"
+        tb = 轉樣式表字串(t)
+        self.assertEqual(tb.replace('\\n', '&#10;'), 'ab')
+
     def test(self):
         from zhongwen.文 import 臚列標題
         text = '''### 標題甲
@@ -20,7 +26,8 @@ if __name__ == '__main__':
     logging.getLogger('googleclient').setLevel(logging.CRITICAL)
     logging.getLogger('matplotlib').setLevel(logging.CRITICAL)
     logging.getLogger('faker').setLevel(logging.CRITICAL)
-    unittest.main()
+    # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test'))  # 指定測試
+    # suite.addTest(Test('test'))
+    suite.addTest(Test('test轉樣式表字串'))
     unittest.TextTestRunner().run(suite)

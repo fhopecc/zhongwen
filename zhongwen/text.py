@@ -206,7 +206,7 @@ def 轉樣式表字串(字串):
     '以將Unicode字串以CSS跳脫字元方式轉成ASCII字串，'
     import re
     try:
-        original_string = 字串
+        original_string = 字串.replace('\n', '；')
         unicode_escaped_string = original_string.encode('unicode_escape').decode()
         # print(unicode_escaped_string)
         pat = r'\\u(\w{4})'

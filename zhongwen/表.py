@@ -196,6 +196,7 @@ def 顯示(df
             }
             df = df.set_table_styles([tr_hover], overwrite=False)
             df = df.set_tooltips(浮動提示)
+    
         except Exception as e:
             logger.error(e)
             breakpoint()
