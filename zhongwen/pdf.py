@@ -1,7 +1,7 @@
 from pathlib import Path
-import logging
 from diskcache import Cache
 from pathlib import Path
+import logging
 
 logger = logging.getLogger(Path(__file__).stem)
 
@@ -14,7 +14,7 @@ def 設定環境():
     安裝套件('pytesseract')
     安裝套件('pdf2image')
     安裝套件('PyMuPDF')
-    安裝套件('pillow')
+    安裝套件('PyPDF2')
     logger.info('設定 pdf 功能')
     cmd =  f'"{sys.executable}" -m zhongwen.pdf --merge_pdfs %* && pause'
     建立傳送到項目('合併為PDF', cmd)
