@@ -9,6 +9,7 @@ cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 def 稅地種類檔(LNDT203):
     '地價稅係以所有權人於該縣所有土地歸戶成一個稅號，房屋稅係以門牌號'
     import pandas as pd
+    from pathlib import Path
     df = pd.read_excel(LNDT203)
     定義表目錄 = Path(__file__).parent / '定義表' 
     col_desc = pd.read_excel(定義表目錄 / '稅地種類檔(LNDT203).xls').set_index('COLUMN_NAME')
@@ -19,6 +20,8 @@ def 稅地種類檔(LNDT203):
 def 所有權人檔(wdir):
     '地價稅係以所有權人於該縣所有土地歸戶成一個稅號，房屋稅係以門牌號'
     '下次要檔要公私有別及身分代號'
+    import pandas as pd
+    from pathlib import Path
     df = pd.read_csv(wdir / '所有權人檔(LNDT202).txt', sep='\t', 
                      dtype={'LND_MARK':object})
     定義表目錄 = Path(__file__).parent / '定義表' 
@@ -72,7 +75,7 @@ def 田賦地籍圖(LNDT203, 地籍圖檔):
     '徵免田賦面積達八成者'
     from zhongwen.地籍圖 import 讀取地籍圖
     shp = 地籍圖檔
-    gdf1 = 地籍圖(shp)
+    gdf1 = 讀取地籍圖(shp)
 
     # 公有地 = 公有土地()
     # df = df.query('段號 not in @公有地.ID')

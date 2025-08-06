@@ -16,9 +16,10 @@ def 國土利用調查成果圖(shps):
     return df
 
 def 國土利用屬性欄位表():
-    from fhopecc import env
+    from pathlib import Path
     import pandas as pd
-    f = env.定義表目錄 / "國土利用屬性欄位表.xlsx"
+    定義表目錄 = Path(__file__).parent / '定義表' 
+    f = 定義表目錄 / "國土利用屬性欄位表.xlsx"
     df = pd.read_excel(f, header=1)
     return df[['欄位名稱', '中文名稱']].set_index('欄位名稱').中文名稱.to_dict()
 
@@ -44,9 +45,10 @@ LAND.factory_use()
 
 @functools.cache
 def 國土利用類別(等級=2):
-    from fhopecc import env
+    from pathlib import Path
     import pandas as pd
-    t = pd.read_excel(env.定義表目錄 / '土地利用代碼.xlsx', sheet_name=f"{等級}級")
+    定義表目錄 = Path(__file__).parent / '定義表' 
+    t = pd.read_excel(定義表目錄 / '土地利用代碼.xlsx', sheet_name=f"{等級}級")
     if 等級==1:
         t['代碼'] = t.代碼.map(lambda i: f'{i:02}')
     elif 等級==2:

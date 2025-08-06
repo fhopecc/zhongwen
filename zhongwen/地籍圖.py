@@ -5,12 +5,10 @@
 from functools import cache
 from pathlib import Path
 from diskcache import Cache
-import fhopecc.env as env
 
 dcache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 
-r = env.datadir / '土地基本資料'
-d = env.workdrive / 'gd' / '110縣府單決' / '沿海保護' / '都計容許使用'
+r = '土地基本資料'
 
 def sname(no):
     '指定 no 地號碼表示的地號簡名，無鄉鎮市區名。'
@@ -53,8 +51,10 @@ def shape():
 
 @cache
 def 地籍圖屬性表():
+    from pathlib import Path
     import pandas as pd
-    df = pd.read_csv(env.定義表目錄 / '地籍圖屬性資料說明表.txt')
+    定義表目錄 = Path(__file__).parent / '定義表' 
+    df = pd.read_csv(定義表目錄 / '地籍圖屬性資料說明表.txt')
     df = df.set_index('欄位名稱')
     return df.資料說明.to_dict()
 
@@ -64,7 +64,7 @@ def 讀取地籍圖(地籍圖檔路徑):
     from zhongwen.file import 最新檔
     import geopandas as gpd
     shp = 地籍圖檔路徑
-    gdf = gpd.read_file(shp, encoding='utf8').to_crs(epsg=3826)
+    gdf = gpd.read_file(shp, encoding='cp950').to_crs(epsg=3826)
     gdf = gdf.rename(columns=地籍圖屬性表())
     return gdf
 
