@@ -8,10 +8,10 @@ cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 @cache.memoize('稅地種類檔')
 def 稅地種類檔(LNDT203):
     '地價稅係以所有權人於該縣所有土地歸戶成一個稅號，房屋稅係以門牌號'
-    from fhopecc import env
     import pandas as pd
     df = pd.read_excel(LNDT203)
-    col_desc = pd.read_excel(env.定義表目錄 / '稅地種類檔(LNDT203).xls').set_index('COLUMN_NAME')
+    定義表目錄 = Path(__file__).parent / '定義表' 
+    col_desc = pd.read_excel(定義表目錄 / '稅地種類檔(LNDT203).xls').set_index('COLUMN_NAME')
     col_desc = col_desc.COMMENTS.to_dict()
     df = df.rename(columns=col_desc)
     return df
@@ -21,7 +21,8 @@ def 所有權人檔(wdir):
     '下次要檔要公私有別及身分代號'
     df = pd.read_csv(wdir / '所有權人檔(LNDT202).txt', sep='\t', 
                      dtype={'LND_MARK':object})
-    col_desc = pd.read_excel(env.定義表目錄 / '所有權人檔(LNDT202).xls').set_index('COLUMN_NAME')
+    定義表目錄 = Path(__file__).parent / '定義表' 
+    col_desc = pd.read_excel(定義表目錄 / '所有權人檔(LNDT202).xls').set_index('COLUMN_NAME')
     col_desc = col_desc.COMMENTS.to_dict()
     df = df.rename(columns=col_desc)
     return df
