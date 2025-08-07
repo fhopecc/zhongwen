@@ -12,7 +12,7 @@ def 設定環境():
     from zhongwen.python_dev import 安裝套件
     import sys
     安裝套件('pytesseract')
-    安裝套件('pdf2image')
+    安裝套件('pdf2image') # 先至github下載 poppler-windows 預編檔，放到 poppler_path=r'C:\Program Files\poppler-24.08.0\Library\bin'
     安裝套件('PyMuPDF')
     安裝套件('PyPDF2')
     logger.info('設定 pdf 功能')
@@ -21,6 +21,9 @@ def 設定環境():
 
     cmd =  f'"{sys.executable}" -m zhongwen.pdf --to_excel %* && pause'
     建立傳送到項目('2excel', cmd)
+
+    cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --to_txt %1 || pause"' 
+    建立傳送到項目('pdf2txt', cmd)
 
     cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --to_txt %1 || pause"' 
     增加檔案右鍵選單功能('2txt', cmd, 'pdf')
