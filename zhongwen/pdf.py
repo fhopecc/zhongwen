@@ -25,6 +25,7 @@ def 設定環境():
     cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --to_txt %1 || pause"' 
     增加檔案右鍵選單功能('2txt', cmd, 'pdf')
     增加檔案右鍵選單功能('2txt', cmd, 'FoxitReader.Document')
+    增加檔案右鍵選單功能('2txt', cmd, 'AcroExch.Document.DC')
 
     cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --split %1 || pause"'
     增加檔案右鍵選單功能('平分', cmd, 'pdf')
