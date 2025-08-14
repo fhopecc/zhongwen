@@ -58,3 +58,7 @@ def tesseract(png):
 
 def 取圖內文(圖檔):
     return tesseract(圖檔)
+
+if __name__ == '__main__':
+    安裝依賴套件及程式()
+    

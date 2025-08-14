@@ -15,6 +15,8 @@ def 設定環境():
     安裝套件('pdf2image') # 先至github下載 poppler-windows 預編檔，放到 poppler_path=r'C:\Program Files\poppler-24.08.0\Library\bin'
     安裝套件('PyMuPDF')
     安裝套件('PyPDF2')
+    安裝套件('pywin32')
+    安裝套件('winshell')
     logger.info('設定 pdf 功能')
     cmd =  f'"{sys.executable}" -m zhongwen.pdf --merge_pdfs %* && pause'
     建立傳送到項目('合併為PDF', cmd)
