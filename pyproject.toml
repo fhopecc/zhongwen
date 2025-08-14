@@ -26,6 +26,7 @@ dependencies = ["diskcache"
                ,"clipboard"
                ,"pytesseract"
                ,"pdf2image"
+               ,"pypdf"
                ,"PyMuPDF"
                ,"PyPDF2"
 ]

@@ -57,21 +57,6 @@ def 游標模式替換(模式, 替換函式):
         i = m.end()+1
     raise ValueError(f'游標處無此模式，模式:{模式}，游標:{c}，行:{line}')
 
-微軟辦公室軟體共用範本路徑 = ['AppData/Roaming/Microsoft/Templates/Normal.dotm']
-
-def 設定微軟辦公室軟體共用範本():
-    from shutil import copy
-    logger.info('設定微軟辦公室軟體共用範本……')
-    for t in 微軟辦公室軟體共用範本路徑:
-        t = Path.home() / t
-        s = Path(__file__).parent / 'resource' / t.name
-        try:
-            copy(s, t)
-        except FileNotFoundError:
-            t.parent.mkdir(exist_ok=True)
-            copy(s, t)
-    logger.info('完成。')
-
 def 轉文字檔(filepath):
     from pathlib import Path
     import os
@@ -125,13 +110,36 @@ def 設定環境():
     cmd = rf'"{gvim}" "%1"' 
     增加檔案右鍵選單功能('open', cmd, '.md') # .docx
 
-def 更新微軟辦公室軟體共用範本():
-    from shutil import copy
-    for s in 微軟辦公室軟體共用範本路徑:
-        s = Path.home() / s
-        t = Path(__file__).parent / 'resource' / s.name
-        copy(s, t)
-    logger.info('更新微軟辦公室軟體共用範本完成！')
+def setup_normal_dotm_dir():
+    '設定 resource 為 Word 預設範本資料夾'
+    import winreg
+    import os
+
+    # Normal.dotm 的資料夾
+    target_path = Path(__file__).parent / 'resource'
+
+    # 支援的 Office 版本（16.0=Office 2016/2019/2021/365，15.0=2013，14.0=2010）
+    office_versions = ["16.0", "15.0", "14.0"]
+
+    # 依序檢查目前版本
+    found_version = None
+    for version in office_versions:
+        reg_path = fr"Software\Microsoft\Office\{version}\Word\Options"
+        try:
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS) as key:
+                found_version = version
+                break
+        except FileNotFoundError:
+            continue
+
+    if found_version:
+        reg_path = fr"Software\Microsoft\Office\{found_version}\Word\Options"
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_ALL_ACCESS) as key:
+            winreg.SetValueEx(key, "USER TEMPLATES", 0, winreg.REG_SZ, str(target_path))
+        print(f"已將 Word Normal.dotm 目錄設定為：{target_path}")
+        print("請重新啟動 Word 後生效。")
+    else:
+        print("未找到已安裝的 Office Word 版本，請確認 Office 是否已安裝。")
 
 def 合併文件(文件集, 合併文件檔=None, 文件以換頁符號分隔=True):
     '合併微軟辦公室文件(Word)，僅副檔名為 docx 者。' 
@@ -347,7 +355,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--setup", help="設定環境", action="store_true")
     parser.add_argument('--print', nargs='+', type=str, help='列印微軟文件')
-    parser.add_argument("--update_temp", help="將目前Word範本更新至GitHub", action="store_true")
+    parser.add_argument("--setup_template", help="設定 resource 為 Word 預設範本資料夾"
+                       ,action="store_true")
     parser.add_argument("--doc2pdf", type=str, help="轉 PDF 格式。", required=False)
     parser.add_argument("--doc2docx", type=str, help="doc 轉 docx 格式。", required=False)
     parser.add_argument("--to_xlsx", type=str, help="ods 或 pdf 轉 xlsx 格式。", required=False)
@@ -362,8 +371,8 @@ if __name__ == '__main__':
         設定環境()
     elif docs := args.print:
         列印(docs)
-    elif args.update_temp:
-        更新微軟辦公室軟體共用範本()
+    elif args.setup_template:
+        setup_normal_dotm_dir()
     elif args.doc2pdf:
         doc2pdf(args.doc2pdf)
     elif args.doc2docx:

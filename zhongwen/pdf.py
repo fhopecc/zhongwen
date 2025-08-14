@@ -371,6 +371,56 @@ def 取輸出圖面文字(pdf):
         print(f"頁面 {page_num + 1} 處理完成。")
     return '\n'.join(full_ocr_content)
 
+def 抽取頁面(源檔, 頁面, 目的檔=None):
+    '抽取頁面(input_pdf, "3-7,10,12-14", "抽出頁面.pdf")'
+    from pypdf import PdfReader, PdfWriter
+    from pathlib import Path
+    input_pdf = 源檔
+    page_str = 頁面
+    if not 目的檔:
+        output_pdf = Path(input_pdf).with_name(f"{input_pdf.stem}_{頁面}{input_pdf.suffix}")
+    else:
+        output_pdf = 目的檔
+
+    def parse_page_ranges(page_str):
+        """
+        將頁碼字串轉成 Python 頁碼列表（0-based）
+        支援格式：
+          "3"          -> [2]
+          "3,5,7"      -> [2,4,6]
+          "3-5"        -> [2,3,4]
+          "3-5,8,10-12"-> [2,3,4,7,9,10,11]
+        """
+        pages = []
+        for part in page_str.split(","):
+            part = part.strip()
+            if "-" in part:
+                start, end = part.split("-")
+                start, end = int(start), int(end)
+                pages.extend(range(start - 1, end))
+            else:
+                pages.append(int(part) - 1)
+        return sorted(set(pages))  # 排序並去重
+
+
+    reader = PdfReader(input_pdf)
+    writer = PdfWriter()
+
+    pages = parse_page_ranges(page_str)
+
+    for p in pages:
+        if 0 <= p < len(reader.pages):
+            writer.add_page(reader.pages[p])
+        else:
+            print(f"頁碼 {p+1} 超出範圍（共 {len(reader.pages)} 頁）")
+
+    with open(output_pdf, "wb") as f:
+        writer.write(f)
+
+    print(f"已將 {page_str} 頁輸出為：{output_pdf}")
+
+
+
 if __name__ == '__main__':
     import argparse
     logging.basicConfig(level=logging.INFO)
