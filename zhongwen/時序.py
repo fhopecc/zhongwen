@@ -2,6 +2,7 @@ from zhongwen.number import 發生例外則回覆非數常數
 from pathlib import Path
 import pandas as pd
 import logging
+
 logger = logging.getLogger(Path(__file__).stem)
 
 @發生例外則回覆非數常數

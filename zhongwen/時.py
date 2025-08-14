@@ -73,6 +73,14 @@ def 取期間(期間, 全取=False):
         logger.error(f"'{期間}'無法解析為期間！")
         return pd.NaT
 
+def 取季別(季別表達):
+    '''
+    一、季別表達具年月，則為年月所在之季別。
+    '''
+    年數 = 季別表達.year
+    季數 = ((季別表達.month-1) // 3)+1
+    return 取期間(f'{年數}Q{季數}')
+
 def 取民國期間(期間):
     p = 取期間(期間)
     if 'Y' in p.freqstr: 
