@@ -1,5 +1,24 @@
 from zhongwen.text import 刪空格, 轉樣式表字串
 
+def geturl(文):
+    '找出文中的 url，如找不到傳回空白'
+    import re
+
+    # 這個正規表達式能匹配大多數常見的 URL 格式
+    # 它可以處理 http/https，以及網址結尾的各種符號
+    # `[a-zA-Z0-9-.]` 處理域名中的字元
+    # `[^\s()<>]+` 處理路徑中的字元，並排除括號
+    url_pattern = re.compile(r'https?://[a-zA-Z0-9-.]+(?:/[^\s()<>]+|)')
+
+    # 使用 findall 方法找出所有符合模式的 URL
+    urls = url_pattern.findall(文)
+
+    if urls:
+        for url in urls:
+            return url
+    else:
+        return ''
+
 def 刪除空行(文):
     return "\n".join(line for line in 文.splitlines() if line.strip())
 
