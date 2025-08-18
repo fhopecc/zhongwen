@@ -17,20 +17,58 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-dependencies = ["diskcache"
-               ,"pandas", "pygtrans", "marisa_trie"
-               ,"selenium"
-               ,"requests"
-               ,"hanlp"
-               ,"opencc"
-               ,"winshell", "pywin32", "comtypes"
-               ,"python-docx", "lark"
+dependencies = ['aiofiles'
+               ,'backupy'
+               ,'bs4'
+               ,'build'
                ,"clipboard"
-               ,"pytesseract"
+               ,"comtypes"
+               ,"diskcache"
+               ,'faker'
+               ,'functions-framework'
+               ,'furigana' # 日文假名標注
+               ,"hanlp" # 中文分詞
+               ,'html5lib'
+               ,'jedi' 
+               ,'jinja2'
+               ,"lark"
+               ,'lxml' 
+               ,"marisa_trie"
+               ,'matplot'
+               ,'oauth2client'
+               ,'odfpy'
+               ,'opencc'   # 中文簡繁轉換
+               ,'openpyxl'
+               ,'orjson'
+               ,"pandas"
                ,"pdf2image"
+               ,'py7zr'
+               ,'pygsheets'
+               ,"pygtrans"
+               ,'pygtrie'
+               ,'pyinstall'
                ,"pypdf"
+               ,'pyxirr'
+               ,"pytesseract"
+               ,"python-docx"
+               ,"pywin32"
                ,"PyMuPDF"
                ,"PyPDF2"
+               ,"requests"
+               ,'scikit-learn'
+               ,"selenium"
+               ,'sympy'
+               ,'tabulate'
+               ,'toml'
+               ,'treelib'
+               ,'twine'
+               ,'wcwidth' # 使tabulate 支援中文表格輸出
+               ,'webdriver_manager'
+               ,"winshell"
+               ,'windows_tools'
+               ,'winshell'
+               ,'wmi'
+               ,'xlrd'
 ]
 [project.urls]
 "Homepage" = "https://github.com/fhopecc/zhongwen"
