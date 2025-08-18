@@ -284,6 +284,11 @@ def 取季別年數季數(季別):
         季別 = 取期間(季別)
     return 季別.year, 季別.quarter
 
+一日 = pd.Timedelta(days=1)
+一週 = pd.Timedelta(days=7)
+一季 = pd.DateOffset(months=3)
+半年 = pd.DateOffset(months=6)
+一年 = pd.DateOffset(year=1)
 今日 = 取日期()
 今年數 = 今日.year
 上年數 = 今年數-1
@@ -291,12 +296,12 @@ def 取季別年數季數(季別):
 年底 = 取日期(f"{今日.year}.12.31")
 年初 = 取日期(f"{今日.year}.1.1")
 最近工作日 = pd.offsets.BDay().rollback(今日)
-昨日 = 今日 - pd.Timedelta(days=1)
-一週前 = 今日 - pd.Timedelta(days=7)
+昨日 = 今日 - 一日
+一週前 = 今日 - 一週
 半月前 = 今日 - pd.Timedelta(days=14)
-一季前 = 今日 - pd.DateOffset(months=3)
-半年前 = 今日 - pd.DateOffset(months=6)
-一年前 = 今日 - pd.DateOffset(years=1)
+一季前 = 今日 - 一季
+半年前 = 今日 - 半年
+一年前 = 今日 - 一年
 五年又一個月前 = 今日 - pd.DateOffset(months=61)
 本月 = pd.Period(今日, 'M')
 上月 = 本月 - 1
