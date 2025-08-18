@@ -19,7 +19,7 @@ classifiers = [
 ]
 dependencies = ['aiofiles'
                ,'backupy'
-               ,'bs4'
+               ,'beautifulsoup4'
                ,'build'
                ,"clipboard"
                ,"comtypes"
