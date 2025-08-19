@@ -37,7 +37,7 @@ dependencies = ['aiofiles'
                ,'matplot'
                ,'oauth2client'
                ,'odfpy'
-               ,'opencc'   # 中文簡繁轉換
+               ,'opencc-python-reimplemented'  # 中文簡繁轉換
                ,'openpyxl'
                ,'orjson'
                ,"pandas"

@@ -74,6 +74,7 @@ def 字寬(字元):
     return 2 if re.match(r'[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]', char) else 1
 
 def 顯示(df
+        ,編號欄位=[]
         ,整數欄位=[], 實數欄位=[], 百分比欄位=[]
         ,日期欄位=[], 隱藏欄位=[]
         ,漸層欄位=[]
@@ -151,6 +152,7 @@ def 顯示(df
         try:
             df.columns = 重名加序(df.columns)
             整數欄位 = set(整數欄位).union(df.select_dtypes(include=['int']).columns)
+            整數欄位 -= set(編號欄位)
             百分比欄位 = set(百分比欄位)
             實數欄位 = set(實數欄位).union(df.select_dtypes(include=['float']).columns)
             實數欄位 -= 整數欄位
@@ -175,6 +177,7 @@ def 顯示(df
             else:
                 df = df.style.applymap(lambda _:'text-align:right')
                 df = df.applymap_index(lambda _:'text-align:center', axis=1)
+            df = df.format('{:.0f}', subset=list(編號欄位), na_rep='')
             df = df.format('{:,.0f}', subset=list(整數欄位), na_rep='')
             df = df.format(lambda v: f"{v*100:.0f}", subset=list(百分比欄位), na_rep='')
             df = df.format('{:,.2f}', subset=list(實數欄位), na_rep='')
