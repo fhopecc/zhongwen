@@ -151,7 +151,7 @@ def 抓取(url:str
         會話識別網址 = f"{p.scheme}://{p.netloc}"
 
     if 會話識別網址:
-        r = requests.get(會話識別網址, headers=headers)
+        r = requests.get(會話識別網址, headers=headers, verify=False)
 
     if 抓取方式=='post':
         headers["content-type"] = "application/x-www-form-urlencoded"
