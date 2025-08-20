@@ -71,6 +71,7 @@ dependencies = ['aiofiles'
                ,'winshell'
                ,'wmi'
                ,'xlrd'
+               ,'yfinance'
 ]
 [project.urls]
 "Homepage" = "https://github.com/fhopecc/zhongwen"

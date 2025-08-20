@@ -102,7 +102,7 @@ def 顯示(df
     if isinstance(df, str):
         df = '<meta charset="UTF-8">\n' + df
         with tempfile.TemporaryDirectory() as tmpdirname:
-            html = os.path.join('d:\cache', "tempfile.html")
+            html = os.path.join('c:\cache', "tempfile.html")
             with open(html, 'w', encoding='utf8') as f:
                 f.write(df)
             os.system(f'start {html}')
