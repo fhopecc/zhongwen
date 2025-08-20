@@ -43,6 +43,7 @@ dependencies = ['aiofiles'
                ,'orjson'
                ,"pandas"
                ,"pdf2image"
+               ,"prophet"
                ,'py7zr'
                ,'pygsheets'
                ,"pygtrans"
