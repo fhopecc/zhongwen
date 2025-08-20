@@ -28,6 +28,7 @@ dependencies = ['aiofiles'
                ,'functions-framework'
                ,'furigana' # 日文假名標注
                ,"hanlp" # 中文分詞
+               ,'holidays' # 世界各國假日檔
                ,'html5lib'
                ,'jedi' 
                ,'jinja2'

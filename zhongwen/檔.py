@@ -160,9 +160,9 @@ def 抓取(url:str
 
     if 'post' in 抓取方式:
         logging.debug(f'參數：{資料!r}')
-        r = requests.post(url, headers=headers, data=參數)
+        r = requests.post(url, headers=headers, data=參數, verify=False)
     else:
-        r = requests.get(url, headers=headers)
+        r = requests.get(url, headers=headers, verify=False)
 
     r.encoding = encoding
     r.raise_for_status()  # 確保請求成功
