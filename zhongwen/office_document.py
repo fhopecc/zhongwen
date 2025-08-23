@@ -277,14 +277,6 @@ def markdown2docx(md):
     cmd += f'--reference-doc="{temp}" --number-sections '
     cmd += f'-o "{docx}" {md}'
     os.system(cmd)
-    # pypandoc.convert_file(md
-                         # ,'docx'
-                         # ,format='markdown+east_asian_line_breaks'
-                         # ,outputfile=docx
-                         # ,extra_args=[f"--reference-doc={temp}"
-                                     # ,"--number-sections"
-                                     # ]
-                         # )
     word_app = win32com.client.Dispatch("Word.Application")
     word_app.DisplayAlerts = 0
     doc = word_app.Documents.Open(str(docx))

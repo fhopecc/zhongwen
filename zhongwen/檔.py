@@ -1,13 +1,11 @@
-from zhongwen.file import 下載
 from pathlib import Path
 from diskcache import Cache
+from zhongwen.程式 import 通知執行時間
 import logging
 
 logger = logging.getLogger(Path(__file__).stem)
 
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
-
-@cache.memoize()
 
 def 同步目錄(源, 終):
     '從源目錄備至終目錄'
@@ -180,4 +178,54 @@ def 抓取(url:str
         return StringIO(r.text)
     else:
         return r.text
+
+def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False):
+    '''下載 URL 內容至指定檔案，並且回傳檔案路徑。'''
+    from urllib.parse import urlparse
+    from requests.exceptions import SSLError
+    import requests
+    p = 儲存路徑
+    downloads = 儲存目錄
+    重載 = 覆寫
+
+    if not downloads:
+        downloads = Path.home() / 'Downloads'
+        downloads.mkdir(exist_ok=True)
+    fn = urlparse(url).path.split('/')[-1]
+    if not p:
+        p = downloads / fn
+
+    if not 覆寫 and p.exists(): 
+        logger.warn(f'警告：[{url}]已下載至[{p}]！')
+        return p
+
+    if p.exists():
+        p.unlink()
+    try:
+        response = requests.get(url)
+    except SSLError:
+        response = requests.get(url, verify=False)
+    
+    if response.status_code == 200:
+        with open(p, 'wb') as file:
+            file.write(response.content)
+        logger.info(f'下載[{url}]至[{p}]成功！')
+    else:
+        raise RuntimeError(r"{url}下載失敗，原因如次：", response.status_code, response.reason)
+    return p
+
+@通知執行時間
+def 解壓(壓縮檔, 目錄):
+    if 壓縮檔.suffix == '.7z':
+        import py7zr
+        壓縮檔 = py7zr.SevenZipFile(壓縮檔, mode='r')
+    else:
+        import zipfile
+        try:
+            壓縮檔 = zipfile.ZipFile(壓縮檔)
+        except zipfile.BadZipFile:
+            raise IOError(f'{壓縮檔}非ZipFile格式')
+    壓縮檔.extractall(目錄)
+    print(f'解壓[{壓縮檔}]成功！')
+
 

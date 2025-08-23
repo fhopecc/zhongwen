@@ -1,5 +1,5 @@
 from zhongwen.pandas_tools import read_docx, read_fwf, show_html
-from zhongwen.pandas_tools import 可顯示, 重名加序
+from zhongwen.pandas_tools import 重名加序
 from pathlib import Path
 import logging
 logger = logging.getLogger(Path(__file__).stem)
@@ -102,7 +102,7 @@ def 顯示(df
     if isinstance(df, str):
         df = '<meta charset="UTF-8">\n' + df
         with tempfile.TemporaryDirectory() as tmpdirname:
-            html = os.path.join('c:\cache', "tempfile.html")
+            html = os.path.join(tmpdirname, "tempfile.html")
             with open(html, 'w', encoding='utf8') as f:
                 f.write(df)
             os.system(f'start {html}')
@@ -250,3 +250,26 @@ class 數據不足(Exception):
             return f"{self.名稱}僅有{self.實際筆數}筆，至少需要{self.至少筆數}筆！"
         else:
             return f"尚無{self.名稱}！"
+
+def 可顯示(查詢資料函數):
+    '裝飾查詢資料函數，指名參數設為【以表顯示=True】，即將查詢結果以 html 顯示。'
+    from functools import wraps
+    import matplotlib.pyplot as plt
+    @wraps(查詢資料函數)
+    def wrapper(*args, 以表顯示=False, 圖示=False, **kargs):
+        try:
+            display_rows = kargs['顯示筆數']
+            real_columns = kargs['實數欄位']
+            del kargs['顯示筆數']
+            del kargs['實數欄位']
+        except KeyError:
+            display_rows = 100
+            real_columns = []
+        df = 查詢資料函數(*args, **kargs)
+        if 以表顯示: 顯示(df, 顯示筆數=display_rows, 實數欄位=real_columns)
+        if 圖示: 
+            plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']
+            df.plot()
+            plt.show()
+        return df
+    return wrapper
