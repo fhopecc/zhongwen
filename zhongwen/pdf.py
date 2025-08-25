@@ -27,10 +27,8 @@ def 設定環境():
     cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --to_txt %1 || pause"' 
     建立傳送到項目('pdf2txt', cmd)
 
-    cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --to_txt %1 || pause"' 
-    增加檔案右鍵選單功能('2txt', cmd, 'pdf')
-    增加檔案右鍵選單功能('2txt', cmd, 'FoxitReader.Document')
-    增加檔案右鍵選單功能('2txt', cmd, 'AcroExch.Document.DC')
+    cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --extract_pages %1 || pause"' 
+    建立傳送到項目('擷取頁面', cmd)
 
     cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --split %1 || pause"'
     增加檔案右鍵選單功能('平分', cmd, 'pdf')
@@ -371,14 +369,16 @@ def 取輸出圖面文字(pdf):
         print(f"頁面 {page_num + 1} 處理完成。")
     return '\n'.join(full_ocr_content)
 
-def 抽取頁面(源檔, 頁面, 目的檔=None):
-    '抽取頁面(input_pdf, "3-7,10,12-14", "抽出頁面.pdf")'
+def 擷取頁面(源檔, 頁面=None, 目的檔=None):
+    '擷取頁面(input_pdf, "3-7,10,12-14", "抽出頁面.pdf")'
     from pypdf import PdfReader, PdfWriter
     from pathlib import Path
-    input_pdf = 源檔
+    input_pdf = Path(源檔)
     page_str = 頁面
+    if page_str == None:
+        page_str = input(f'請依格式範例"3-7,10,12-14"輸入要擷取之頁面區間：')
     if not 目的檔:
-        output_pdf = Path(input_pdf).with_name(f"{input_pdf.stem}_{頁面}{input_pdf.suffix}")
+        output_pdf = Path(input_pdf).with_name(f"{input_pdf.stem}_{page_str}{input_pdf.suffix}")
     else:
         output_pdf = 目的檔
 
@@ -419,8 +419,6 @@ def 抽取頁面(源檔, 頁面, 目的檔=None):
 
     print(f"已將 {page_str} 頁輸出為：{output_pdf}")
 
-
-
 if __name__ == '__main__':
     import argparse
     logging.basicConfig(level=logging.INFO)
@@ -430,6 +428,7 @@ if __name__ == '__main__':
     parser.add_argument('--merge_pdfs', nargs='+', type=str, help='合併PDF')
     parser.add_argument("--split", type=str, help="平分", required=False)
     parser.add_argument('--to_txt', type=str, help='轉文字檔')
+    parser.add_argument('--extract_pages', type=str, help='擷取頁面')
     args = parser.parse_args()
     if args.setup:
         設定環境()
@@ -440,7 +439,6 @@ if __name__ == '__main__':
     elif pdfs := args.to_excel:
         to_excel(pdfs)
     elif pdf := args.to_txt:
-        # print(pdf)
-        # import time
-        # time.sleep(10)
         轉文字檔(pdf)
+    elif pdf := args.extract_pages:
+        擷取頁面(pdf)
