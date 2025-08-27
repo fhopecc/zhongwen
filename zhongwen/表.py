@@ -252,7 +252,7 @@ class 數據不足(Exception):
             return f"尚無{self.名稱}！"
 
 def 可顯示(查詢資料函數):
-    '裝飾查詢資料函數，指名參數設為【以表顯示=True】，即將查詢結果以 html 顯示。'
+    '裝飾查詢資料函數，指名參數設為【表示=True】，即將查詢結果以 html 顯示。'
     from functools import wraps
     import matplotlib.pyplot as plt
     @wraps(查詢資料函數)
