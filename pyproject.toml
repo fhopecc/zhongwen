@@ -38,6 +38,7 @@ dependencies = ['aiofiles'
                ,'matplot'
                ,'oauth2client'
                ,'odfpy'
+               ,'openai-whisper'  # 中文簡繁轉換
                ,'opencc-python-reimplemented'  # 中文簡繁轉換
                ,'openpyxl'
                ,'orjson'
@@ -61,7 +62,9 @@ dependencies = ['aiofiles'
                ,"selenium"
                ,'sympy'
                ,'tabulate'
-               ,'toml'
+               ,'torch'
+               ,'torchvision'
+               ,'torchaudio'
                ,'treelib'
                ,'twine'
                ,'wcwidth' # 使tabulate 支援中文表格輸出

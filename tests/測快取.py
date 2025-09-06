@@ -7,7 +7,10 @@ class Test(unittest.TestCase):
             # Index(tempfile.TemporaryFile(delete=True).name))
     def test(self):
         from 股票分析.行情分析 import 預測報酬率
-        from zhongwen.表 import 數據不足
+        from 股票分析.自結損益 import 分析月稅前損益
+        from zhongwen.表 import 數據不足, 顯示
+        分析月稅前損益('遠東銀', 重新分析=True)
+ 
         self.assertRaises(數據不足, 預測報酬率,'FB台50')
         預測報酬率('崑鼎')
         self.assertRaises(數據不足, 預測報酬率,'二信股票')

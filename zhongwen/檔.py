@@ -158,9 +158,16 @@ def 抓取(url:str
 
     if 'post' in 抓取方式:
         logging.debug(f'參數：{資料!r}')
-        r = requests.post(url, headers=headers, data=參數, verify=False)
+        try:
+            r = requests.post(url, headers=headers, data=參數)
+        except requests.exceptions.SSLError:
+            r = requests.post(url, headers=headers, data=參數, verify=False)
     else:
-        r = requests.get(url, headers=headers, verify=False)
+        try:
+            r = requests.get(url, headers=headers)
+        except requests.exceptions.SSLError:
+            r = requests.get(url, headers=headers, verify=False)
+
 
     r.encoding = encoding
     r.raise_for_status()  # 確保請求成功
@@ -203,8 +210,12 @@ def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False):
         p.unlink()
     try:
         response = requests.get(url)
-    except SSLError:
-        response = requests.get(url, verify=False)
+    except requests.exceptions.SSLError as e:
+        import certifi
+        try:
+            response = requests.get(url, verify=certifi.where())
+        except requests.exceptions.SSLError as e:
+            response = requests.get(url, verify=False)
     
     if response.status_code == 200:
         with open(p, 'wb') as file:
