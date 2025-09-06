@@ -137,9 +137,12 @@ def 合併(pdfs, 合併檔名='合併檔案.pdf'):
     merger.write(output)
     merger.close()
 
-def 旋轉(源檔, 角度=180, 旋轉頁=None, 目標檔=None):
-    import PyPDF2
+def 旋轉(源檔, 角度=180, 旋轉頁=None, 目標檔=None, 奇數頁旋轉角度=None, 偶數頁旋轉角度=None):
+    '''
+    一、起始頁數係0，惟為符合一般頁碼編碼方式，奇偶頁判斷係將起始頁數視為1。
+    '''
     from pathlib import Path
+    import PyPDF2
     if not 目標檔: 
         目標檔 = 源檔.with_stem(源檔.stem+"旋轉後")
     with open(源檔, 'rb') as pdf_in, open(目標檔, 'wb') as pdf_out:
@@ -147,7 +150,16 @@ def 旋轉(源檔, 角度=180, 旋轉頁=None, 目標檔=None):
         pdf_writer = PyPDF2.PdfWriter()
         for pagenum in range(len(pdf_reader.pages)):
             page = pdf_reader.pages[pagenum]
-            if 旋轉頁 is None or pagenum in 旋轉頁:
+            if 奇數頁旋轉角度 is not None or 偶數頁旋轉角度 is not None:
+                if not 奇數頁旋轉角度: 
+                    奇數頁旋轉角度 = 0
+                if not 偶數頁旋轉角度: 
+                    偶數頁旋轉角度 = 0
+                if pagenum % 2 == 0:
+                    page.rotate(奇數頁旋轉角度)
+                else:
+                    page.rotate(偶數頁旋轉角度)
+            elif 旋轉頁 is None or pagenum in 旋轉頁:
                 page.rotate(角度)
             pdf_writer.add_page(page)
         pdf_writer.write(pdf_out)
