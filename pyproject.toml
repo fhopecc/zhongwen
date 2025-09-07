@@ -27,6 +27,7 @@ dependencies = ['aiofiles'
                ,'faker'
                ,'functions-framework'
                ,'furigana' # 日文假名標注
+               ,'google.generativeai'
                ,"hanlp" # 中文分詞
                ,'holidays' # 世界各國假日檔
                ,'html5lib'
@@ -38,7 +39,7 @@ dependencies = ['aiofiles'
                ,'matplot'
                ,'oauth2client'
                ,'odfpy'
-               ,'openai-whisper'  # 中文簡繁轉換
+               ,'openai-whisper'
                ,'opencc-python-reimplemented'  # 中文簡繁轉換
                ,'openpyxl'
                ,'orjson'

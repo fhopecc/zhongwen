@@ -1,8 +1,8 @@
-__zhipuai_api_key__="7b337bd4c21e4ec5af06cd1e013cc7fd.TrI6SFhI6gcC1wp3"
 def 設定環境():
     from zhongwen.python_dev import 安裝套件
     for 套件 in ['zhipuai']:
         安裝套件(套件)
+
 def deepseek():
     from openai import OpenAI
 
@@ -43,7 +43,7 @@ def 取年報摘要(年報內容):
     )
     return response.choices[0].message.content
 
-def 詢問(問題):
+def 諮詢智譜(問題):
     '需連入中國網域'
     from zhongwen.時 import 今日
     from zhipuai import ZhipuAI
@@ -99,3 +99,23 @@ def 詢問(問題):
         return response.choices[0].message.content
     except Exception as e:
         print(f"發生錯誤: {e}")
+
+def 諮詢谷歌雙子星(問題, 服務金鑰=None):
+    import google.generativeai as genai
+    from clipboard import copy
+    try:
+        from fhopecc import 金鑰
+        服務金鑰 = 金鑰.__gemini_api_key__
+    except Exception:
+        if not 服務金鑰:
+            raise ValueError('請提供服務金鑰！')
+    
+    genai.configure(api_key=服務金鑰)
+    model = genai.GenerativeModel("gemini-2.5-flash")
+    response = model.generate_content(問題)
+    print(response.text)
+    copy(response.text)
+    return response.text
+
+def 詢問(問題, 服務金鑰=None):
+    return 諮詢谷歌雙子星(問題, 服務金鑰=None)

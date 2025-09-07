@@ -21,10 +21,14 @@ class Test(unittest.TestCase):
         r = 取年報摘要(c)[:200]
         print(r)
 
-    def test取詢問(self):
+    def test詢問(self):
         from zhongwen.智 import 詢問
-        r = 詢問('最近假期')
-        print(r)
+        詢問('弘煜科市占率、主要營收組成、主要客戶占比、外銷占比、主要競爭對手及最近財報分析')
+        
+    def test諮詢谷歌雙子星(self):
+        from zhongwen.智 import 諮詢谷歌雙子星
+        from clipboard import copy 
+        諮詢谷歌雙子星('弘煜科市占率、主要營收組成、主要客戶占比、外銷占比、主要競爭對手及最近財報分析')
  
 if __name__ == '__main__':
     import logging
@@ -35,5 +39,5 @@ if __name__ == '__main__':
     # unittest.main()
     suite = unittest.TestSuite()
     # suite.addTest(Test('test取年報摘要'))
-    suite.addTest(Test('test取詢問'))
+    suite.addTest(Test('test詢問'))
     unittest.TextTestRunner().run(suite)
