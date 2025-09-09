@@ -8,15 +8,14 @@ logger = logging.getLogger(Path(__file__).stem)
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 
 def 設定環境():
+    r"""
+    一、安裝套件 pdf2image，先至github下載 poppler-windows 預編檔，
+        放到 poppler_path=r'C:\Program Files\poppler-24.08.0\Library\bin'
+    """
     from zhongwen.winman import 建立傳送到項目, 增加檔案右鍵選單功能
     from zhongwen.python_dev import 安裝套件
     import sys
-    安裝套件('pytesseract')
-    安裝套件('pdf2image') # 先至github下載 poppler-windows 預編檔，放到 poppler_path=r'C:\Program Files\poppler-24.08.0\Library\bin'
-    安裝套件('PyMuPDF')
-    安裝套件('PyPDF2')
-    安裝套件('pywin32')
-    安裝套件('winshell')
+    
     logger.info('設定 pdf 功能')
     cmd =  f'"{sys.executable}" -m zhongwen.pdf --merge_pdfs %* && pause'
     建立傳送到項目('合併為PDF', cmd)
@@ -30,9 +29,9 @@ def 設定環境():
     cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --extract_pages %1 || pause"' 
     建立傳送到項目('擷取頁面', cmd)
 
-    cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --split %1 || pause"'
-    增加檔案右鍵選單功能('平分', cmd, 'pdf')
-    增加檔案右鍵選單功能('平分', cmd, 'FoxitReader.Document')
+    cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --arrange %1 || pause"'
+    增加檔案右鍵選單功能('整理頁面', cmd, 'pdf')
+    增加檔案右鍵選單功能('整理頁面', cmd, 'FoxitReader.Document')
 
 # @cache.memoize('轉文字檔')
 def 轉文字檔(pdf_path, output_txt_path=None):
@@ -141,8 +140,10 @@ def 旋轉(源檔, 角度=180, 旋轉頁=None, 目標檔=None, 奇數頁旋轉�
     '''
     一、起始頁數係0，惟為符合一般頁碼編碼方式，奇偶頁判斷係將起始頁數視為1。
     '''
+    from zhongwen.數 import 取數值
     from pathlib import Path
     import PyPDF2
+    源檔 = Path(源檔)
     if not 目標檔: 
         目標檔 = 源檔.with_stem(源檔.stem+"旋轉後")
     with open(源檔, 'rb') as pdf_in, open(目標檔, 'wb') as pdf_out:
@@ -159,8 +160,8 @@ def 旋轉(源檔, 角度=180, 旋轉頁=None, 目標檔=None, 奇數頁旋轉�
                     page.rotate(奇數頁旋轉角度)
                 else:
                     page.rotate(偶數頁旋轉角度)
-            elif 旋轉頁 is None or pagenum in 旋轉頁:
-                page.rotate(角度)
+            elif 旋轉頁 is None or pagenum in 剖析頁碼字串(旋轉頁):
+                page.rotate(取數值(角度))
             pdf_writer.add_page(page)
         pdf_writer.write(pdf_out)
 
@@ -381,6 +382,26 @@ def 取輸出圖面文字(pdf):
         print(f"頁面 {page_num + 1} 處理完成。")
     return '\n'.join(full_ocr_content)
 
+def 剖析頁碼字串(page_str):
+    """
+    將頁碼字串轉成 Python 頁碼列表（0-based）
+    支援格式：
+      "3"          -> [2]
+      "3,5,7"      -> [2,4,6]
+      "3-5"        -> [2,3,4]
+      "3-5,8,10-12"-> [2,3,4,7,9,10,11]
+    """
+    pages = []
+    for part in page_str.split(","):
+        part = part.strip()
+        if "-" in part:
+            start, end = part.split("-")
+            start, end = int(start), int(end)
+            pages.extend(range(start - 1, end))
+        else:
+            pages.append(int(part) - 1)
+    return sorted(set(pages))  # 排序並去重
+
 def 擷取頁面(源檔, 頁面=None, 目的檔=None):
     '擷取頁面(input_pdf, "3-7,10,12-14", "抽出頁面.pdf")'
     from pypdf import PdfReader, PdfWriter
@@ -394,32 +415,10 @@ def 擷取頁面(源檔, 頁面=None, 目的檔=None):
     else:
         output_pdf = 目的檔
 
-    def parse_page_ranges(page_str):
-        """
-        將頁碼字串轉成 Python 頁碼列表（0-based）
-        支援格式：
-          "3"          -> [2]
-          "3,5,7"      -> [2,4,6]
-          "3-5"        -> [2,3,4]
-          "3-5,8,10-12"-> [2,3,4,7,9,10,11]
-        """
-        pages = []
-        for part in page_str.split(","):
-            part = part.strip()
-            if "-" in part:
-                start, end = part.split("-")
-                start, end = int(start), int(end)
-                pages.extend(range(start - 1, end))
-            else:
-                pages.append(int(part) - 1)
-        return sorted(set(pages))  # 排序並去重
-
 
     reader = PdfReader(input_pdf)
     writer = PdfWriter()
-
-    pages = parse_page_ranges(page_str)
-
+    pages = 剖析頁碼字串(page_str)
     for p in pages:
         if 0 <= p < len(reader.pages):
             writer.add_page(reader.pages[p])
@@ -431,6 +430,15 @@ def 擷取頁面(源檔, 頁面=None, 目的檔=None):
 
     print(f"已將 {page_str} 頁輸出為：{output_pdf}")
 
+def 整理頁面(pdf):
+    '整理頁面'
+    print(f'整理{pdf}頁面……')
+    操作 = input('1.請選擇操作：(r)旋轉頁面：')
+    if 操作 == 'r':
+        角度 = input('2.請指定旋轉角度(90、180、270、-90、-180、-270)：')
+        頁面 = input('3.請旋轉頁面(示例1,3,4-5)：')
+        旋轉(pdf, 角度, 頁面)
+
 if __name__ == '__main__':
     import argparse
     logging.basicConfig(level=logging.INFO)
@@ -441,6 +449,7 @@ if __name__ == '__main__':
     parser.add_argument("--split", type=str, help="平分", required=False)
     parser.add_argument('--to_txt', type=str, help='轉文字檔')
     parser.add_argument('--extract_pages', type=str, help='擷取頁面')
+    parser.add_argument('--arrange', type=str, help='整理文件頁面')
     args = parser.parse_args()
     if args.setup:
         設定環境()
@@ -454,3 +463,5 @@ if __name__ == '__main__':
         轉文字檔(pdf)
     elif pdf := args.extract_pages:
         擷取頁面(pdf)
+    elif pdf := args.arrange:
+        整理頁面(pdf)
