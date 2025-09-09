@@ -52,6 +52,7 @@ dependencies = ['aiofiles'
                ,'pygtrie'
                ,'pyinstall'
                ,"pypdf"
+               ,"pyperclip"
                ,'pyxirr'
                ,"pytesseract"
                ,"python-docx"
