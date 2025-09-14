@@ -2,10 +2,32 @@ from lark import Lark, Transformer
 from pathlib import Path
 import logging
 logger = logging.getLogger(Path(__file__).stem)
+
 TITLE = -1
 PROPOSER = -2
 EVENTS = -3
 
+def get_doc_text(doc):
+    "取得舊版 Word 檔案 .doc 內文"
+    import win32com.client as win32
+    import os
+    import pyperclip
+
+    # 啟動 Word 應用程式
+    word = win32.gencache.EnsureDispatch('Word.Application')
+    word.Visible = False  # 讓 Word 在背景執行
+    try:
+        # 打開文件
+        doc = word.Documents.Open(str(doc))
+        return f"源檔：{doc}\n{doc.Content.Text}"
+    except Exception as e:
+        print(f"發生錯誤：{e}")
+    finally:
+        # 關閉文件和 Word 程式，確保資源被釋放
+        if 'doc' in locals() and doc:
+            doc.Close(False)  # False 表示不儲存變更
+        word.Quit()
+        
 def 列印(docs):
     from collections.abc import Iterable 
     import win32com.client as win32

@@ -11,6 +11,7 @@ def 設定環境():
     r"""
     一、安裝套件 pdf2image，先至github下載 poppler-windows 預編檔，
         放到 poppler_path=r'C:\Program Files\poppler-24.08.0\Library\bin'
+        指定之目錄。
     """
     from zhongwen.winman import 建立傳送到項目, 增加檔案右鍵選單功能
     from zhongwen.python_dev import 安裝套件
@@ -23,28 +24,12 @@ def 設定環境():
     cmd =  f'"{sys.executable}" -m zhongwen.pdf --to_excel %* && pause'
     建立傳送到項目('2excel', cmd)
 
-    cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --to_txt %1 || pause"' 
-    建立傳送到項目('pdf2txt', cmd)
-
     cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --extract_pages %1 || pause"' 
     建立傳送到項目('擷取頁面', cmd)
 
     cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --arrange %1 || pause"'
     增加檔案右鍵選單功能('整理頁面', cmd, 'pdf')
     增加檔案右鍵選單功能('整理頁面', cmd, 'FoxitReader.Document')
-
-# @cache.memoize('轉文字檔')
-def 轉文字檔(pdf_path, output_txt_path=None):
-    """從 PDF 提取文字並存成文字檔"""
-    import fitz  # PyMuPDF
-    pdf_path = Path(pdf_path.strip('"'))
-    if not output_txt_path:
-        output_txt_path = pdf_path.with_suffix(".txt")
-
-    text = 取文字(pdf_path)
-    with open(output_txt_path, "w", encoding="utf-8") as txt_file:
-        txt_file.write(text)
-    print(f"文字已存入 {output_txt_path}")
 
 def ocr_pdf(input_pdf, output_pdf, lang='chi_tra'):
     from pdf2image import convert_from_path
@@ -286,9 +271,9 @@ def 平分(文件路徑, 平分文件數=2, 平分文件大小=None):
 
     logger.info(f'{pdf_path.name} -\\\\-> [{output_part1}, {output_part2}]')
 
-def 取文字(pdf, 圖內文語言='chi_tra'):
+def 取內文(pdf, 圖內文語言='chi_tra'):
     """
-    從指定 PDF 中提取文字並辨識圖內文字。
+    提取 pdf 內文字並辨識圖內文字。
     """
     from zhongwen.圖 import 取圖內文
     from pdf2image import convert_from_path
@@ -305,7 +290,7 @@ def 取文字(pdf, 圖內文語言='chi_tra'):
     OCR_LANG = 圖內文語言
 
     doc = fitz.open(pdf_path)
-    results = []
+    results = [f"源檔：{pdf}"]
 
     for page_num in range(len(doc)):
         page = doc.load_page(page_num)
@@ -327,60 +312,6 @@ def 取文字(pdf, 圖內文語言='chi_tra'):
                 results.append(f"第 {page_num+1} 頁：無法載入圖片")
 
     return "\n\n".join(results)
-
-def 取輸出圖面文字(pdf):
-    from PIL import Image
-    from zhongwen.圖 import 取圖內文
-    import fitz  # PyMuPDF
-    import io
-    import os
-    """
-    將 PDF 的每一頁渲染成圖片，然後對每張圖片進行 OCR。
-    """
-    pdf_path = str(pdf)
-    if not os.path.exists(pdf_path):
-        print(f"錯誤：找不到 PDF 檔案 '{pdf_path}'")
-        return
-
-    full_ocr_content = []
-
-    dpi = 72
-
-    doc = fitz.open(pdf_path)
-    total_pages = doc.page_count
-    print(f"正在處理 PDF 檔案：'{pdf_path}'，共 {total_pages} 頁...")
-    print(f"將每頁渲染為 {dpi} DPI 的圖片進行 OCR...")
-
-    for page_num in range(total_pages):
-        page = doc[page_num]
-        ocr_text_on_page = f"\n--- Page {page_num + 1} (OCR from Rendered Image) ---\n"
-
-        # 渲染頁面為圖片
-        # matrix = fitz.Matrix(scale_x, scale_y) 控制渲染解析度
-        # 例如，預設 DPI 是 72，要渲染 300 DPI，scale = 300 / 72 ≈ 4.16
-        zoom = dpi / 72
-        mat = fitz.Matrix(zoom, zoom)
-        
-        pix = page.get_pixmap(matrix=mat) # 獲取頁面的像素圖
-
-        # 將像素圖轉換為 Pillow 圖像對象
-        img_bytes = pix.tobytes("png") # 獲取 PNG 格式的圖片數據
-        image = Image.open(io.BytesIO(img_bytes))
-
-        # 執行 OCR
-        try:
-            text = 取圖內文(image)
-            if text.strip():
-                ocr_text_on_page += text
-            else:
-                ocr_text_on_page += "[此頁圖片中沒有識別出文字。]\n"
-        except Exception as ocr_err:
-            ocr_text_on_page += f"[執行 OCR 時發生錯誤：{ocr_err}]\n"
-            print(f"頁面 {page_num + 1} 執行 OCR 時發生錯誤：{ocr_err}")
-
-        full_ocr_content.append(ocr_text_on_page)
-        print(f"頁面 {page_num + 1} 處理完成。")
-    return '\n'.join(full_ocr_content)
 
 def 剖析頁碼字串(page_str):
     """
@@ -447,7 +378,6 @@ if __name__ == '__main__':
     parser.add_argument('--to_excel', nargs='+', type=str, help='2excel')
     parser.add_argument('--merge_pdfs', nargs='+', type=str, help='合併PDF')
     parser.add_argument("--split", type=str, help="平分", required=False)
-    parser.add_argument('--to_txt', type=str, help='轉文字檔')
     parser.add_argument('--extract_pages', type=str, help='擷取頁面')
     parser.add_argument('--arrange', type=str, help='整理文件頁面')
     args = parser.parse_args()
@@ -459,8 +389,6 @@ if __name__ == '__main__':
         合併(pdfs)
     elif pdfs := args.to_excel:
         to_excel(pdfs)
-    elif pdf := args.to_txt:
-        轉文字檔(pdf)
     elif pdf := args.extract_pages:
         擷取頁面(pdf)
     elif pdf := args.arrange:
