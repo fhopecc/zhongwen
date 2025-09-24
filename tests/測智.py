@@ -23,12 +23,12 @@ class Test(unittest.TestCase):
 
     def test詢問(self):
         from zhongwen.智 import 詢問
-        詢問('弘煜科市占率、主要營收組成、主要客戶占比、外銷占比、主要競爭對手及最近財報分析')
+        詢問('富林-KY市占率、主要營收組成、主要客戶占比、外銷占比、主要競爭對手及最近財報分析')
         
     def test諮詢谷歌雙子星(self):
         from zhongwen.智 import 諮詢谷歌雙子星
         from clipboard import copy 
-        諮詢谷歌雙子星('弘煜科市占率、主要營收組成、主要客戶占比、外銷占比、主要競爭對手及最近財報分析')
+        諮詢谷歌雙子星('富林-KY市占率、主要營收組成、主要客戶占比、外銷占比、主要競爭對手及最近財報分析')
  
 if __name__ == '__main__':
     import logging

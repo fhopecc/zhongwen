@@ -110,9 +110,34 @@ def 諮詢谷歌雙子星(問題, 服務金鑰=None):
         if not 服務金鑰:
             raise ValueError('請提供服務金鑰！')
     
-    genai.configure(api_key=服務金鑰)
-    model = genai.GenerativeModel("gemini-2.5-flash")
-    response = model.generate_content(問題)
+    # genai.configure(api_key=服務金鑰)
+    # model = genai.GenerativeModel("gemini-2.5-flash"
+    #                              )
+    # response = model.generate_content(問題)
+    # print(response.text)
+    # copy(response.text)
+    # return response.text
+
+    from google import genai
+    from google.genai.types import (
+        GenerateContentConfig,
+        GoogleSearch,
+        HttpOptions,
+        Tool,
+    )
+
+    client = genai.Client(api_key=服務金鑰)
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=問題,
+        config=GenerateContentConfig(
+            tools=[
+                # Use Google Search Tool
+                Tool(google_search=GoogleSearch())
+            ],
+        ),
+    )
     print(response.text)
     copy(response.text)
     return response.text
