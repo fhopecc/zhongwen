@@ -31,38 +31,6 @@ def 設定環境():
     增加檔案右鍵選單功能('整理頁面', cmd, 'pdf')
     增加檔案右鍵選單功能('整理頁面', cmd, 'FoxitReader.Document')
 
-def ocr_pdf(input_pdf, output_pdf, lang='chi_tra'):
-    from pdf2image import convert_from_path
-    from PyPDF2 import PdfMerger
-    from PIL import Image
-    import pytesseract
-    import io
-
-    # 設定 Tesseract 執行檔路徑（Windows 才需要）
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-
-    # 1. 將 PDF 每頁轉成影像（DPI 可調整）
-    images = convert_from_path(input_pdf, dpi=300)
-
-    # 用來儲存每頁 OCR 的 PDF 檔
-    ocr_pdfs = []
-
-    for i, img in enumerate(images):
-        # 2. 用 Tesseract OCR 取得該頁文字（使用 hocr 方式）
-        pdf_bytes = pytesseract.image_to_pdf_or_hocr(img, extension='pdf', lang=lang)
-
-        # 3. 儲存臨時 PDF
-        pdf_io = io.BytesIO(pdf_bytes)
-        ocr_pdfs.append(pdf_io)
-
-    # 4. 合併所有頁面成一個 PDF
-    merger = PdfMerger()
-    for pdf in ocr_pdfs:
-        pdf.seek(0)
-        merger.append(pdf)
-    merger.write(output_pdf)
-    merger.close()
-
 def 解鎖(pdfs, 覆蓋原檔=False):
     import PyPDF2
     from collections.abc import Iterable 
@@ -361,14 +329,86 @@ def 擷取頁面(源檔, 頁面=None, 目的檔=None):
 
     print(f"已將 {page_str} 頁輸出為：{output_pdf}")
 
+def 移動頁面(源檔, 頁面, 移動頁數, 目的檔=None):
+    """
+    將 PDF 檔案中的某頁往後移動一頁。
+
+    參數:
+    input_pdf_path (str): 輸入的 PDF 檔案路徑。
+    output_pdf_path (str): 儲存新 PDF 檔案的路徑。
+    page_number (int): 要移動的頁碼（從 1 開始）。
+    """
+    from pathlib import Path
+    from zhongwen.數 import 取數值
+    import PyPDF2
+    源檔 = Path(源檔 )
+    input_pdf_path = str(源檔)
+    page_to_move_num = 頁面 = 取數值(頁面)
+    m = 移動頁數 = 取數值(移動頁數)
+    if not 目的檔:
+        output_pdf_path = 源檔.with_name(f"{源檔.stem}移動第{頁面}頁至第{頁面+移動頁數}頁.pdf")
+        output_pdf_path = str(output_pdf_path)
+    else:
+        output_pdf_path = 目的檔
+    try:
+        with open(input_pdf_path, 'rb') as file:
+            reader = PyPDF2.PdfReader(file)
+            writer = PyPDF2.PdfWriter()
+
+            total_pages = len(reader.pages)
+
+            # 將使用者輸入的頁碼轉為索引（從 0 開始）
+            page_to_move_index = page_to_move_num - 1
+
+            # 檢查頁碼是否有效
+            if not 0 <= page_to_move_index < total_pages:
+                print(f"錯誤：頁碼 {page_to_move_num} 不存在。")
+                return
+
+            # 計算目標頁碼索引
+            target_page_index = page_to_move_index + m
+            
+            # 檢查目標位置是否超出範圍
+            if not 0 <= target_page_index <= total_pages:
+                print(f"錯誤：目標位置 {page_to_move_num + m} 超出範圍。")
+                return
+
+            # 取得要移動的頁面物件
+            page_to_move = reader.pages[page_to_move_index]
+
+            # 建立新的頁面列表，排除要移動的頁面
+            remaining_pages = [page for i, page in enumerate(reader.pages) if i != page_to_move_index]
+            
+            # 將要移動的頁面插入到新的目標位置
+            remaining_pages.insert(target_page_index, page_to_move)
+
+            # 將所有頁面添加到 writer
+            for page in remaining_pages:
+                writer.add_page(page)
+
+            # 儲存新的 PDF 檔案
+            with open(output_pdf_path, 'wb') as output_file:
+                writer.write(output_file)
+        print(f"{Path(input_pdf_path).name} ~{頁面}>>{頁面+移動頁數}~> {Path(output_pdf_path).name}")
+    except FileNotFoundError:
+        print(f"錯誤：找不到檔案 {input_pdf_path}")
+    except Exception as e:
+        print(f"發生錯誤：{e}")
+
 def 整理頁面(pdf):
     '整理頁面'
+    import time
     print(f'整理{pdf}頁面……')
-    操作 = input('1.請選擇操作：(r)旋轉頁面：')
+    操作 = input('1.請選擇操作：(r)旋轉頁面；(m)移動頁面：')
     if 操作 == 'r':
         角度 = input('2.請指定旋轉角度(90、180、270、-90、-180、-270)：')
-        頁面 = input('3.請旋轉頁面(示例1,3,4-5)：')
+        頁面 = input('3.請指定旋轉頁面(示例1,3,4-5)：')
         旋轉(pdf, 角度, 頁面)
+    if 操作 == 'm':
+        頁面= input('2.請指定移動之頁面(示例1,2,3…)：')
+        移動頁數 = input('3.請指定移動頁數(示例1,-5,)：')
+        移動頁面(pdf, 頁面, 移動頁數)
+    time.sleep(10)
 
 if __name__ == '__main__':
     import argparse
