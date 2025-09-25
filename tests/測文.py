@@ -18,7 +18,7 @@ class Test(unittest.TestCase):
 
 ### 標題丙
 '''
-        self.assertEqual(臚列標題(text), '(一)標題甲；(二)標題乙；(三)標題丙')
+        self.assertEqual(臚列標題(text, 級別='3'), '(一)標題甲；(二)標題乙；(三)標題丙')
  
 if __name__ == '__main__':
     import logging
@@ -28,6 +28,6 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    # suite.addTest(Test('test'))
-    suite.addTest(Test('test轉樣式表字串'))
+    suite.addTest(Test('test'))
+    # suite.addTest(Test('test轉樣式表字串'))
     unittest.TextTestRunner().run(suite)

@@ -55,9 +55,9 @@ def 隨機中文(最大字串長度):
 def 臚列標題(文, 級別=3) -> str:
     """### 標題甲\n### 標題乙 -> 1.標題甲；2.標題乙
     """
-    from zhongwen.數 import 取中文數字
+    from zhongwen.數 import 取中文數字, 取數值
     import re
-    
+    級別 = 取數值(級別)
     pattern = re.compile(rf'^{"#" * 級別}\s+(.+)$')
     lines = 文.splitlines()
     
