@@ -15,4 +15,4 @@ def 轉錄文字(音檔, 語言="zh"):
     result = model.transcribe(str(音檔), language=語言) # 設定語言為中文
     text = result["text"]
     logger.info(f"轉錄文字：\r{text}")
-    return text
+    return f"音檔：{音檔}\n{text}"

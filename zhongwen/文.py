@@ -151,30 +151,6 @@ if __name__ == "__main__":
     from zhongwen.數 import 取中文數字
     import argparse
     parser = argparse.ArgumentParser()
-    # parser.add_argument("file", help="Markdown 文件路径")
-    # parser.add_argument("-l", "--level", type=int, default=3, 
-    #                    help="标题级别 (1-6)，默认为3")
-    # parser.add_argument("-s", "--separator", default="；",
-    #                    help="输出分隔符，默认为中文分号")
-    # parser.add_argument("-n", "--no-space", action="store_true",
-    #                    help="序号后不加空格 (1.标题)")
-    
-    # args = parser.parse_args()
-    
-    # try:
-    #     result = extract_and_number_headers(
-    #         args.file,
-    #         level=args.level,
-    #         output_separator=args.separator
-    #     )
-        
-    #     # 处理不加空格的情况
-    #     if args.no_space:
-    #         result = result.replace(". ", ".")
-        
-    #     print(result)
-    # except Exception as e:
-    #     print(f"错误: {e}")
     parser.add_argument('--setup', help="設定環境", action='store_true')
     parser.add_argument('--output', '-o', help="轉錄文字儲存至檔案" ,action='store_true')
     parser.add_argument('--clipboard', '-c', help="轉錄文字複製至剪貼簿", action='store_true')
