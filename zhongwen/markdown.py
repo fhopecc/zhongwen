@@ -1,21 +1,35 @@
 from pathlib import Path 
 import os
 
-def 網頁表達(檔名, 覆寫=True): 
+def 網頁表達(md, 覆寫=True): 
     from zhongwen.時 import 今日
     from pathlib import Path
-    import pypandoc
+    import subprocess
     import tempfile
     import time
-    檔名 = Path(檔名)
+    md = Path(md)
     網頁區 = Path
-    模板目錄 = Path(__file__).parent
-    # env = Environment(loader=FileSystemLoader(模板目錄))
-    # template = env.get_template('一般模版.html')
-    內容 = pypandoc.convert_file(str(檔名), 'html'
-                                ,format='markdown+east_asian_line_breaks'
-                                ,extra_args=['--mathjax', '--number-sections']
-                                ) 
+    try:
+        command = ['pandoc'
+                  ,'-f markdown+east_asian_line_breaks'
+                  ,'--mathjax'
+                  ,'--number-sections'
+                  ,str(md)
+        ]
+        command = ' '.join(command)
+        result = subprocess.run(command
+                               ,capture_output=True
+                               ,text=True
+                               ,check=True
+                               ,encoding='utf-8')
+        內容 = result.stdout
+    except FileNotFoundError:
+        print("錯誤：找不到 'pandoc' 命令。請確認已安裝並設定環境變數。")
+        return None
+    except subprocess.CalledProcessError as e:
+        print(f"執行 pandoc 時發生錯誤：{e}")
+        return None
+
     with tempfile.TemporaryDirectory() as tmpdirname:
         html = os.path.join(tmpdirname, "tempfile.html")
         content = Path(html).write_text(內容, encoding='utf8') 
@@ -24,7 +38,4 @@ def 網頁表達(檔名, 覆寫=True):
     return html
 
 if __name__ == '__main__':
-    from pathlib import Path
-    # md = Path(r'D:\GitHub\fhopecc.github.io\notes\破解 WIFA WPA 密碼.html')
     網頁表達('g:\我的雲端硬碟\股票分析\文件\凌陽創新.md')
-    # os.system(f'start "" "{md}"')

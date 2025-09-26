@@ -289,7 +289,6 @@ def markdown2docx(md):
     from pathlib import Path
     import win32com.client
     import pythoncom
-    import pypandoc
     import os
     import gc
     md = Path(md)
