@@ -1,4 +1,11 @@
 from zhongwen.text import 刪空格, 轉樣式表字串
+from diskcache import Cache
+from pathlib import Path
+import functools
+cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
+
+倉頡字根表 = str.maketrans("abcdefghijklmnopqrstuvwxy"
+                          ,"日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜" )
 
 def 設定環境():
     from zhongwen.winman import 建立傳送到項目
@@ -6,19 +13,73 @@ def 設定環境():
     cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.文 -o -c -f %* || pause"'
     建立傳送到項目('轉錄至文檔', cmd)
 
+@functools.cache
+@cache.memoize()
+def 取臺灣字頻序號(字=None):
+    '''
+    一、查詢指定字之臺灣字頻序號，即依字頻遞減排序號。
+    二、未指定字則傳回臺灣字頻序號表，係以字為鍵而序號為值之 dict 物件。
+    三、未列入統計字則傳回最大序號加一即 5732。 
+    四、資料來源取自國語辭典簡編本編輯資料字詞頻統計報告，
+　　    統計所得之單字數為 5731 字，頻次總數為 1982882 次。
+    五、網址：(https://language.moe.gov.tw/001/Upload/files/SITE_CONTENT/M0001/PIN/F11.HTML)
+    '''
+    from zhongwen.表 import 顯示
+    from pathlib import Path
+    import pandas as pd
+    if 字:
+        try:
+            return 取臺灣字頻序號()[字]
+        except KeyError:
+            return 5732
+    f = Path(__file__).parent / r'resource\BIAU1.TXT'
+    df = pd.read_csv(f) 
+    print(df.shape)
+    df = df.query("字.str.len()==1") # 排除如[口白]無造字，以雙字元表達字型者
+    return dict(zip(df.字, df.字頻序號))
+ 
+@functools.cache
+@cache.memoize()
+def 倉頡檢字(倉頡碼=None):
+    '''
+    一、查詢指定倉頡碼之候選字，並依碼長、字頻序號及候選字序遞增排序。
+    二、倉頡碼可用倉頡字根或其對應英文字母指定。
+    三、候選字為字及倉頡字根碼，如：張弓尸一女、簡竹日弓日
+    四、未指定倉頡碼則傳回前綴樹，前綴樹值係倉頡字根碼加字。
+    '''
+    from zhongwen.檔 import 下載
+    from pandas import read_csv
+    from marisa_trie import Trie
+    from pathlib import Path
+    if 倉頡碼:
+        倉頡碼 = 倉頡碼.translate(倉頡字根表)
+        t : Trie = 倉頡檢字()
+        return sorted([c[-1] + c[:-1] for c in t.keys(倉頡碼) if len(c) > len(倉頡碼)]
+                     ,key = lambda s:(len(s), 取臺灣字頻序號(s[0]), s))
+    try:
+        f = 下載('https://github.com/Jackchows/Cangjie5/raw/master/Cangjie5_TC.txt')
+    except Exception as e:
+        print(f'下載倉頡碼表發生錯誤如次：{e}，改用內建碼表。')
+        f = Path(__file__).parent / 'resource\Cangjie5_TC.txt'
+    df = read_csv(f, encoding='latin1'
+                 ,skiprows=12
+                 ,sep='\t'
+                 ,names=['漢字','倉頡碼','標註']
+                 )
+    def convert(latin1:str):
+        try:
+            return latin1.encode('latin1').decode('utf8', errors='replace') 
+        except AttributeError:
+            return latin1
+    df['漢字'] = df.漢字.map(convert)
+    df['倉頡碼字'] = df.倉頡碼.map(lambda s: s.translate(倉頡字根表))+df.漢字
+    return Trie(df.倉頡碼字.tolist())
+
 def geturl(文):
     '找出文中的 url，如找不到傳回空白'
     import re
-
-    # 這個正規表達式能匹配大多數常見的 URL 格式
-    # 它可以處理 http/https，以及網址結尾的各種符號
-    # `[a-zA-Z0-9-.]` 處理域名中的字元
-    # `[^\s()<>]+` 處理路徑中的字元，並排除括號
     url_pattern = re.compile(r'https?://[a-zA-Z0-9-.]+(?:/[^\s()<>]+|)')
-
-    # 使用 findall 方法找出所有符合模式的 URL
     urls = url_pattern.findall(文)
-
     if urls:
         for url in urls:
             return url
