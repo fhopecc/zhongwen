@@ -3,7 +3,6 @@ from diskcache import Cache
 from pathlib import Path
 import functools
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
-
 倉頡字根表 = str.maketrans("abcdefghijklmnopqrstuvwxy"
                           ,"日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜" )
 
@@ -205,6 +204,9 @@ def 轉錄文字(源檔集):
             text += "源檔：{s}尚無轉錄文字程式。"
         text += "\n\n"
     return text
+
+def escape_vim_string(s:str):
+    return s.replace('\\', '\\\\')
 
 if __name__ == "__main__":
     from pyperclip import copy

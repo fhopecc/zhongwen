@@ -1,4 +1,3 @@
-'Python 開發工具'
 from pathlib import Path
 import logging
 logger = logging.getLogger(Path(__file__).stem)
@@ -33,13 +32,6 @@ def 布署(檔案:Path=None):
             os.system(cmd)
         except FileNotFoundError:
             logger.error(f'當前目錄 {os.getcwd()} 無 pyproject.toml 檔案！')
-
-def 至():
-    from zhongwen.file import FileLocation
-    import vim
-    line = vim.eval("getline('.')")
-    錯誤位置 = FileLocation(line)
-    vim.command(f"e +{錯誤位置.列} {錯誤位置.路徑}")
 
 def find_testfile(f:Path, debug=True):
     '依據路徑推論測試檔位置'
@@ -91,16 +83,6 @@ def 光標物件():
         return script.goto(l, c, follow_imports=True)[0]
     except IndexError: None
 
-def 至定義():
-    '至光標處Python物件之定義'
-    import vim
-    r = 光標物件()
-    if r:
-        p = r.module_path
-        l = r.line
-        c = r.column
-        vim.command(f"e +{l} {p}")
-
 def escape_vim_special_chars(text):
     import vim
     escaped_text = vim.eval('escape("' + text + '", "#")')
@@ -132,9 +114,9 @@ def setgit():
     cmd = 'git config --global core.quotepath off'
     os.system(cmd)
 
-def 筆記本轉程式碼(ipynb):
+def 取筆記本源碼(ipynb):
+    '取 Jupyter Notebook 之源碼。'
     import nbformat
-
     ipynb = Path(ipynb)
 
     # 讀取 .ipynb 檔案

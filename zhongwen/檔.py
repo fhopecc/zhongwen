@@ -1,6 +1,6 @@
+from zhongwen.程式 import 通知執行時間
 from pathlib import Path
 from diskcache import Cache
-from zhongwen.程式 import 通知執行時間
 import logging
 
 logger = logging.getLogger(Path(__file__).stem)
@@ -239,4 +239,25 @@ def 解壓(壓縮檔, 目錄):
     壓縮檔.extractall(目錄)
     print(f'解壓[{壓縮檔}]成功！')
 
+模式集 ={"python":r'File "(?P<path>.+.py)", line (?P<line>\d+).*'
+        ,"python_warn":r'^(?P<path>.+.py):(?P<line>\d+):.*'
+        ,"python_debugger":r'^> (?P<path>.+.py)\((?P<line>\d+)\)'
+        ,"jest":r'\((?P<path>.+\.js):(?P<line>\d+):(?P<pos>\d+)\)'
+        ,"path":r'(?P<path>[^"\']+\.(js|py))'
+        }
 
+def 取文檔位置(訊息):
+    '萃取文字內之路徑資訊'
+    import re 
+    d = {'路徑':'', '列':0, '行':0}
+    for k in 模式集:
+        模式 = 模式集[k]
+        if m:=re.search(模式, 訊息):
+            try:
+                d['路徑']= m['path']
+                d['列'] = int(m['line'])
+                d['行'] = int(m['pos'])
+                break
+            except IndexError:
+                continue
+    return d

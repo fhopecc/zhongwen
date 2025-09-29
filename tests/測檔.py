@@ -15,6 +15,10 @@ class Test(unittest.TestCase):
         df = df.query('股票代號=="8271"')
         顯示(df)
 
+    def test取文檔位置(self):
+        from zhongwen.檔 import 取文檔位置
+        d = 取文檔位置(r'd:\github\zhongwen\tests\測檔.py')
+        self.assertEqual(d, '')
  
 if __name__ == '__main__':
     import logging
@@ -22,7 +26,7 @@ if __name__ == '__main__':
     logging.getLogger('googleclient').setLevel(logging.CRITICAL)
     logging.getLogger('matplotlib').setLevel(logging.CRITICAL)
     logging.getLogger('faker').setLevel(logging.CRITICAL)
-    unittest.main()
+    # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test'))  # 指定測試
+    suite.addTest(Test('test取文檔位置'))  # 指定測試
     unittest.TextTestRunner().run(suite)
