@@ -7,7 +7,7 @@ cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
                           ,"日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜" )
 
 def 設定環境():
-    from zhongwen.winman import 建立傳送到項目
+    from zhongwen.windows import 建立傳送到項目
     import sys
     cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.文 -o -c -f %* || pause"'
     建立傳送到項目('轉錄至文檔', cmd)
