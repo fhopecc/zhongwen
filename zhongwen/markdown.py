@@ -1,14 +1,15 @@
-from pathlib import Path 
-import os
-
-def 網頁表達(md, 覆寫=True): 
+def 網頁表達(md, 預覽=True): 
+    '''
+    一、傳回表達 markdown 文件網頁字串。
+    二、預設會以 chrome 預覽。
+    '''
     from zhongwen.時 import 今日
     from pathlib import Path
     import subprocess
     import tempfile
     import time
+    import os
     md = Path(md)
-    網頁區 = Path
     try:
         command = ['pandoc'
                   ,'-f markdown+east_asian_line_breaks'
@@ -30,12 +31,13 @@ def 網頁表達(md, 覆寫=True):
         print(f"執行 pandoc 時發生錯誤：{e}")
         return None
 
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        html = os.path.join(tmpdirname, "tempfile.html")
-        content = Path(html).write_text(內容, encoding='utf8') 
-        os.system(f'start {html}')
-        time.sleep(10)
-    return html
+    if 預覽:
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            html = os.path.join(tmpdirname, "tempfile.html")
+            content = Path(html).write_text(內容, encoding='utf8') 
+            os.system(f'start {html}')
+            time.sleep(10)
+    return 內容
 
 if __name__ == '__main__':
     網頁表達('g:\我的雲端硬碟\股票分析\文件\凌陽創新.md')

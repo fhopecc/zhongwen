@@ -101,7 +101,6 @@ def 諮詢智譜(問題):
         print(f"發生錯誤: {e}")
 
 def 諮詢谷歌雙子星(問題, 服務金鑰=None):
-    import google.generativeai as genai
     from clipboard import copy
     try:
         from fhopecc import 金鑰
