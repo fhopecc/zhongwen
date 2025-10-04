@@ -1,29 +1,50 @@
 'windows 系統管理工具'
 from pathlib import Path
 import logging
-import os
 
 logger = logging.getLogger(Path(__file__).stem)
 
-def setx(var, value):
+def setenv(var, value):
     '設定 Windows 環境變數'
-    #cmd = f'setx {var} {value} /M >nul 2>nul'
+    import os
+    # setx 將環境變數寫入登錄檔，永久有效
     cmd = f'setx {var} "{value}"'
     if not (r:=os.system(cmd)) == 0:
-        raise WindowsError(f'設定 Windows 環境變數指令[{cmd}]失敗，回傳值為[{r}]！')
+        raise WindowsError(f'{cmd} \n執行失敗，錯誤值為[{r}]！')
+
+    # set 僅設定執行程序之環境變數暫時有效
     cmd = f'set {var}="{value}"'
     if not (r:=os.system(cmd)) == 0:
-        raise WindowsError(f'設定 Windows 環境變數指令[{cmd}]失敗，回傳值為[{r}]！')
-    print(f'設定 Windows 環境變數[{var}]為[{value}]成功！')
+        raise WindowsError(f'{cmd} \n執行失敗，錯誤值為[{r}]！')
+    logger.info(f'setenv({var}, {value})')
 
 def addpath(p, path_var='PATH'):
+    import os
+    import subprocess
     p = str(p)
     ps = os.environ[path_var].split(';')
+
+    powershell_command = '[Environment]::GetEnvironmentVariable("Path", "Machine")'
+    try:
+        # 執行命令並捕獲輸出
+        result = subprocess.run(
+            ["powershell", "-Command", powershell_command],
+            check=True,                 # 檢查是否執行成功 (Exit Code 為 0)
+            capture_output=True,        # 捕獲 stdout 和 stderr
+            text=True,                  # 將輸出解碼為字串 (通常是 UTF-8)
+            encoding='utf-8'
+        )
+        machine_pathes = result.stdout.split(';')
+    except subprocess.CalledProcessError as e:
+        print(f"執行失敗，錯誤訊息：{e.stderr}")
+    except FileNotFoundError:
+        print("錯誤：找不到 'powershell' 命令。")
+    ps = [p for p in ps if p not in machine_pathes]
     if p not in ps:
         p = p.replace('"', '')
         ps.append(p)
         ps = list(set(ps))
-        setx(path_var, ';'.join(ps))
+        setenv(path_var, ';'.join(ps))
 
 TEMP = Path(os.environ['TEMP'])
 
