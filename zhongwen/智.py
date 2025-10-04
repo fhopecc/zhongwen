@@ -100,23 +100,8 @@ def 諮詢智譜(問題):
     except Exception as e:
         print(f"發生錯誤: {e}")
 
-def 諮詢谷歌雙子星(問題, 服務金鑰=None):
+def 諮詢谷歌雙子星(問題, 服務金鑰=None, 不輸出回答=False):
     from clipboard import copy
-    try:
-        from fhopecc import 金鑰
-        服務金鑰 = 金鑰.__gemini_api_key__
-    except Exception:
-        if not 服務金鑰:
-            raise ValueError('請提供服務金鑰！')
-    
-    # genai.configure(api_key=服務金鑰)
-    # model = genai.GenerativeModel("gemini-2.5-flash"
-    #                              )
-    # response = model.generate_content(問題)
-    # print(response.text)
-    # copy(response.text)
-    # return response.text
-
     from google import genai
     from google.genai.types import (
         GenerateContentConfig,
@@ -125,6 +110,13 @@ def 諮詢谷歌雙子星(問題, 服務金鑰=None):
         Tool,
     )
 
+    try:
+        from fhopecc import 金鑰
+        服務金鑰 = 金鑰.__gemini_api_key__
+    except Exception:
+        if not 服務金鑰:
+            raise ValueError('請提供服務金鑰！')
+    
     client = genai.Client(api_key=服務金鑰)
 
     response = client.models.generate_content(
@@ -137,9 +129,10 @@ def 諮詢谷歌雙子星(問題, 服務金鑰=None):
             ],
         ),
     )
-    print(response.text)
+    if not 不輸出回答:
+        print(response.text)
     copy(response.text)
     return response.text
 
-def 詢問(問題, 服務金鑰=None):
-    return 諮詢谷歌雙子星(問題, 服務金鑰=None)
+def 詢問(問題, 服務金鑰=None, 不輸出回答=False):
+    return 諮詢谷歌雙子星(問題, 服務金鑰=None, 不輸出回答=不輸出回答)
