@@ -7,6 +7,21 @@ logger = logging.getLogger(Path(__file__).stem)
 
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 
+def 取檔名補全選項(文:str, 行, 欄):
+    '行及欄是以1起始'
+    from glob import glob
+    l = 文.splitlines()[行-1]
+    prefix = l[:欄]
+    print(prefix)
+    while prefix:
+        if Path(prefix):
+            cs = [{'word':c[len(prefix):], 'abbr':c, 'kind':'路徑'} for c in glob(rf"{prefix}**\**")]
+            if len(cs)>0:
+                cs = sorted(cs, key=lambda p: p['abbr'])
+                return cs
+        prefix = prefix[1:]
+    return []
+
 def 同步目錄(源, 終):
     '從源目錄備至終目錄'
     import shutil

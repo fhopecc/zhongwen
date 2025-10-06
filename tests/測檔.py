@@ -19,6 +19,13 @@ class Test(unittest.TestCase):
         from zhongwen.檔 import 取文檔位置
         d = 取文檔位置(r'd:\github\zhongwen\tests\測檔.py')
         self.assertEqual(d, '')
+
+    def test取檔名補全選項(self):
+        from zhongwen.檔 import 取檔名補全選項
+        from pathlib import Path
+        f = Path(r"g:\我的雲端硬碟\00.114-2花縣府原民處0901-16-1017提出\原民處查核工作紀錄.md")
+        cs = 取檔名補全選項(f.read_text(encoding='utf-8'), 11, 11)
+        print(cs)
  
 if __name__ == '__main__':
     import logging
@@ -28,5 +35,5 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test取文檔位置'))  # 指定測試
+    suite.addTest(Test('test取檔名補全選項'))  # 指定測試
     unittest.TextTestRunner().run(suite)
