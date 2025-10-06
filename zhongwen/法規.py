@@ -1,6 +1,6 @@
 import functools
 
-# @functools.cache
+@functools.cache
 def 取文內法規字首樹(文):
     from marisa_trie import Trie
     import re
