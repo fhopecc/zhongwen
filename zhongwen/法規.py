@@ -1,5 +1,30 @@
-import pandas as pd
-import re
+import functools
+
+# @functools.cache
+def 取文內法規字首樹(文):
+    from marisa_trie import Trie
+    import re
+    laws = []
+    law_pat = r'[\u4e00-\u9fa5()]+?(法|條例|辦法|基準|要點|手冊|注意事項|契約)'
+    pat = fr'依({law_pat})'
+    laws += re.findall(pat, 文)
+    pat = fr'\[({law_pat})\]'
+    laws += re.findall(pat, 文)
+    return Trie([l[0] for l in laws])
+
+def 取法規補全選項(文:str, 行, 欄):
+    '行及欄是以1起始'
+    import re
+    t = 取文內法規字首樹(文)
+    l = 文.splitlines()[行-1]
+    prefix = l[:欄]
+    print(prefix)
+    while prefix:
+        if t.has_keys_with_prefix(prefix):
+            cs = [{'word':c[len(prefix):], 'abbr':c, 'kind':'法規'} for c in t.keys(prefix)]
+            return cs
+        prefix = prefix[1:]
+    return []
 
 def 中央地方法規條文():
     from zhongwen import 中央法規
