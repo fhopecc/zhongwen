@@ -234,3 +234,34 @@ if __name__ == "__main__":
             with open(str(輸出文檔), 'w', encoding='utf-8') as out_f:
                 out_f.write(text)
         print(f"{' '.join(sources)} =~->> {輸出文檔}")
+
+def 去標籤(字串):
+    import re
+    字串 = 字串.replace('\u200b', '')
+    字串 = 字串.replace('\xff', '')
+    return re.sub(r'<.*?>', '', 字串)
+
+class 萌典尚無定義之字詞(Exception):pass
+def 查萌典(字詞):
+    '傳回定義清單'
+    from .檔 import 抓取
+    import requests
+    import logging
+    import json
+    url = f'https://www.moedict.tw/{字詞}.json'
+    try:
+        d = 抓取(url, return_json=True)
+        hs = d['heteronyms']
+        def 取定義(異名):
+            h = 異名
+            try:
+                m = h['bopomofo']
+                m += '：'
+            except KeyError:
+                m = ''
+            ds = h['definitions']
+            m += ''.join([去標籤(d["def"]) for d in ds])
+            return m
+        return [取定義(h) for h in hs]
+    except (json.JSONDecodeError, requests.exceptions.HTTPError):
+        raise 萌典尚無定義之字詞(字詞) 

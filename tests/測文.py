@@ -43,6 +43,17 @@ class Test(unittest.TestCase):
 
         self.assertNotEqual(倉頡檢字('jj')[0], '十十')
 
+    def test查萌典(self):
+        from zhongwen.文 import 查萌典, 萌典尚無定義之字詞
+
+        self.assertEqual(查萌典('查'), ['ㄔㄚˊ：考察、檢查。翻閱、檢尋。大筏，水中的浮木。', 
+                                        'ㄓㄚ：姓。如五代時南唐有查文徽。我。同「咱」(一)。'])
+
+        with self.assertRaises(萌典尚無定義之字詞):
+            查萌典('word')
+        import logging
+        logging.getLogger().setLevel(logging.DEBUG)
+        self.assertEqual(查萌典('彊')[0], '「強」的異體字。')
 
 if __name__ == '__main__':
     import logging
@@ -52,6 +63,6 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test取倉頡候選字'))
+    suite.addTest(Test('test查萌典'))
     # suite.addTest(Test('test轉樣式表字串'))
     unittest.TextTestRunner().run(suite)
