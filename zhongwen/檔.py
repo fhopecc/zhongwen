@@ -14,10 +14,13 @@ def 取檔名補全選項(文:str, 行, 欄):
     prefix = l[:欄]
     print(prefix)
     while prefix:
+        w = Path()
         if Path(prefix):
-            cs = [{'word':c[len(prefix):], 'abbr':c, 'kind':'路徑'} for c in glob(rf"{prefix}**\**")]
+            cs = [{'word':c[len(prefix)-3:], 'abbr':c
+                  ,'kind': '目錄' if Path(c).is_dir() else '檔案'
+                  } for c in glob(rf"{prefix}**\**")]
             if len(cs)>0:
-                cs = sorted(cs, key=lambda p: p['abbr'])
+                cs = sorted(cs, key=lambda p: (p['kind'], p['abbr']))
                 return cs
         prefix = prefix[1:]
     return []

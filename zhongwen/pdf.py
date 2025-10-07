@@ -14,18 +14,12 @@ def 設定環境():
         指定之目錄。
     """
     from zhongwen.winman import 建立傳送到項目, 增加檔案右鍵選單功能
-    from zhongwen.python_dev import 安裝套件
+    from zhongwen.python import 安裝套件
     import sys
     
     logger.info('設定 pdf 功能')
     cmd =  f'"{sys.executable}" -m zhongwen.pdf --merge_pdfs %* && pause'
     建立傳送到項目('合併為PDF', cmd)
-
-    cmd =  f'"{sys.executable}" -m zhongwen.pdf --to_excel %* && pause'
-    建立傳送到項目('2excel', cmd)
-
-    cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --extract_pages %1 || pause"' 
-    建立傳送到項目('擷取頁面', cmd)
 
     cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --arrange %1 || pause"'
     增加檔案右鍵選單功能('整理頁面', cmd, 'pdf')
@@ -429,7 +423,5 @@ if __name__ == '__main__':
         合併(pdfs)
     elif pdfs := args.to_excel:
         to_excel(pdfs)
-    elif pdf := args.extract_pages:
-        擷取頁面(pdf)
     elif pdf := args.arrange:
         整理頁面(pdf)
