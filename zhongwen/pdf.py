@@ -7,6 +7,146 @@ logger = logging.getLogger(Path(__file__).stem)
 
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 
+def 整理頁面(pdf):
+    '整理頁面'
+    import time
+    print(f'整理{pdf}頁面……')
+
+    操作 = input('1.請選擇操作：(d)刪除；(r)旋轉；(m)移動：')
+
+    if 操作 == 'd':
+        頁面 = input('2.請指定刪除頁面(示例1,3,4-5)：')
+        刪除(pdf, 頁面)
+
+    if 操作 == 'r':
+        角度 = input('2.請指定旋轉角度(90、180、270、-90、-180、-270)：')
+        頁面 = input('3.請指定旋轉頁面(示例1,3,4-5)：')
+        旋轉(pdf, 角度, 頁面)
+
+    if 操作 == 'm':
+        頁面= input('2.請指定移動之頁面(示例1,2,3…)：')
+        移動頁數 = input('3.請指定移動頁數(示例1,-5,)：')
+        移動(pdf, 頁面, 移動頁數)
+    time.sleep(10)
+
+def 刪除(源檔, 頁碼, 目的檔=None):
+    from PyPDF2 import PdfWriter, PdfReader
+    from zhongwen.文 import 臚列
+    from pathlib import Path
+    源檔 = Path(源檔)
+    頁碼 = 剖析頁碼字串(頁碼)
+    if not 目的檔:
+        s = 源檔.stem
+        目的檔 = 源檔.with_stem(f'原{s}刪除第{臚列(p+1 for p in 頁碼)}頁')
+    with open(源檔, 'rb') as file:
+        reader = PdfReader(file)
+        writer = PdfWriter()
+
+        total_pages = len(reader.pages)
+
+        for page_number in range(total_pages):
+            if page_number not in 頁碼:
+                writer.add_page(reader.pages[page_number])
+
+        with open(目的檔, 'wb') as output_file:
+            writer.write(output_file)
+        print(f"{源檔.name} -[{', '.join(str(p+1) for p in 頁碼)}]->X {目的檔.name}")
+
+def 旋轉(源檔, 角度=180, 旋轉頁=None, 目標檔=None, 奇數頁旋轉角度=None, 偶數頁旋轉角度=None):
+    '''
+    一、起始頁數係0，惟為符合一般頁碼編碼方式，奇偶頁判斷係將起始頁數視為1。
+    '''
+    from zhongwen.數 import 取數值
+    from pathlib import Path
+    import PyPDF2
+    源檔 = Path(源檔)
+    if not 目標檔: 
+        目標檔 = 源檔.with_stem(源檔.stem+"旋轉後")
+    with open(源檔, 'rb') as pdf_in, open(目標檔, 'wb') as pdf_out:
+        pdf_reader = PyPDF2.PdfReader(pdf_in)
+        pdf_writer = PyPDF2.PdfWriter()
+        for pagenum in range(len(pdf_reader.pages)):
+            page = pdf_reader.pages[pagenum]
+            if 奇數頁旋轉角度 is not None or 偶數頁旋轉角度 is not None:
+                if not 奇數頁旋轉角度: 
+                    奇數頁旋轉角度 = 0
+                if not 偶數頁旋轉角度: 
+                    偶數頁旋轉角度 = 0
+                if pagenum % 2 == 0:
+                    page.rotate(奇數頁旋轉角度)
+                else:
+                    page.rotate(偶數頁旋轉角度)
+            elif 旋轉頁 is None or pagenum in 剖析頁碼字串(旋轉頁):
+                page.rotate(取數值(角度))
+            pdf_writer.add_page(page)
+        pdf_writer.write(pdf_out)
+
+def 移動(源檔, 頁面, 移動頁數, 目的檔=None):
+    """
+    將 PDF 檔案中的某頁往後移動一頁。
+
+    參數:
+    input_pdf_path (str): 輸入的 PDF 檔案路徑。
+    output_pdf_path (str): 儲存新 PDF 檔案的路徑。
+    page_number (int): 要移動的頁碼（從 1 開始）。
+    """
+    from pathlib import Path
+    from zhongwen.數 import 取數值
+    import PyPDF2
+    源檔 = Path(源檔 )
+    input_pdf_path = str(源檔)
+    page_to_move_num = 頁面 = 取數值(頁面)
+    m = 移動頁數 = 取數值(移動頁數)
+    if not 目的檔:
+        output_pdf_path = 源檔.with_name(f"{源檔.stem}第{頁面}頁移動至第{頁面+移動頁數}頁.pdf")
+        output_pdf_path = str(output_pdf_path)
+    else:
+        output_pdf_path = 目的檔
+    try:
+        with open(input_pdf_path, 'rb') as file:
+            reader = PyPDF2.PdfReader(file)
+            writer = PyPDF2.PdfWriter()
+
+            total_pages = len(reader.pages)
+
+            # 將使用者輸入的頁碼轉為索引（從 0 開始）
+            page_to_move_index = page_to_move_num - 1
+
+            # 檢查頁碼是否有效
+            if not 0 <= page_to_move_index < total_pages:
+                print(f"錯誤：頁碼 {page_to_move_num} 不存在。")
+                return
+
+            # 計算目標頁碼索引
+            target_page_index = page_to_move_index + m
+            
+            # 檢查目標位置是否超出範圍
+            if not 0 <= target_page_index <= total_pages:
+                print(f"錯誤：目標位置 {page_to_move_num + m} 超出範圍。")
+                return
+
+            # 取得要移動的頁面物件
+            page_to_move = reader.pages[page_to_move_index]
+
+            # 建立新的頁面列表，排除要移動的頁面
+            remaining_pages = [page for i, page in enumerate(reader.pages) if i != page_to_move_index]
+            
+            # 將要移動的頁面插入到新的目標位置
+            remaining_pages.insert(target_page_index, page_to_move)
+
+            # 將所有頁面添加到 writer
+            for page in remaining_pages:
+                writer.add_page(page)
+
+            # 儲存新的 PDF 檔案
+            with open(output_pdf_path, 'wb') as output_file:
+                writer.write(output_file)
+        print(f"{Path(input_pdf_path).name} ~{頁面}>>{頁面+移動頁數}~> {Path(output_pdf_path).name}")
+    except FileNotFoundError:
+        print(f"錯誤：找不到檔案 {input_pdf_path}")
+    except Exception as e:
+        print(f"發生錯誤：{e}")
+
 def 設定環境():
     r"""
     一、安裝套件 pdf2image，先至github下載 poppler-windows 預編檔，
@@ -83,35 +223,6 @@ def 合併(pdfs, 合併檔名='合併檔案.pdf'):
     merger.write(output)
     merger.close()
 
-def 旋轉(源檔, 角度=180, 旋轉頁=None, 目標檔=None, 奇數頁旋轉角度=None, 偶數頁旋轉角度=None):
-    '''
-    一、起始頁數係0，惟為符合一般頁碼編碼方式，奇偶頁判斷係將起始頁數視為1。
-    '''
-    from zhongwen.數 import 取數值
-    from pathlib import Path
-    import PyPDF2
-    源檔 = Path(源檔)
-    if not 目標檔: 
-        目標檔 = 源檔.with_stem(源檔.stem+"旋轉後")
-    with open(源檔, 'rb') as pdf_in, open(目標檔, 'wb') as pdf_out:
-        pdf_reader = PyPDF2.PdfReader(pdf_in)
-        pdf_writer = PyPDF2.PdfWriter()
-        for pagenum in range(len(pdf_reader.pages)):
-            page = pdf_reader.pages[pagenum]
-            if 奇數頁旋轉角度 is not None or 偶數頁旋轉角度 is not None:
-                if not 奇數頁旋轉角度: 
-                    奇數頁旋轉角度 = 0
-                if not 偶數頁旋轉角度: 
-                    偶數頁旋轉角度 = 0
-                if pagenum % 2 == 0:
-                    page.rotate(奇數頁旋轉角度)
-                else:
-                    page.rotate(偶數頁旋轉角度)
-            elif 旋轉頁 is None or pagenum in 剖析頁碼字串(旋轉頁):
-                page.rotate(取數值(角度))
-            pdf_writer.add_page(page)
-        pdf_writer.write(pdf_out)
-
 def 去空白頁(源檔, 轉換檔=None):
     if not 轉換檔: 
         轉換檔 = 源檔.with_stem(源檔.stem+"去空白頁")
@@ -147,27 +258,6 @@ def 去空白頁(源檔, 轉換檔=None):
             非空白頁碼清單.append(page_number)
     doc.select(非空白頁碼清單)
     doc.save(output_file)
-
-def 刪除頁面(input_path, pages, output_path=None):
-    from PyPDF2 import PdfWriter, PdfReader
-    from pathlib import Path
-    input_path = Path(input_path)
-    if not output_path:
-        s = input_path.stem
-        output_path = input_path.with_stem(f'{s}刪除後')
-    with open(input_path, 'rb') as file:
-        reader = PdfReader(file)
-        writer = PdfWriter()
-
-        total_pages = len(reader.pages)
-
-        for page_number in range(total_pages):
-            if page_number + 1 not in pages:
-                writer.add_page(reader.pages[page_number])
-
-        with open(output_path, 'wb') as output_file:
-            writer.write(output_file)
-        print(f"{input_path}刪除頁面{', '.join(map(str, pages))}，結果另存於{output_path}。")
 
 def to_excel(pdfs):
     from collections.abc import Iterable 
@@ -275,7 +365,7 @@ def 取內文(pdf, 圖內文語言='chi_tra'):
 
     return "\n\n".join(results)
 
-def 剖析頁碼字串(page_str):
+def 剖析頁碼字串(頁碼字串):
     """
     將頁碼字串轉成 Python 頁碼列表（0-based）
     支援格式：
@@ -285,7 +375,7 @@ def 剖析頁碼字串(page_str):
       "3-5,8,10-12"-> [2,3,4,7,9,10,11]
     """
     pages = []
-    for part in page_str.split(","):
+    for part in 頁碼字串.split(","):
         part = part.strip()
         if "-" in part:
             start, end = part.split("-")
@@ -323,86 +413,6 @@ def 擷取頁面(源檔, 頁面=None, 目的檔=None):
 
     print(f"已將 {page_str} 頁輸出為：{output_pdf}")
 
-def 移動頁面(源檔, 頁面, 移動頁數, 目的檔=None):
-    """
-    將 PDF 檔案中的某頁往後移動一頁。
-
-    參數:
-    input_pdf_path (str): 輸入的 PDF 檔案路徑。
-    output_pdf_path (str): 儲存新 PDF 檔案的路徑。
-    page_number (int): 要移動的頁碼（從 1 開始）。
-    """
-    from pathlib import Path
-    from zhongwen.數 import 取數值
-    import PyPDF2
-    源檔 = Path(源檔 )
-    input_pdf_path = str(源檔)
-    page_to_move_num = 頁面 = 取數值(頁面)
-    m = 移動頁數 = 取數值(移動頁數)
-    if not 目的檔:
-        output_pdf_path = 源檔.with_name(f"{源檔.stem}移動第{頁面}頁至第{頁面+移動頁數}頁.pdf")
-        output_pdf_path = str(output_pdf_path)
-    else:
-        output_pdf_path = 目的檔
-    try:
-        with open(input_pdf_path, 'rb') as file:
-            reader = PyPDF2.PdfReader(file)
-            writer = PyPDF2.PdfWriter()
-
-            total_pages = len(reader.pages)
-
-            # 將使用者輸入的頁碼轉為索引（從 0 開始）
-            page_to_move_index = page_to_move_num - 1
-
-            # 檢查頁碼是否有效
-            if not 0 <= page_to_move_index < total_pages:
-                print(f"錯誤：頁碼 {page_to_move_num} 不存在。")
-                return
-
-            # 計算目標頁碼索引
-            target_page_index = page_to_move_index + m
-            
-            # 檢查目標位置是否超出範圍
-            if not 0 <= target_page_index <= total_pages:
-                print(f"錯誤：目標位置 {page_to_move_num + m} 超出範圍。")
-                return
-
-            # 取得要移動的頁面物件
-            page_to_move = reader.pages[page_to_move_index]
-
-            # 建立新的頁面列表，排除要移動的頁面
-            remaining_pages = [page for i, page in enumerate(reader.pages) if i != page_to_move_index]
-            
-            # 將要移動的頁面插入到新的目標位置
-            remaining_pages.insert(target_page_index, page_to_move)
-
-            # 將所有頁面添加到 writer
-            for page in remaining_pages:
-                writer.add_page(page)
-
-            # 儲存新的 PDF 檔案
-            with open(output_pdf_path, 'wb') as output_file:
-                writer.write(output_file)
-        print(f"{Path(input_pdf_path).name} ~{頁面}>>{頁面+移動頁數}~> {Path(output_pdf_path).name}")
-    except FileNotFoundError:
-        print(f"錯誤：找不到檔案 {input_pdf_path}")
-    except Exception as e:
-        print(f"發生錯誤：{e}")
-
-def 整理頁面(pdf):
-    '整理頁面'
-    import time
-    print(f'整理{pdf}頁面……')
-    操作 = input('1.請選擇操作：(r)旋轉頁面；(m)移動頁面：')
-    if 操作 == 'r':
-        角度 = input('2.請指定旋轉角度(90、180、270、-90、-180、-270)：')
-        頁面 = input('3.請指定旋轉頁面(示例1,3,4-5)：')
-        旋轉(pdf, 角度, 頁面)
-    if 操作 == 'm':
-        頁面= input('2.請指定移動之頁面(示例1,2,3…)：')
-        移動頁數 = input('3.請指定移動頁數(示例1,-5,)：')
-        移動頁面(pdf, 頁面, 移動頁數)
-    time.sleep(10)
 
 if __name__ == '__main__':
     import argparse
@@ -411,14 +421,11 @@ if __name__ == '__main__':
     parser.add_argument("--setup", help="設定環境", action='store_true')
     parser.add_argument('--to_excel', nargs='+', type=str, help='2excel')
     parser.add_argument('--merge_pdfs', nargs='+', type=str, help='合併PDF')
-    parser.add_argument("--split", type=str, help="平分", required=False)
     parser.add_argument('--extract_pages', type=str, help='擷取頁面')
     parser.add_argument('--arrange', type=str, help='整理文件頁面')
     args = parser.parse_args()
     if args.setup:
         設定環境()
-    elif pdf := args.split:
-        平分(pdf)
     elif pdfs := args.merge_pdfs:
         合併(pdfs)
     elif pdfs := args.to_excel:
