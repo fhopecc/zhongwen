@@ -45,15 +45,24 @@ class Test(unittest.TestCase):
 
     def test查萌典(self):
         from zhongwen.文 import 查萌典, 萌典尚無定義之字詞
+        import logging
 
         self.assertEqual(查萌典('查'), ['ㄔㄚˊ：考察、檢查。翻閱、檢尋。大筏，水中的浮木。', 
                                         'ㄓㄚ：姓。如五代時南唐有查文徽。我。同「咱」(一)。'])
 
         with self.assertRaises(萌典尚無定義之字詞):
             查萌典('word')
-        import logging
         logging.getLogger().setLevel(logging.DEBUG)
         self.assertEqual(查萌典('彊')[0], '「強」的異體字。')
+
+    def test取文內簡稱字首樹(self):
+        from zhongwen.文 import 取文內簡稱字首樹, 取簡稱補全選項
+        from pathlib import Path
+        f = Path(r"g:\我的雲端硬碟\00.114-2花縣府原民處0901-16-1017提出\原民處查核工作紀錄.md")
+        abbrs = 取文內簡稱字首樹(f.read_text(encoding='utf-8'))
+        print(abbrs.keys('2'))
+        opts = 取簡稱補全選項(f.read_text(encoding='utf-8'), 315, 7)
+        print(opts)
 
 if __name__ == '__main__':
     import logging
@@ -63,6 +72,6 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test查萌典'))
+    suite.addTest(Test('test取文內簡稱字首樹'))
     # suite.addTest(Test('test轉樣式表字串'))
     unittest.TextTestRunner().run(suite)

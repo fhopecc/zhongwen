@@ -2,10 +2,31 @@ from zhongwen.text import 刪空格, 轉樣式表字串
 from diskcache import Cache
 from pathlib import Path
 import functools
+
+# @functools.cache
+def 取文內簡稱字首樹(文):
+    from marisa_trie import Trie
+    import re
+    abbrs = []
+    pat = r'\(下稱(.+?)\)'
+    return Trie(re.findall(pat, 文))
+
+def 取簡稱補全選項(文:str, 行, 欄):
+    '行及欄是以1起始'
+    import re
+    t = 取文內簡稱字首樹(文)
+    l = 文.splitlines()[行-1]
+    prefix = l[:欄]
+    while prefix:
+        if t.has_keys_with_prefix(prefix):
+            cs = [{'word':c[len(prefix):], 'abbr':c, 'kind':'簡稱'} for c in t.keys(prefix)]
+            return cs
+        prefix = prefix[1:]
+    return []
+
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 倉頡字根表 = str.maketrans("abcdefghijklmnopqrstuvwxy"
                           ,"日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜" )
-
 def 設定環境():
     from zhongwen.windows import 建立傳送到項目
     import sys
@@ -59,7 +80,7 @@ def 倉頡檢字(倉頡碼=None):
         f = 下載('https://github.com/Jackchows/Cangjie5/raw/master/Cangjie5_TC.txt')
     except Exception as e:
         print(f'下載倉頡碼表發生錯誤如次：{e}，改用內建碼表。')
-        f = Path(__file__).parent / 'resource\Cangjie5_TC.txt'
+        f = Path(__file__).parent / r'resource\Cangjie5_TC.txt'
     df = read_csv(f, encoding='latin1'
                  ,skiprows=12
                  ,sep='\t'
@@ -265,3 +286,151 @@ def 查萌典(字詞):
         return [取定義(h) for h in hs]
     except (json.JSONDecodeError, requests.exceptions.HTTPError):
         raise 萌典尚無定義之字詞(字詞) 
+
+def 是否為中文字元(char:str):
+    return '\u4e00' <= char <= '\u9fa5'
+
+def 是否為中文符號(char:str):
+    import re
+    chinese_punctuation_pattern = re.compile(r'[\u3000-\u303F\uFF00-\uFFEF\u2000-\u206F]')
+    return bool(re.match(chinese_punctuation_pattern, char))
+
+def 是否為平假名(c:str):
+    return "\u3041" <= c <= "\u3096"
+
+def 是否為片假名(c:str):
+    return "\u30A1" <= c <= "\u30F6"
+
+def 是否為字元(c:str):
+    import string
+    # 檢查字元是否為符號
+    if c in string.punctuation or 是否為中文符號(c) or c.isspace():
+        return False
+    return True
+
+全型表 = {i: i + 0xFEE0 for i in range(0x21, 0x7F)}
+全型表[0x20] = 0x3000
+半型表 = {v: k for k, v in 全型表.items()}
+
+def 轉全型(s):
+    return s.translate(全型表)
+
+def 轉半型(s):
+    return s.translate(半型表).replace('—', '-')
+
+重碼字 ='車路類例宅金易勒精神行煉練復療溜樓例列量料飯旅冷靈禮福利老六數歷里不拉簾來說度便力錄連年爐讀益'
+重碼字+='立異理狀'
+正體字 ='車路類例宅金易勒精神行煉練復療溜樓例列量料飯旅冷靈禮福利老六數歷里不拉簾來說度便力錄連年爐讀益'
+正體字+='立異理狀'
+
+def 是否為重碼字(字串:str):
+    return 字串[0] in 重碼字 
+
+def 校正中文字(字串:str):
+    t = str.maketrans(重碼字, 正體字)
+    return 字串.translate(t)
+
+def 字元切換(string:str):
+    '''就大小寫字母，舉如拉丁字母，進行大小寫切換；重碼字母進行校正；中文字母進行簡繁切換；日文字母平片假名切換；符號則為全半型轉換(Todo)。
+'''
+    from opencc import OpenCC
+    if string == '': return string
+    def switch_case(c:str):
+        if c == '[': return '「'
+        if c == ']': return '」'
+
+        if 是否為重碼字(c):
+            return 校正中文字(c)
+
+        if 是否為中文字元(c):
+            # 簡繁切換
+            r = OpenCC('s2t').convert(c)
+            if r == c:
+                return OpenCC('t2s').convert(c)
+            return r
+        if 是否為平假名(c):
+            return chr(ord(c)-0x3041+0x30A1)
+        if 是否為片假名(c):
+            return chr(ord(c)-0x30A1+0x3041)
+        if c.islower():
+            return c.upper()
+        else:
+            return c.lower()
+
+    if len(string) == 1: return switch_case(string)
+
+    return ''.join(map(switch_case, string))
+
+def 翻譯(word):
+    from pygtrans import Translate
+    client = Translate()
+    # 翻译句子
+    text = client.translate(word, 'zh-tw')
+    return text.translatedText
+
+def 安裝雅黑混合字型():
+    import win32gui
+    def callback(font, tm, fonttype, names):
+        names.append(font.lfFaceName)
+        return True
+    fontnames = []
+    hdc = win32gui.GetDC(None)
+    win32gui.EnumFontFamilies(hdc, None, callback, fontnames)
+    win32gui.ReleaseDC(hdc, None)
+    字型已安裝 = "Microsoft YaHei Mono" in fontnames
+
+    if 字型已安裝:
+        print('雅黑混合字型已安裝！')
+        return 
+    from pathlib import Path
+    font = Path(__file__).parent.parent / 'font' / 'MSYHMONO.ttf'
+    cmd = f'''$FONTS = 0x14
+$objShell = New-Object -ComObject Shell.Application
+$objFolder = $objShell.Namespace($FONTS)
+$objFolder.CopyHere("{font}")
+'''
+    import subprocess
+    result = subprocess.run(["powershell", "-Command", cmd], capture_output=True)
+    if result.returncode !=0:
+        raise WindowsError(f'執行 powershell 發生錯誤：{result}；指令{cmd}')
+    print(f'安裝雅黑混合字型完成!')
+
+def 下載倉頡碼對照表():
+    from zhongwen.檔 import 下載
+    f = 下載('https://github.com/Jackchows/Cangjie5/raw/master/Cangjie5_TC.txt')
+    return f
+
+@cache.memoize()
+def 倉頡對照表():
+    from pandas import read_csv
+    f = 下載倉頡碼對照表()
+    df = read_csv(f, encoding='latin1'
+                 ,skiprows=12
+                 ,sep='\t'
+                 ,names=['漢字','倉頡碼','標註']
+                 )
+    def convert(latin1:str):
+        try:
+            return latin1.encode('latin1').decode('utf8', errors='replace') 
+        except AttributeError:
+            return latin1
+    df['漢字'] = df.漢字.map(convert)
+    d = {}
+    for index, row in df.iterrows():
+        if not row['漢字'] in d:
+            d[row['漢字']] = row['倉頡碼']
+    return d
+
+對照表 = 倉頡對照表() # 以模組變數將對照表緩存在記憶體
+def 倉頡首碼(char):
+    try:
+        return 對照表[char][0]
+    except KeyError:
+        return char
+
+def 首碼搜尋表示式(char, text):
+    cs = set()
+    for i, c in enumerate(text):
+        if c == char or 倉頡首碼(c) == char:
+            cs.add(c)
+    return f'[{"".join(cs)}]'

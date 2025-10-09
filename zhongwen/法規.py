@@ -18,7 +18,6 @@ def 取法規補全選項(文:str, 行, 欄):
     t = 取文內法規字首樹(文)
     l = 文.splitlines()[行-1]
     prefix = l[:欄]
-    print(prefix)
     while prefix:
         if t.has_keys_with_prefix(prefix):
             cs = [{'word':c[len(prefix):], 'abbr':c, 'kind':'法規'} for c in t.keys(prefix)]
