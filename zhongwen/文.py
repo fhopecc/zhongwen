@@ -3,35 +3,49 @@ from diskcache import Cache
 from pathlib import Path
 import functools
 
-# @functools.cache
-def 取文內簡稱字首樹(文):
-    from marisa_trie import Trie
-    import re
-    abbrs = []
-    pat = r'\(下稱(.+?)\)'
-    return Trie(re.findall(pat, 文))
-
-def 取簡稱補全選項(文:str, 行, 欄):
-    '行及欄是以1起始'
-    import re
-    t = 取文內簡稱字首樹(文)
-    l = 文.splitlines()[行-1]
-    prefix = l[:欄]
-    while prefix:
-        if t.has_keys_with_prefix(prefix):
-            cs = [{'word':c[len(prefix):], 'abbr':c, 'kind':'簡稱'} for c in t.keys(prefix)]
-            return cs
-        prefix = prefix[1:]
-    return []
-
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 倉頡字根表 = str.maketrans("abcdefghijklmnopqrstuvwxy"
                           ,"日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜" )
-def 設定環境():
-    from zhongwen.windows import 建立傳送到項目
-    import sys
-    cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.文 -o -c -f %* || pause"'
-    建立傳送到項目('轉錄至文檔', cmd)
+
+@functools.cache
+@cache.memoize('取倉頡碼')
+def 取倉頡碼(字元=None):
+    from zhongwen.檔 import 下載
+    from pandas import read_csv
+
+    if 字元:
+        return 取倉頡碼().get(字元, [字元])
+
+    try:
+        f = 下載('https://github.com/Jackchows/Cangjie5/raw/master/Cangjie5_TC.txt')
+    except Exception as e:
+        print(f'下載倉頡碼表發生錯誤如次：{e}，改用內建碼表。')
+        f = Path(__file__).parent / r'resource\Cangjie5_TC.txt'
+
+    df = read_csv(f, encoding='latin1'
+                 ,skiprows=12
+                 ,sep='\t'
+                 ,names=['漢字','倉頡碼','標註']
+                 )
+    def convert(latin1:str):
+        try:
+            return latin1.encode('latin1').decode('utf8', errors='replace') 
+        except AttributeError:
+            return latin1
+    df['漢字'] = df.漢字.map(convert)
+    d = {}
+    for index, row in df.iterrows():
+        if not row['漢字'] in d:
+            d[row['漢字']] = row['倉頡碼']
+    return d
+
+def 首碼搜尋表示式(char, text):
+    cs = set()
+    for i, c in enumerate(text):
+        if c == char or 取倉頡碼(c)[0] == char:
+            cs.add(c)
+    return f'[{"".join(cs)}]'
+
 
 @functools.cache
 @cache.memoize()
@@ -94,6 +108,45 @@ def 倉頡檢字(倉頡碼=None):
     df['漢字'] = df.漢字.map(convert)
     df['倉頡碼字'] = df.倉頡碼.map(lambda s: s.translate(倉頡字根表))+df.漢字
     return Trie(df.倉頡碼字.tolist())
+
+@functools.cache
+def 取文內簡稱字首樹(文):
+    from marisa_trie import Trie
+    import re
+    pat = r'\(下稱(.+?)\)'
+    return Trie(re.findall(pat, 文))
+
+def 取簡稱補全選項(文:str, 行, 欄):
+    '行及欄是以1起始'
+    import re
+    t = 取文內簡稱字首樹(文)
+    l = 文.splitlines()[行-1]
+    prefix = l[:欄]
+    while prefix:
+        if t.has_keys_with_prefix(prefix):
+            cs = [{'word':c[len(prefix):], 'abbr':c, 'kind':'簡稱'} for c in t.keys(prefix)]
+            return cs
+        prefix = prefix[1:]
+    return []
+
+# @functools.cache
+def 取詞字首樹(文):
+    from marisa_trie import Trie
+    import re
+    pat = r'[a-zA-Z-9\u4e00-\u9fa5]+'
+    return Trie(re.findall(pat, 文))
+
+def 取詞補全選項(文:str, 行, 欄):
+    '行及欄是以1起始'
+    import re
+    t = 取詞字首樹(文)
+    l = 文.splitlines()[行-1]
+    pat = r'[a-zA-Z-9\u4e00-\u9fa5]+'
+    prefix = re.findall(pat, l[:欄])[-1]
+    if prefix and t.has_keys_with_prefix(prefix):
+        return [{'word':c[len(prefix):], 'abbr':c, 'kind':'詞'} for c in t.keys(prefix)]
+        return cs
+    return []
 
 def geturl(文):
     '找出文中的 url，如找不到傳回空白'
@@ -228,33 +281,6 @@ def 轉錄文字(源檔集):
 
 def escape_vim_string(s:str):
     return s.replace('\\', '\\\\')
-
-if __name__ == "__main__":
-    from pyperclip import copy
-    from pathlib import Path
-    from zhongwen.數 import 取中文數字
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--setup', help="設定環境", action='store_true')
-    parser.add_argument('--output', '-o', help="轉錄文字儲存至檔案" ,action='store_true')
-    parser.add_argument('--clipboard', '-c', help="轉錄文字複製至剪貼簿", action='store_true')
-    parser.add_argument('--files', '-f', nargs='+', help='指定欲轉錄文字之源檔集')
-    args = parser.parse_args()
-    if args.setup:
-        設定環境()
-    elif sources := args.files:
-        text = 轉錄文字(sources)
-        if args.clipboard:
-            copy(text)
-        if args.output:
-            s1 = Path(sources[0])
-            if len(sources) > 1:
-                輸出文檔 = Path(s1).with_stem(f'{s1.stem[:6]}等{取中文數字(len(sources))}個文檔').with_suffix('.txt')
-            else:
-                輸出文檔 = Path(s1).with_suffix('.txt')
-            with open(str(輸出文檔), 'w', encoding='utf-8') as out_f:
-                out_f.write(text)
-        print(f"{' '.join(sources)} =~->> {輸出文檔}")
 
 def 去標籤(字串):
     import re
@@ -395,42 +421,37 @@ $objFolder.CopyHere("{font}")
         raise WindowsError(f'執行 powershell 發生錯誤：{result}；指令{cmd}')
     print(f'安裝雅黑混合字型完成!')
 
-def 下載倉頡碼對照表():
-    from zhongwen.檔 import 下載
-    f = 下載('https://github.com/Jackchows/Cangjie5/raw/master/Cangjie5_TC.txt')
-    return f
+def 設定環境():
+    from zhongwen.windows import 建立傳送到項目
+    import sys
+    cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.文 -o -c -f %* || pause"'
+    建立傳送到項目('轉錄至文檔', cmd)
 
-@cache.memoize()
-def 倉頡對照表():
-    from pandas import read_csv
-    f = 下載倉頡碼對照表()
-    df = read_csv(f, encoding='latin1'
-                 ,skiprows=12
-                 ,sep='\t'
-                 ,names=['漢字','倉頡碼','標註']
-                 )
-    def convert(latin1:str):
-        try:
-            return latin1.encode('latin1').decode('utf8', errors='replace') 
-        except AttributeError:
-            return latin1
-    df['漢字'] = df.漢字.map(convert)
-    d = {}
-    for index, row in df.iterrows():
-        if not row['漢字'] in d:
-            d[row['漢字']] = row['倉頡碼']
-    return d
+if __name__ == "__main__":
+    from pyperclip import copy
+    from pathlib import Path
+    from zhongwen.數 import 取中文數字
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--setup', help="設定環境", action='store_true')
+    parser.add_argument('--output', '-o', help="轉錄文字儲存至檔案" ,action='store_true')
+    parser.add_argument('--clipboard', '-c', help="轉錄文字複製至剪貼簿", action='store_true')
+    parser.add_argument('--files', '-f', nargs='+', help='指定欲轉錄文字之源檔集')
+    args = parser.parse_args()
+    if args.setup:
+        設定環境()
+    elif sources := args.files:
+        text = 轉錄文字(sources)
+        if args.clipboard:
+            copy(text)
+        if args.output:
+            s1 = Path(sources[0])
+            if len(sources) > 1:
+                輸出文檔 = Path(s1).with_stem(f'{s1.stem[:6]}等{取中文數字(len(sources))}個文檔').with_suffix('.txt')
+            else:
+                輸出文檔 = Path(s1).with_suffix('.txt')
+            with open(str(輸出文檔), 'w', encoding='utf-8') as out_f:
+                out_f.write(text)
+        print(f"{' '.join(sources)} =~->> {輸出文檔}")
 
-對照表 = 倉頡對照表() # 以模組變數將對照表緩存在記憶體
-def 倉頡首碼(char):
-    try:
-        return 對照表[char][0]
-    except KeyError:
-        return char
 
-def 首碼搜尋表示式(char, text):
-    cs = set()
-    for i, c in enumerate(text):
-        if c == char or 倉頡首碼(c) == char:
-            cs.add(c)
-    return f'[{"".join(cs)}]'

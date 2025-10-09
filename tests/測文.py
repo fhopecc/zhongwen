@@ -21,10 +21,10 @@ class Test(unittest.TestCase):
         self.assertEqual(臚列標題(text, 級別='3'), '(一)標題甲；(二)標題乙；(三)標題丙')
 
     def test取倉頡候選字(self):
-        from zhongwen.文 import 倉頡檢字, 取臺灣字頻序號
+        from zhongwen.文 import 倉頡檢字, 取臺灣字頻序號, 首碼搜尋表示式
         from zhongwen.文 import cache
         from marisa_trie import Trie
-        cache.clear()
+        # cache.clear()
         f = 取臺灣字頻序號() 
         self.assertEqual(f['的'], 1)
         self.assertEqual(取臺灣字頻序號('的'), 1)
@@ -42,6 +42,15 @@ class Test(unittest.TestCase):
         print(candidates)
 
         self.assertNotEqual(倉頡檢字('jj')[0], '十十')
+
+        text = '''fa 命令原係向前搜尋字母a，
+擴充為向前搜尋字母a及中文倉頡碼首碼為a的中文字，
+如【是】倉頡碼為【amyo】。函u
+'''
+        self.assertTrue('是' in 首碼搜尋表示式('a', text))
+        self.assertTrue('倉' in 首碼搜尋表示式('o', text))
+        self.assertTrue('令' in 首碼搜尋表示式('o', text))
+        self.assertTrue('係' in 首碼搜尋表示式('o', text))
 
     def test查萌典(self):
         from zhongwen.文 import 查萌典, 萌典尚無定義之字詞
@@ -64,6 +73,16 @@ class Test(unittest.TestCase):
         opts = 取簡稱補全選項(f.read_text(encoding='utf-8'), 315, 7)
         print(opts)
 
+    def test取詞字首樹(self):
+        from zhongwen.文 import 取詞字首樹, 取詞補全選項
+        from pathlib import Path
+        f = Path(__file__)
+        words = 取詞字首樹(f.read_text(encoding='utf-8'))
+        print(words.keys('test'))
+        # test取
+        opts = 取詞補全選項(f.read_text(encoding='utf-8'), 82, 15)
+        print(opts)
+
 if __name__ == '__main__':
     import logging
     logging.basicConfig(level=logging.INFO)
@@ -72,6 +91,6 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test取文內簡稱字首樹'))
+    suite.addTest(Test('test取詞字首樹'))
     # suite.addTest(Test('test轉樣式表字串'))
     unittest.TextTestRunner().run(suite)
