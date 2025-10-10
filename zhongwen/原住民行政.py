@@ -1,5 +1,8 @@
 from diskcache import Cache
 from pathlib import Path
+import logging
+
+logger = logging.getLogger(Path(__file__).stem)
 
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 
@@ -21,13 +24,15 @@ def 載入原住民部落(檔, 縣市='花蓮縣'):
 @cache.memoize('取營業地點位於原住民部落範圍者')
 def 取營業地點位於原住民部落範圍者(營業登記檔, 部落檔): 
     from zhongwen.營業稅 import 載入營業登記檔, cache
+    from zhongwen.快取 import 刪除指定名稱快取
     from zhongwen.表 import 顯示
     from pathlib import Path
-    from zhongwen.快取 import 刪除指定名稱快取
     import pandas as pd
     import re
     bgm = 載入營業登記檔(營業登記檔).query('營業地址.str.contains("花蓮縣")')
+    logger.info(f"營業登記檔規模：{bgm.shape}")
     tribes = 載入原住民部落(部落檔) 
+    logger.info(f"原住民部落檔規模：{tribes.shape}")
     tribes['村里'] = tribes['村/里'].str.replace('、', '|')
     bgm_in_tribes = bgm.merge(tribes, how='cross')
     def 營業地址是否包含村里(row):
@@ -36,11 +41,7 @@ def 取營業地點位於原住民部落範圍者(營業登記檔, 部落檔):
         if pd.isna(address) or pd.isna(pattern):
             return False
         return bool(re.search(str(pattern), str(address), re.IGNORECASE))
-
     conditions = bgm_in_tribes.apply(營業地址是否包含村里, axis=1)
     bgm_in_tribes = bgm_in_tribes[conditions]
-    # bgm_in_tribes = bgm_in_tribes.query('營業地址.str.contains(村里)')
-    # bgm = bgm.query('營業地址.str.contains("大平村|大馬")')
-    # tribe = tribe.sort_values('原住民人口數', ascending=False)
     return bgm_in_tribes 
 
