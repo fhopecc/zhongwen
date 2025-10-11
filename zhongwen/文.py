@@ -129,11 +129,11 @@ def 取簡稱補全選項(文:str, 行, 欄):
         prefix = prefix[1:]
     return []
 
-# @functools.cache
+@functools.cache
 def 取詞字首樹(文):
     from marisa_trie import Trie
     import re
-    pat = r'[a-zA-Z-9\u4e00-\u9fa5]+'
+    pat = r'[\w\u4e00-\u9fff\u3000-\u30ff\uff01-\uff5e-]+'
     return Trie(re.findall(pat, 文))
 
 def 取詞補全選項(文:str, 行, 欄):
