@@ -109,6 +109,26 @@ def 倉頡檢字(倉頡碼=None):
     df['倉頡碼字'] = df.倉頡碼.map(lambda s: s.translate(倉頡字根表))+df.漢字
     return Trie(df.倉頡碼字.tolist())
 
+def 取最近詞首(字串, 欄數):
+    import re
+    text = 字串
+    column = 欄數
+    if column <= 0 or column > len(text):
+        return None
+    sub_text = text[0:column]
+
+    pattern = r'(\w+)\W*$'
+    
+    match = re.search(pattern, sub_text)
+
+    if match:
+        return match.group(1)
+    
+    if re.search(r'\w$', sub_text) and not re.search(r'\W', sub_text):
+         return sub_text
+         
+    return None
+
 @functools.cache
 def 取文內簡稱字首樹(文):
     from marisa_trie import Trie

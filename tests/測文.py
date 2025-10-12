@@ -83,6 +83,13 @@ class Test(unittest.TestCase):
         opts = 取詞補全選項(f.read_text(encoding='utf-8'), 82, 15)
         print(opts)
 
+    def test取最近詞首(self):
+        from zhongwen.文 import 取最近詞首
+        print('abcd')
+        w = 取最近詞首('set compe', 8)
+        print(w)
+        self.assertEqual(w, comp)
+
 if __name__ == '__main__':
     import logging
     logging.basicConfig(level=logging.INFO)
@@ -91,6 +98,6 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test取詞字首樹'))
+    suite.addTest(Test('test取最近詞首'))
     # suite.addTest(Test('test轉樣式表字串'))
     unittest.TextTestRunner().run(suite)
