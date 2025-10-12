@@ -2,6 +2,47 @@ from pathlib import Path
 import logging
 logger = logging.getLogger(Path(__file__).stem)
 
+def 取錯誤位置清單(errmsg):
+    import re
+    if isinstance(errmsg, list):
+        errmsg = '\n'.join(errmsg)
+    # 解析項目：1.檔名；2.行號；3.訊息。
+    traceback_pattern = re.compile(r'^\s*File\s+"(.*?)",\s*line\s*(\d+)(.*)$')
+    qf_list = []
+    output_lines = errmsg.splitlines()
+
+    # 用來儲存最後一行錯誤類型和訊息 (e.g. IndexError: list index out of range)
+    final_error_message = "未知錯誤"
+
+    # 1. 第一次迭代：找出所有的堆疊追蹤行
+    for line in output_lines:
+        match = traceback_pattern.search(line)
+        if match:
+            # 這是堆疊中的一個呼叫層
+            file_path = match.group(1)
+            line_num = int(match.group(2))
+            text = match.group(3).strip()
+
+            # 構建 QuickFix 項目
+            qf_item = {
+                'filename': file_path,
+                'lnum': line_num,
+                'text': text,
+                'type': 'E'
+            }
+            qf_list.append(qf_item)
+        elif qf_list and not line.strip().startswith('Traceback'):
+            # 捕捉堆疊追蹤的最後一行 (實際的錯誤訊息)
+            # 假設它是跟在堆疊行之後，且不以 'Traceback' 開頭
+            if not re.match(r'^\s*$', line): # 忽略空白行
+                final_error_message = line.strip()
+    # 2. 如果成功解析了堆疊，將最終錯誤訊息加入到列表的第一個項目
+    # 讓 QuickFix 視窗中的訊息更豐富
+    if qf_list:
+        # 將最底層（最近發生）的錯誤訊息，作為 QuickFix 列表中的第一條記錄
+        qf_list[-1]['text'] = f"{final_error_message} (in {qf_list[-1]['text']})"
+    return qf_list
+
 def 專案根目錄(檔案:Path):
     p = 檔案
     while not(p.parent / 'pyproject.toml').exists():
@@ -26,9 +67,9 @@ def 布署(檔案:Path=None):
     else:
         try:
             n = 套件名稱('pyproject.toml') 
-            cmd =  f'del dist\* && py -m build && twine upload dist\* && '
-            cmd += f'python -m pip install {n} -U && '
-            cmd += f'python -m pip install {n} -U'
+            cmd =  rf'del dist\* && py -m build && twine upload dist\* && '
+            cmd += rf'python -m pip install {n} -U && '
+            cmd += rf'python -m pip install {n} -U'
             os.system(cmd)
         except FileNotFoundError:
             logger.error(f'當前目錄 {os.getcwd()} 無 pyproject.toml 檔案！')
@@ -153,6 +194,7 @@ def 安裝套件(套件名稱):
     except Exception as e:
         print(f"安裝 {套件名稱} 時發生未知錯誤: {e}")
 
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
@@ -165,6 +207,10 @@ if __name__ == '__main__':
     parser.add_argument("--setgit"
                        ,help="設定 git 環境。"
                        ,action='store_true')
+    parser.add_argument("--test"
+                       ,help="設定 git 環境。"
+                       ,action='store_true')
+
     args = parser.parse_args()
     if args.deploy2pypi:
         布署()
@@ -172,5 +218,9 @@ if __name__ == '__main__':
         當前目錄加入模組查找路徑()
     elif args.setgit:
         setgit()
+    elif args.test:
+        # qf = 執行並取錯誤位置清單(r'd:\github\vimchinese\plugin\python.vim')
+        qf = 執行並取錯誤位置清單(__file__)
+        print(qf)
     else:
         pass
