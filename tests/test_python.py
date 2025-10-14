@@ -75,7 +75,7 @@ class TestPythonDebug(unittest.TestCase):
         self.test_file.unlink()
         self.test_file2.unlink()
         
-    # def test_至定義(self):
+    def test_至定義(self):
         # code = '''from stock.tifrs_schema import 科目表
         # w = 科目表()
         # '''
