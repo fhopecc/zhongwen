@@ -3,6 +3,15 @@ import unittest
 wdir = Path(__file__).parent
 
 class TestPythonDebug(unittest.TestCase):
+
+    def test取錯誤位置清單(self):
+        from zhongwen.python import 取錯誤位置清單
+        from pathlib import Path
+        testee = Path(__file__).parent / '取錯誤位置清單測例日記帳.txt'
+        ls = 取錯誤位置清單(testee.read_text(encoding='utf-8'))
+        print(ls)
+        self.assertEqual(ls, [])
+
     def setUp(self):
         test_file = wdir / 'test_file.py'
         test_file.touch()
@@ -30,7 +39,7 @@ class TestPythonDebug(unittest.TestCase):
             布署(Path(r'd:\GitHub\vimpython\ftplugin\python.vim'))
 
     def test_find_testfile(self):
-        from zhongwen.python_dev import find_testfile
+        from zhongwen.python import find_testfile
         from pathlib import Path
         import os
 
@@ -75,14 +84,14 @@ class TestPythonDebug(unittest.TestCase):
         self.test_file.unlink()
         self.test_file2.unlink()
         
-    def test_至定義(self):
-        # code = '''from stock.tifrs_schema import 科目表
-        # w = 科目表()
-        # '''
-        # from jedi import Script
-        # import fhopecc.env as env
-        # s = Script(code=code, path='test.py')
-        # gs = s.goto(2, 6, follow_imports=True)
+    def test至定義(self):
+        code = '''from stock.tifrs_schema import 科目表
+        w = 科目表()
+        '''
+        from jedi import Script
+        import fhopecc.env as env
+        s = Script(code=code, path='test.py')
+        gs = s.goto(2, 6, follow_imports=True)
         # self.assertGreater(len(gs), 0)
         # self.assertEqual(gs[0].module_path, env.workdir / 'stock' / 'tifrs_schema.py')
     

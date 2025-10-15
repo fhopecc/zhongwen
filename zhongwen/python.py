@@ -15,20 +15,17 @@ def 取錯誤位置清單(errmsg):
         lines = errmsg.split('\n')
     else:
         lines = errmsg
-    # 正規表達式：匹配堆棧條目 (File "path", line num, in func)
-    # 注意：在 Windows 路徑中，Python Traceback 仍使用 '\'，但需要轉義
+
+    # 執行函數項目樣式(File "path", line num, in func)
     frame_pattern = re.compile(r'^\s*File\s+"(.+)",\s+line\s+(\d+)(.*)')
     
     current_frame = None
     
     for line in lines:
         line = line.strip()
-
-        # 1. 匹配堆棧條目（File 行）
         match = frame_pattern.match(line)
-        
         if match:
-            # 找到新的堆棧條目
+            # 找到新執行函數項目
             if current_frame:
                 # 處理上一個條目，加入 Quickfix 列表
                 quickfix_entries.append(current_frame)
@@ -39,7 +36,7 @@ def 取錯誤位置清單(errmsg):
                 # 替換 Windows 的 '\' 為 Quickfix 慣用的 '/'
                 'filename': path.replace('\\', '/'), 
                 'lnum': int(lineno),
-                'text': f"Frame: in {funcname}", # 預設訊息
+                'text': f"Frame: in {funcname}",
             }
             continue
 
@@ -62,15 +59,15 @@ def 取錯誤位置清單(errmsg):
                     current_frame['text'] += f" | Context: {line}"
 
     # 3. 處理頂層 ERROR 訊息 (例如: ERROR: test取最近詞首...)
-    if not quickfix_entries and lines:
-        # 如果沒有堆棧條目（例如解析失敗或頂層錯誤），將其作為單獨的訊息
-        header_text = lines[0].strip()
-        quickfix_entries.append({
-            'filename': 'Test Log',
-            'lnum': 0, # 使用 0 表示沒有確切行號
-            'text': header_text,
-        })
-    elif quickfix_entries and lines:
+    # if not quickfix_entries and lines:
+    #     # 如果沒有堆棧條目（例如解析失敗或頂層錯誤），將其作為單獨的訊息
+    #     header_text = lines[0].strip()
+    #     quickfix_entries.append({
+    #         'filename': 'Test Log',
+    #         'lnum': 0, # 使用 0 表示沒有確切行號
+    #         'text': header_text,
+    #     })
+    if quickfix_entries and lines:
         # 如果有堆棧條目，將頂層 ERROR 訊息加到第一個條目的前綴
         error_header_match = re.match(r'ERROR:\s+(.+?)\s+\((.+?)\)', lines[0].strip())
         if error_header_match:
