@@ -73,14 +73,20 @@ class Test(unittest.TestCase):
         opts = 取簡稱補全選項(f.read_text(encoding='utf-8'), 315, 7)
         print(opts)
 
-    def test取詞字首樹(self):
-        from zhongwen.文 import 取詞字首樹, 取詞補全選項
+    def test取英文單字補全選項(self):
+        from zhongwen.文 import 取英文單字補全選項, 取英文單字首樹
         from pathlib import Path
         f = Path(__file__)
-        words = 取詞字首樹(f.read_text(encoding='utf-8'))
+        words = 取英文單字首樹(f.read_text(encoding='utf-8'))
         print(words.keys('test'))
-        # test取
-        opts = 取詞補全選項(f.read_text(encoding='utf-8'), 82, 15)
+        # pr
+        # 
+        # vim9
+        opts = 取英文單字補全選項(f.read_text(encoding='utf-8'), 82, 12)
+        print(opts)
+        opts = 取英文單字補全選項(f.read_text(encoding='utf-8'), 83, 10)
+        print(opts)
+        opts = 取英文單字補全選項(f.read_text(encoding='utf-8'), 84, 14)
         print(opts)
 
     def test取最近詞首(self):
@@ -90,6 +96,15 @@ class Test(unittest.TestCase):
         print(w)
         self.assertEqual(w, comp)
 
+    def test取名詞字首樹(self):
+        from zhongwen.文 import 取名詞字首樹
+        from pathlib import Path
+        f = r'g:\我的雲端硬碟\00.114-2花縣府原民處0901-16-1017(20)提出\慢食產業計畫查核工作紀錄.md'
+        f = Path(f)
+        nouns = 取名詞字首樹(f.read_text(encoding='utf-8'))
+        nouns = [n.encode('cp950', errors='replace').decode('cp950') for n in nouns]
+        print(nouns)
+
 if __name__ == '__main__':
     import logging
     logging.basicConfig(level=logging.INFO)
@@ -98,6 +113,6 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test取最近詞首'))
+    suite.addTest(Test('test取英文單字補全選項'))
     # suite.addTest(Test('test轉樣式表字串'))
     unittest.TextTestRunner().run(suite)

@@ -149,23 +149,51 @@ def 取簡稱補全選項(文:str, 行, 欄):
         prefix = prefix[1:]
     return []
 
-@functools.cache
-def 取詞字首樹(文):
+def 取名詞字首樹(文):
+    '取文中長複合名詞優先被取出'
+    import jieba.posseg as psg
     from marisa_trie import Trie
     import re
-    pat = r'[\w\u4e00-\u9fff\u3000-\u30ff\uff01-\uff5e-]+'
+    # pat = r'\b[a-zA-Z_-]+\b'
+    # return Trie(re.findall(pat, 文))
+
+    # 1. 使用 jieba.posseg.cut 進行詞性標註
+    # 準確模式 (cut_all=False) 會傾向於切出最長、最合理的詞彙，這就是長複合名詞優先的基礎。
+    words_with_pos = psg.cut(文)
+    
+    # 2. 過濾名詞
+    nouns = []
+    # 正則表達式 [\u4e00-\u9fa5] 用來匹配所有中文字符
+    chinese_char_pattern = re.compile(r'[\u4e00-\u9fa5]+')
+    
+    for word, flag in words_with_pos:
+        # 移除空白字元
+        trimmed_word = word.strip()
+        
+        # 1. 檢查詞性是否為名詞 (以 'n' 開頭: n, nr, ns, nt, nz, ...)
+        if flag.startswith('n'):
+            # 2. 檢查詞彙是否包含中文字，以確保我們只取中文名詞
+            if trimmed_word and chinese_char_pattern.search(trimmed_word):
+                 nouns.append(trimmed_word)
+    return nouns
+
+@functools.cache
+def 取英文單字首樹(文):
+    '找出字串中包含英文單字，單字包含底線。'
+    from marisa_trie import Trie
+    import re
+    pat = r'\b[a-zA-Z_-]+\b'
     return Trie(re.findall(pat, 文))
 
-def 取詞補全選項(文:str, 行, 欄):
+def 取英文單字補全選項(文:str, 行, 欄):
     '行及欄是以1起始'
     import re
-    t = 取詞字首樹(文)
+    t = 取英文單字首樹(文)
     l = 文.splitlines()[行-1]
-    pat = r'[a-zA-Z-9\u4e00-\u9fa5]+'
-    prefix = re.findall(pat, l[:欄])[-1]
-    if prefix and t.has_keys_with_prefix(prefix):
-        return [{'word':c[len(prefix):], 'abbr':c, 'kind':'詞'} for c in t.keys(prefix)]
-        return cs
+    pat = r'\b[a-zA-Z_-]+\b'
+    prefixes = re.findall(pat, l[:欄])
+    if prefixes and (prefix:=prefixes[-1]) and t.has_keys_with_prefix(prefix):
+        return [{'word':c[len(prefix):], 'abbr':c, 'kind':'英文單字'} for c in t.keys(prefix)]
     return []
 
 def geturl(文):
