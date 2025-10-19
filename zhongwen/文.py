@@ -13,11 +13,14 @@ def 取停用詞():
     return pd.read_csv(Path(__file__).parent / 'resource' / '停用詞.csv')
 
 @functools.cache
-def 取分隔詞模式(程式語言='Python'):
+def 取分隔詞模式(程式語言=None):
+    if 程式語言=='vim':
+        return python_re_to_vim_magic(取分隔詞模式())
     df = 取停用詞()
     pat = df.iloc[:, 0].values
     pat = '|'.join(pat)
-    return rf"(?:[\uff00-\uffef\u3000-\u303f\s,.?;:/\\\"'|~!@#$%^&*()\[\]{{}}\_=\+\-]|{pat})+"
+    return rf"(?:[\uff00-\uffef\u3000-\u303f\s,.?;:/\\\"'|~!@#$%^&*()\[\]{{}}\=\+\-]|{pat})+"
+    
 
 @functools.cache
 @cache.memoize('取倉頡碼')
@@ -503,4 +506,57 @@ if __name__ == "__main__":
                 out_f.write(text)
         print(f"{' '.join(sources)} =~->> {輸出文檔}")
 
+def python_re_to_vim_magic(py_pattern: str) -> str:
+    """
+    將 Python re (PCRE 風格) 的正規表示式轉換為 Vim (magic 風格)。
 
+    Vim magic 模式需要轉義的特殊字符：() + ? | {} <>
+    注意：此函數假設輸入的 Python 模式是有效的。
+
+    Args:
+        py_pattern: Python re 模組使用的正規表示式字串。
+
+    Returns:
+        適用於 Vim magic 模式的正規表示式字串。
+    """
+    import re
+    vim_pattern = py_pattern.replace('(', r'\(')
+    vim_pattern = vim_pattern.replace(')', r'\)')
+    
+    vim_pattern = vim_pattern.replace('+', r'\+')
+    vim_pattern = vim_pattern.replace('?', r'\?')
+
+    vim_pattern = vim_pattern.replace('|', r'\|')
+
+    vim_pattern = vim_pattern.replace('{', r'\{')
+    vim_pattern = vim_pattern.replace('}', r'\}')
+    
+    vim_pattern = vim_pattern.replace(r'\(?:', r'\%(')
+    vim_pattern = vim_pattern.replace(r'\)', ')') # 臨時還原 \)
+    vim_pattern = vim_pattern.replace(r'\%()', r'\%(\)') # 重新轉義
+    
+    vim_pattern = py_pattern
+    
+    def escape_vim_char(match):
+        char = match.group(0)
+        if char in '()|?+{}<>':
+            return r'\%s' % char
+        return char
+
+    replacements = {
+        '(': r'\(', ')': r'\)', 
+        '+': r'\+', '?': r'\?', 
+        '|': r'\|', 
+        '{': r'\{', '}': r'\}',
+        '\\': r'\\', # 確保反斜線本身被保留
+    }
+
+    for py_char, vim_char in replacements.items():
+        # 注意：這是一個簡化處理，無法區分字元集 [] 內外
+        # 在實際使用中，如果遇到問題，需要寫更複雜的狀態機或使用 regex 進行非捕獲判斷
+        vim_pattern = vim_pattern.replace(py_char, vim_char)
+
+    # 處理非捕獲群組 (?:...) -> \(\) (忽略非捕獲特性，轉為標準群組)
+    vim_pattern = vim_pattern.replace(r'\(?:', r'\(')
+
+    return vim_pattern.replace(r'\\', r'\\\\') # 確保反斜線在輸出時被正確表示

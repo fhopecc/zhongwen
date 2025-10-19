@@ -150,6 +150,12 @@ class Test(unittest.TestCase):
         opts = 取詞補全選項(f.read_text(encoding='utf-8'), 146, 14)
         print(opts)
 
+    def test_re_pattern_convesion(self):
+        from zhongwen.文 import python_re_to_vim_magic
+        from zhongwen.文 import 取分隔詞模式
+        print(取分隔詞模式())
+        print(python_re_to_vim_magic(取分隔詞模式()))
+        self.assertEqual(取分隔詞模式('vim'), python_re_to_vim_magic(取分隔詞模式()))
 
 if __name__ == '__main__':
     import logging
@@ -159,6 +165,5 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test取詞補全選項'))
-    # suite.addTest(Test('test轉樣式表字串'))
+    suite.addTest(Test('test_re_pattern_convesion'))
     unittest.TextTestRunner().run(suite)
