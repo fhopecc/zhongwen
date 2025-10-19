@@ -8,6 +8,18 @@ cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
                           ,"日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜" )
 
 @functools.cache
+def 取停用詞():
+    import pandas as pd
+    return pd.read_csv(Path(__file__).parent / 'resource' / '停用詞.csv')
+
+@functools.cache
+def 取分隔詞模式(程式語言='Python'):
+    df = 取停用詞()
+    pat = df.iloc[:, 0].values
+    pat = '|'.join(pat)
+    return rf"(?:[\uff00-\uffef\u3000-\u303f\s,.?;:/\\\"'|~!@#$%^&*()\[\]{{}}\_=\+\-]|{pat})+"
+
+@functools.cache
 @cache.memoize('取倉頡碼')
 def 取倉頡碼(字元=None):
     from zhongwen.檔 import 下載
@@ -149,33 +161,22 @@ def 取簡稱補全選項(文:str, 行, 欄):
         prefix = prefix[1:]
     return []
 
-def 取名詞字首樹(文):
-    '取文中長複合名詞優先被取出'
-    import jieba.posseg as psg
+@functools.cache
+def 取詞字首樹(文):
+    '找出字串詞。'
     from marisa_trie import Trie
     import re
-    # pat = r'\b[a-zA-Z_-]+\b'
-    # return Trie(re.findall(pat, 文))
+    return Trie([w for w in re.split(取分隔詞模式(), 文) if len(w)>0])
 
-    # 1. 使用 jieba.posseg.cut 進行詞性標註
-    # 準確模式 (cut_all=False) 會傾向於切出最長、最合理的詞彙，這就是長複合名詞優先的基礎。
-    words_with_pos = psg.cut(文)
-    
-    # 2. 過濾名詞
-    nouns = []
-    # 正則表達式 [\u4e00-\u9fa5] 用來匹配所有中文字符
-    chinese_char_pattern = re.compile(r'[\u4e00-\u9fa5]+')
-    
-    for word, flag in words_with_pos:
-        # 移除空白字元
-        trimmed_word = word.strip()
-        
-        # 1. 檢查詞性是否為名詞 (以 'n' 開頭: n, nr, ns, nt, nz, ...)
-        if flag.startswith('n'):
-            # 2. 檢查詞彙是否包含中文字，以確保我們只取中文名詞
-            if trimmed_word and chinese_char_pattern.search(trimmed_word):
-                 nouns.append(trimmed_word)
-    return nouns
+def 取詞補全選項(文:str, 行, 欄):
+    '行及欄是以1起始'
+    import re
+    t = 取詞字首樹(文)
+    l = 文.splitlines()[行-1]
+    prefixes = re.split(取分隔詞模式(), l[:欄])
+    if prefixes and (prefix:=prefixes[-1]) and t.has_keys_with_prefix(prefix):
+        return [{'word':c[len(prefix):], 'abbr':c, 'kind':'詞'} for c in t.keys(prefix)]
+    return []
 
 @functools.cache
 def 取英文單字首樹(文):

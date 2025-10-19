@@ -105,6 +105,52 @@ class Test(unittest.TestCase):
         nouns = [n.encode('cp950', errors='replace').decode('cp950') for n in nouns]
         print(nouns)
 
+    def test取停用詞(self):
+        from zhongwen.文 import 取停用詞
+        import re
+        df = 取停用詞()
+        pat = df.iloc[:, 0].values
+        pat = '|'.join(pat)
+        pat = rf"(?:[\uff00-\uffef\u3000-\u303f\s,.?;:/\\\"'|~!@#$%^&*()\[\]{{}}\_=\+\-]|{pat})+"
+        print(pat)
+        s = '''#### 徵選原住民部落範圍內商家給予獎勵金補助提升慢食產業，惟食農相關商家參與徵選比例偏低，且僅於慢食組織說明徵件方式，允宜協調相關機關組織協助加強宣導，以提升商家參與比補助成效
+        '''
+        s1 = re.findall(pat, s)
+        print(s1)
+        s2 = [w for w in re.split(pat, s) if len(w)>0]
+        print(s2)
+
+    def test取英文單字補全選項(self):
+        from zhongwen.文 import 取英文單字補全選項, 取英文單字首樹
+        from pathlib import Path
+        f = Path(__file__)
+        words = 取英文單字首樹(f.read_text(encoding='utf-8'))
+        print(words.keys('test'))
+        # pr
+        # 
+        # vim9
+        opts = 取英文單字補全選項(f.read_text(encoding='utf-8'), 82, 12)
+        print(opts)
+        opts = 取英文單字補全選項(f.read_text(encoding='utf-8'), 83, 10)
+        print(opts)
+        opts = 取英文單字補全選項(f.read_text(encoding='utf-8'), 84, 14)
+        print(opts)
+
+    def test取詞補全選項(self):
+        from zhongwen.文 import 取詞字首樹, 取詞補全選項
+        from pathlib import Path
+        f = Path(__file__)
+        words = 取詞字首樹(f.read_text(encoding='utf-8'))
+        print(words.keys('test'))
+        print(words.keys('取詞'))
+        # pr
+        # 取詞
+        opts = 取詞補全選項(f.read_text(encoding='utf-8'), 147, 12)
+        print(opts)
+        opts = 取詞補全選項(f.read_text(encoding='utf-8'), 146, 14)
+        print(opts)
+
+
 if __name__ == '__main__':
     import logging
     logging.basicConfig(level=logging.INFO)
@@ -113,6 +159,6 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test取英文單字補全選項'))
+    suite.addTest(Test('test取詞補全選項'))
     # suite.addTest(Test('test轉樣式表字串'))
     unittest.TextTestRunner().run(suite)
