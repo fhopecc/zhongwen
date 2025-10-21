@@ -143,11 +143,22 @@ class Test(unittest.TestCase):
         words = 取詞字首樹(f.read_text(encoding='utf-8'))
         print(words.keys('test'))
         print(words.keys('取詞'))
-        # pr
-        # 取詞
         opts = 取詞補全選項(f.read_text(encoding='utf-8'), 147, 12)
         print(opts)
         opts = 取詞補全選項(f.read_text(encoding='utf-8'), 146, 14)
+        print(opts)
+
+    def test取強調詞補全選項(self):
+        from zhongwen.文 import 取強調詞字首樹, 取強調詞補全選項
+        from pathlib import Path
+        # 「強調甲」
+        # 【強調乙】
+        # [強調丙]
+        # 強
+        f = Path(__file__)
+        words = 取強調詞字首樹(f.read_text(encoding='utf-8'))
+        print(words.keys('強調甲'))
+        opts = 取強調詞補全選項(f.read_text(encoding='utf-8'), 157, 11)
         print(opts)
 
     def test_re_pattern_convesion(self):
@@ -165,5 +176,5 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test_re_pattern_convesion'))
+    suite.addTest(Test('test取強調詞補全選項'))
     unittest.TextTestRunner().run(suite)

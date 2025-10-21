@@ -145,6 +145,27 @@ def 取最近詞首(字串, 欄數):
     return None
 
 @functools.cache
+def 取強調詞字首樹(文):
+    '強調詞係以「」、【】、[]等符號所夾註之詞'
+    from marisa_trie import Trie
+    import re
+    pat = r'「(.+?)」|【(.+?)】|\[(.+?)\]'
+    return Trie([''.join(r) for r in re.findall(pat, 文)])
+
+def 取強調詞補全選項(文:str, 行, 欄):
+    '行及欄是以1起始'
+    import re
+    t = 取強調詞字首樹(文)
+    l = 文.splitlines()[行-1]
+    prefix = l[:欄]
+    while prefix:
+        if t.has_keys_with_prefix(prefix):
+            cs = [{'word':c[len(prefix):], 'abbr':c, 'kind':'強調詞'} for c in t.keys(prefix)]
+            return cs
+        prefix = prefix[1:]
+    return []
+
+@functools.cache
 def 取文內簡稱字首樹(文):
     from marisa_trie import Trie
     import re
