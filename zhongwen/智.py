@@ -136,3 +136,8 @@ def 諮詢谷歌雙子星(問題, 服務金鑰=None, 不輸出回答=False):
 
 def 詢問(問題, 服務金鑰=None, 不輸出回答=False):
     return 諮詢谷歌雙子星(問題, 服務金鑰=None, 不輸出回答=不輸出回答)
+
+def 取搜尋連結(字串):
+    '取字串的 Google 搜尋連結'
+    href = f"https://www.google.com/search?q={字串}"
+    return f'<a href={href} target="_blank">{字串}</a>'
