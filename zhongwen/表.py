@@ -273,3 +273,14 @@ def 可顯示(查詢資料函數):
             plt.show()
         return df
     return wrapper
+
+def 取名稱帶同名圖片超文件碼(名稱, 圖檔子目錄, 圖寬='100%', 顯示名稱=None):
+    if not 顯示名稱: 
+        顯示名稱=名稱
+    img_path = f"{圖檔子目錄}/{名稱}.png"
+    html_content = (
+        f"<div>{顯示名稱}<br>"
+        f"<img src='{img_path}' alt='{顯示名稱} Image' width='{圖寬}'></div>"
+    )
+    return html_content
+

@@ -285,16 +285,13 @@ def html2docx(html):
     logger.info(f'{html.name}已轉成{docx.name}！')
     return docx
 
+
 def markdown2docx(md):
-    from pathlib import Path
-    import win32com.client
-    import pythoncom
-    import os
-    import gc
+    from zhongwen.數 import 取中文數字, 取大寫中文數字
     from docx import Document
     from pathlib import Path
-    from zhongwen.number import 中文數字, 大寫中文數字
     import re
+    import os
     md = Path(md)
     docx = Path(__file__).parent / md.with_suffix('.docx')
     temp = r'c:\GitHub\zhongwen\zhongwen\resource\審核報告範本.docx'
@@ -302,32 +299,34 @@ def markdown2docx(md):
     cmd += f'--reference-doc="{temp}" --number-sections '
     cmd += f'-o "{docx}" {md}'
     os.system(cmd)
-    f = docx
-    document = Document(f)
+    document = Document(str(docx))
     階層 = 0
+
+    def 取中文階層編號(編號, 階層):
+        if 階層==0:
+            return ''
+        elif 階層==1:
+            return f'{取大寫中文數字(編號)}、'
+        elif 階層==2: 
+            return f'{取中文數字(編號)}、'
+        elif 階層==3: 
+            return f'({取中文數字(編號)})'
+        elif 階層==4: 
+            return f'{編號}.'
+        elif 階層==5: 
+            return f'({編號})'
+        return 編號
+
     for paragraph in document.paragraphs:
-        print(paragraph.style.name)
         if m:='Heading' in paragraph.style.name:
             runs = list(paragraph.runs)
-            if len(runs) > 0:
-                text = runs[0].text
+            if len(runs) > 0 and number_run=runs[0]:
+                text = number_run.text
                 pat = r'^((\d+.)*(\d+))$'
                 if m:=re.match(pat, text):
                     階層 = m[1].count('.')
-                    編號 = m[3]
-                    if 階層==0:
-                        編號 = ''
-                    elif 階層==1:
-                        編號 = f'{大寫中文數字(編號)}、'
-                    elif 階層==2: 
-                        編號 = f'{中文數字(編號)}、'
-                    elif 階層==3: 
-                        編號 = f'({中文數字(編號)})'
-                    elif 階層==4: 
-                        編號 = f'{編號}.'
-                    elif 階層==5: 
-                        編號 = f'({編號})'
-                    runs[0].text = text.replace(m[1], 編號)
+                    編號 = 取中文階層編號(m[3])
+                    number_run.text = text.replace(m[1], 編號)
         if 'Normal' in paragraph.style.name:
             if int(階層)>0:
                 paragraph.style = f'內文{階層+1}'
