@@ -40,4 +40,12 @@ def 網頁表達(md, 預覽=True):
     return 內容
 
 if __name__ == '__main__':
-    網頁表達('g:\我的雲端硬碟\股票分析\文件\凌陽創新.md')
+    import argparse
+    import sys
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--file", type=str, help="指定處理的 markdown 檔")
+    args = parser.parse_args()
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+    elif f := args.file:
+        網頁表達(f) 
