@@ -320,17 +320,17 @@ def markdown2docx(md):
     for paragraph in document.paragraphs:
         if m:='Heading' in paragraph.style.name:
             runs = list(paragraph.runs)
-            if len(runs) > 0 and number_run=runs[0]:
+            if len(runs) > 0 and (number_run:=runs[0]):
                 text = number_run.text
                 pat = r'^((\d+.)*(\d+))$'
                 if m:=re.match(pat, text):
                     階層 = m[1].count('.')
-                    編號 = 取中文階層編號(m[3])
+                    編號 = 取中文階層編號(m[3], int(階層))
                     number_run.text = text.replace(m[1], 編號)
         if 'Normal' in paragraph.style.name:
             if int(階層)>0:
                 paragraph.style = f'內文{階層+1}'
-    f = Path(f)
+    f = docx
     nf = f.with_stem(f'{f.stem}新')
     document.save(str(nf))
     os.system(f'start {nf}')
