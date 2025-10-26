@@ -23,7 +23,15 @@ def 網頁表達(md, 預覽=True):
                                ,text=True
                                ,check=True
                                ,encoding='utf-8')
-        內容 = result.stdout
+        內容 = f'''<html>
+</head>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7516968926110807" crossorigin="anonymous"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+{result.stdout}
+</html>
+'''
     except FileNotFoundError:
         print("錯誤：找不到 'pandoc' 命令。請確認已安裝並設定環境變數。")
         return None

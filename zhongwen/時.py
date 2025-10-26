@@ -117,7 +117,9 @@ def 取前年至次年間(取樣頻率='ME'):
     return pd.date_range(f'{前年數}0131', f'{次年數}1231', freq=取樣頻率)
 
 def 取季別名(季別):
+    '形式如2024年第3季。'
     try:
+        季別 = 取季別(季別)
         return f'{季別.year}年第{季別.quarter}季'
     except Exception:
         return 季別

@@ -20,7 +20,6 @@ def 取分隔詞模式(程式語言=None):
     pat = df.iloc[:, 0].values
     pat = '|'.join(pat)
     return rf"(?:[\uff00-\uffef\u3000-\u303f\s,.?;:/\\\"'|~!@#$%^&*()\[\]{{}}\=\+\-]|{pat})+"
-    
 
 @functools.cache
 @cache.memoize('取倉頡碼')
@@ -30,7 +29,6 @@ def 取倉頡碼(字元=None):
 
     if 字元:
         return 取倉頡碼().get(字元, [字元])
-
     try:
         f = 下載('https://github.com/Jackchows/Cangjie5/raw/master/Cangjie5_TC.txt')
     except Exception as e:
