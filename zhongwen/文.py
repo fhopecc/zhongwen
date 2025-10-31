@@ -4,6 +4,7 @@ from pathlib import Path
 import functools
 
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
+
 倉頡字根表 = str.maketrans("abcdefghijklmnopqrstuvwxy"
                           ,"日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜" )
 
@@ -195,9 +196,15 @@ def 取詞補全選項(文:str, 行, 欄):
     import re
     t = 取詞字首樹(文)
     l = 文.splitlines()[行-1]
-    prefixes = re.split(取分隔詞模式(), l[:欄])
-    if prefixes and (prefix:=prefixes[-1]) and t.has_keys_with_prefix(prefix):
-        return [{'word':c[len(prefix):], 'abbr':c, 'kind':'詞'} for c in t.keys(prefix)]
+    # prefixes = re.split(取分隔詞模式(), l[:欄])
+    # if prefixes and (prefix:=prefixes[-1]) and t.has_keys_with_prefix(prefix):
+    #     return [{'word':c[len(prefix):], 'abbr':c, 'kind':'詞'} for c in t.keys(prefix)]
+    prefix = l[:欄]
+    while prefix:
+        if t.has_keys_with_prefix(prefix):
+            cs = [{'word':c[len(prefix):], 'abbr':c, 'kind':'詞'} for c in t.keys(prefix)]
+            return cs
+        prefix = prefix[1:]
     return []
 
 @functools.cache

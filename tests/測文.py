@@ -144,10 +144,11 @@ class Test(unittest.TestCase):
         print(words.keys('test'))
         print(words.keys('取詞'))
         print(words.keys("'"))
-        opts = 取詞補全選項(f.read_text(encoding='utf-8'), 147, 12)
+        # 前方段落，取詞
+        opts = 取詞補全選項(f.read_text(encoding='utf-8'), 147, 26)
         print(opts)
-        opts = 取詞補全選項(f.read_text(encoding='utf-8'), 146, 14)
-        print(opts)
+        # opts = 取詞補全選項(f.read_text(encoding='utf-8'), 146, 14)
+        # print(opts)
 
     def test取強調詞補全選項(self):
         from zhongwen.文 import 取強調詞字首樹, 取強調詞補全選項

@@ -285,7 +285,6 @@ def html2docx(html):
     logger.info(f'{html.name}已轉成{docx.name}！')
     return docx
 
-
 def markdown2docx(md):
     from zhongwen.數 import 取中文數字, 取大寫中文數字
     from docx import Document
@@ -300,7 +299,6 @@ def markdown2docx(md):
     cmd += f'-o "{docx}" {md}'
     os.system(cmd)
     document = Document(str(docx))
-    階層 = 0
 
     def 取中文階層編號(編號, 階層):
         if 階層==0:
@@ -317,7 +315,9 @@ def markdown2docx(md):
             return f'({編號})'
         return 編號
 
+    階層 = 0
     for paragraph in document.paragraphs:
+        print(paragraph.style.name)
         if m:='Heading' in paragraph.style.name:
             runs = list(paragraph.runs)
             if len(runs) > 0 and (number_run:=runs[0]):
@@ -327,13 +327,12 @@ def markdown2docx(md):
                     階層 = m[1].count('.')
                     編號 = 取中文階層編號(m[3], int(階層))
                     number_run.text = text.replace(m[1], 編號)
-        if 'Normal' in paragraph.style.name:
+        if 'Normal' in paragraph.style.name or 'Body Text' in paragraph.style.name:
             if int(階層)>0:
+                print(f'{階層} -> 內文{階層+1}')
                 paragraph.style = f'內文{階層+1}'
-    f = docx
-    nf = f.with_stem(f'{f.stem}新')
-    document.save(str(nf))
-    os.system(f'start {nf}')
+    document.save(str(docx))
+    os.system(f'start {docx}')
 
 def 另存醒目文字(docx):
     from docx import Document
@@ -380,7 +379,6 @@ def to_xlsx(odses_or_pdfs):
 
 if __name__ == '__main__':
     import argparse
-    import clipboard
     logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser()
     parser.add_argument("--setup", help="設定環境", action="store_true")
@@ -393,10 +391,10 @@ if __name__ == '__main__':
     parser.add_argument("--md2docx", type=str, help="markdown 轉 docx 格式。", required=False)
     parser.add_argument("--to_text", type=str, help="轉文字檔", required=False)
     parser.add_argument("--copy_text", type=str, help="複製文字", required=False)
-    parser.add_argument("--level_number_to_chinese_number", help="標題階層編號轉中文編號")
     parser.add_argument("--save_highlight", help="另存醒目文字")
 
     args = parser.parse_args()
+
     if args.setup:
         設定環境()
     elif docs := args.print:
@@ -415,7 +413,5 @@ if __name__ == '__main__':
         轉文字檔(args.to_text)
     elif args.copy_text:
         複製文字(args.copy_text)
-    elif args.level_number_to_chinese_number:
-        print(標題階層編號轉中文編號(args.level_number_to_chinese_number))
     elif args.save_highlight:
         print(另存醒目文字(args.save_highlight))
