@@ -17,8 +17,9 @@ class Test(unittest.TestCase):
 
     def test取文檔位置(self):
         from zhongwen.檔 import 取文檔位置
-        d = 取文檔位置(r'd:\github\zhongwen\tests\測檔.py')
-        self.assertEqual(d, '')
+        s = fr'File "D:\github\vimchinese\plugin\python.vim", line 74'
+        d = 取文檔位置(s) 
+        self.assertEqual(d['列'], 74)
 
     def test取檔名補全選項(self):
         from zhongwen.檔 import 取檔名補全選項
@@ -35,5 +36,5 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test取檔名補全選項'))  # 指定測試
+    suite.addTest(Test('test取文檔位置'))
     unittest.TextTestRunner().run(suite)

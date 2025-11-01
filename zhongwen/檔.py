@@ -257,10 +257,9 @@ def 解壓(壓縮檔, 目錄):
     壓縮檔.extractall(目錄)
     print(f'解壓[{壓縮檔}]成功！')
 
-模式集 ={"python":r'File "(?P<path>.+.py)", line (?P<line>\d+).*'
-        ,"python_warn":r'^(?P<path>.+.py):(?P<line>\d+):.*'
-        ,"python_debugger":r'^> (?P<path>.+.py)\((?P<line>\d+)\)'
-        ,"jest":r'\((?P<path>.+\.js):(?P<line>\d+):(?P<pos>\d+)\)'
+模式集 ={"python":r'File "(?P<path>.+)", line (?P<line>\d+).*'
+        ,"python_warn":r'^(?P<path>.+):(?P<line>\d+):.*'
+        ,"python_debugger":r'^> (?P<path>.+)\((?P<line>\d+)\)'
         ,"path":r'(?P<path>[^"\']+\.(js|py))'
         }
 
