@@ -141,3 +141,27 @@ def 取搜尋連結(字串):
     '取字串的 Google 搜尋連結'
     href = f"https://www.google.com/search?q={字串}"
     return f'<a href={href} target="_blank">{字串}</a>'
+
+def 查詢關鍵字(關鍵字):
+    import os
+    try: # 如有股票基本資料分析模組，則屬股票關鍵字財開啟財報檔
+        from 股票分析.股票基本資料分析 import 查股票代號
+        if m:=查股票代號(關鍵字, 查不到傳回鍵值=False):
+            cmd = f'py -m 股票分析.財報爬蟲 {關鍵字} -t'
+            os.system(cmd)
+    except Exception: pass
+
+    # 搜尋關鍵字
+    cmd = 取搜尋連結(關鍵字)
+    cmd = f'start https://www.google.com/search?q="{關鍵字}"'
+    print(cmd)
+    os.system(cmd)
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("query", type=str, help="問題")
+    parser.add_argument("-k", "--keyword", action="store_true", help="查詢關鍵字")
+    args = parser.parse_args()
+    if args.keyword:
+        查詢關鍵字(args.query)
