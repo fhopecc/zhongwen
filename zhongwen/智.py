@@ -149,6 +149,7 @@ def 查詢關鍵字(關鍵字):
         if m:=查股票代號(關鍵字, 查不到傳回鍵值=False):
             cmd = f'py -m 股票分析.財報爬蟲 {關鍵字} -t'
             os.system(cmd)
+            return
     except Exception: pass
 
     # 搜尋關鍵字
