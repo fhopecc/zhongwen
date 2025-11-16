@@ -102,7 +102,7 @@ def 字元切換(string:str):
     return ''.join(map(switch_case, string))
 
 def 下載倉頡碼對照表():
-    from zhongwen.file import 下載
+    from zhongwen.檔 import 下載
     f = 下載('https://github.com/Jackchows/Cangjie5/raw/master/Cangjie5_TC.txt')
     return f
 
