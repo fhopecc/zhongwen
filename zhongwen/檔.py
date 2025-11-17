@@ -7,18 +7,28 @@ logger = logging.getLogger(Path(__file__).stem)
 
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 
-def 取檔名補全選項(文:str, 行, 欄):
+def 取檔名補全選項(文:str, 行, 欄, 工作目錄=None):
     '行及欄是以1起始'
     from glob import glob
     l = 文.splitlines()[行-1]
     prefix = l[:欄]
-    print(prefix)
     while prefix:
-        w = Path()
-        if Path(prefix):
-            cs = [{'word':c[len(prefix)-3:], 'abbr':c
+        print(f'prefix:{prefix}')
+        if (p:=Path(prefix)).exists():
+            cs = [c + ('\\' if Path(c).is_dir() and c[-1] != '\\' else '')
+                  for c in glob(rf"{prefix}*")]
+            cs = [{'word':c[len(prefix):], 'abbr':c
                   ,'kind': '目錄' if Path(c).is_dir() else '檔案'
-                  } for c in glob(rf"{prefix}*\*")]
+                  } for c in cs]
+            if len(cs)>0:
+                cs = sorted(cs, key=lambda p: (p['kind'], p['abbr']))
+                return cs
+        elif 工作目錄 and (p:=Path(工作目錄)).exists():
+            cs = [c.name + ('\\' if Path(c).is_dir() else '')
+                  for c in p.glob(rf"{prefix}*")]
+            cs = [{'word':c[len(prefix):], 'abbr':c
+                  ,'kind': '目錄' if (p / c).is_dir() else '檔案'
+                  } for c in cs]
             if len(cs)>0:
                 cs = sorted(cs, key=lambda p: (p['kind'], p['abbr']))
                 return cs
