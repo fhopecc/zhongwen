@@ -201,7 +201,7 @@ def 顯示(df
             df = df.set_tooltips(浮動提示)
         except Exception as e:
             logger.error(e)
-            breakpoint()
+            # breakpoint()
             return 顯示(odf, 無格式=True)
 
     if 不顯示:
@@ -251,22 +251,85 @@ class 數據不足(Exception):
         else:
             return f"尚無{self.名稱}！"
 
-def 可顯示(查詢資料函數):
-    '裝飾查詢資料函數，指名參數設為【表示=True】，即將查詢結果以 html 顯示。'
+def 可顯示(查詢資料函數或顯示筆數=object(), 顯示筆數=100, 隱藏欄位=[], 整數欄位=[], 實數欄位=[]):
+    '''
+    一、裝飾查詢資料函數，指名參數設為【以表顯示=True】，即將查詢結果以 html 顯示。
+    二、可用選項：顯示筆數、隱藏欄位、整數欄位、實數欄位。
+    '''
+    if callable(查詢資料函數或顯示筆數):
+        return _可顯示(查詢資料函數或顯示筆數)
+    else:
+        def decorator(func):
+            return _可顯示(func, 顯示筆數, 隱藏欄位, 整數欄位, 實數欄位)
+        return decorator
+
+
+def _可顯示(函數=object(), 顯示筆數=100, 隱藏欄位=[], 整數欄位=[], 實數欄位=[]):
     from functools import wraps
     import matplotlib.pyplot as plt
     @wraps(查詢資料函數)
-    def wrapper(*args, 以表顯示=False, 圖示=False, **kargs):
-        try:
-            display_rows = kargs['顯示筆數']
-            real_columns = kargs['實數欄位']
-            del kargs['顯示筆數']
-            del kargs['實數欄位']
-        except KeyError:
-            display_rows = 100
-            real_columns = []
+    def wrapper(*args, 以表顯示=False, 圖示=False
+               ,**kargs):
+        可用選項 = ['顯示筆數', '隱藏欄位', '整數欄位', '實數欄位']
+        for 選項 in 可用選項:
+            if 選項值:=kargs.get(選項, None):
+                del kargs[選項]
+                if 選項=='顯示筆數': 
+                    顯示筆數 = 選項值
+                elif 選項=='隱藏欄位': 
+                    隱藏欄位 = 選項值
+                elif 選項=='整數欄位': 
+                    整數欄位 = 選項值
+                elif 選項=='實數欄位': 
+                    實數欄位 = 選項值
         df = 查詢資料函數(*args, **kargs)
-        if 以表顯示: 顯示(df, 顯示筆數=display_rows, 實數欄位=real_columns)
+        if 以表顯示: 顯示(df, 顯示筆數=顯示筆數
+                          ,隱藏欄位=隱藏欄位
+                          ,整數欄位=整數欄位
+                          ,實數欄位=實數欄位)
+        if 圖示: 
+            plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']
+            df.plot()
+            plt.show()
+        return df
+    return wrapper
+
+def 取名稱帶同名圖片超文件碼(名稱, 圖檔子目錄, 圖寬='100%', 顯示名稱=None):
+    if not 顯示名稱: 
+        顯示名稱=名稱
+    img_path = f"{圖檔子目錄}/{名稱}.png"
+    html_content = (
+        f"<div>{顯示名稱}<br>"
+        f"<img src='{img_path}' alt='{顯示名稱} Image' width='{圖寬}'></div>"
+    )
+    return html_content
+            
+
+def _可顯示(查詢資料函數=object(), 顯示筆數=100, 隱藏欄位=[], 整數欄位=[], 實數欄位=[]):
+    from functools import wraps
+    import matplotlib.pyplot as plt
+    @wraps(查詢資料函數)
+    def wrapper(*args, 以表顯示=False, 圖示=False
+               ,**kargs):
+        nonlocal 顯示筆數, 隱藏欄位, 整數欄位, 實數欄位
+        可用選項 = ['顯示筆數', '隱藏欄位', '整數欄位', '實數欄位']
+        for 選項 in 可用選項:
+            if 選項值:=kargs.get(選項, None):
+                del kargs[選項]
+                if 選項=='顯示筆數': 
+                    顯示筆數 = 選項值
+                elif 選項=='隱藏欄位': 
+                    隱藏欄位 = 選項值
+                elif 選項=='整數欄位': 
+                    整數欄位 = 選項值
+                elif 選項=='實數欄位': 
+                    實數欄位 = 選項值
+        df = 查詢資料函數(*args, **kargs)
+        if 以表顯示: 顯示(df
+                          ,顯示筆數=顯示筆數
+                          ,隱藏欄位=隱藏欄位
+                          ,整數欄位=整數欄位
+                          ,實數欄位=實數欄位)
         if 圖示: 
             plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']
             df.plot()

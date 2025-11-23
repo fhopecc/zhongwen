@@ -13,7 +13,6 @@ def 取檔名補全選項(文:str, 行, 欄, 工作目錄=None):
     l = 文.splitlines()[行-1]
     prefix = l[:欄]
     while prefix:
-        print(f'prefix:{prefix}')
         if (p:=Path(prefix)).exists():
             cs = [c + ('\\' if Path(c).is_dir() and c[-1] != '\\' else '')
                   for c in glob(rf"{prefix}*")]
@@ -24,14 +23,21 @@ def 取檔名補全選項(文:str, 行, 欄, 工作目錄=None):
                 cs = sorted(cs, key=lambda p: (p['kind'], p['abbr']))
                 return cs
         elif 工作目錄 and (p:=Path(工作目錄)).exists():
-            cs = [c.name + ('\\' if Path(c).is_dir() else '')
-                  for c in p.glob(rf"{prefix}*")]
-            cs = [{'word':c[len(prefix):], 'abbr':c
-                  ,'kind': '目錄' if (p / c).is_dir() else '檔案'
-                  } for c in cs]
-            if len(cs)>0:
-                cs = sorted(cs, key=lambda p: (p['kind'], p['abbr']))
-                return cs
+            try:
+                cs = [c.name + ('\\' if Path(c).is_dir() else '')
+                      for c in p.glob(rf"{prefix}*")]
+                cs = [{'word':c[len(prefix):], 'abbr':c
+                      ,'kind': '目錄' if (p / c).is_dir() else '檔案'
+                      } for c in cs]
+                if len(cs)>0:
+                    cs = sorted(cs, key=lambda p: (p['kind'], p['abbr']))
+                    return cs
+            except NotImplementedError:
+                # 如在 Windows 系統且模式第2字元是:，如 "顯:日月"，
+                # 因為 Windows 路徑係以磁碟機代號加:，前開模式會視為
+                # 顯 磁碟機之絕對路徑，引發執行未實作非相對路徑模式錯誤，
+                # 爰不作處理。
+                pass
         prefix = prefix[1:]
     return []
 

@@ -26,10 +26,13 @@ class Test(unittest.TestCase):
         from pathlib import Path
         # d:\github\zhongwen\zhongwen\
         # te
+        # if 以表顯示: 顯示(df, 顯示筆數=display_rows, 整實數欄位=real_columns)
         cs = 取檔名補全選項(Path(__file__).read_text(encoding='utf8'), 27, 38)
         # print([c['abbr'] for c in cs])
         cs = 取檔名補全選項(Path(__file__).read_text(encoding='utf8'), 28
                            ,11, 工作目錄=Path(__file__).parent.parent)
+        cs = 取檔名補全選項(Path(__file__).read_text(encoding='utf8'), 29
+                           ,66, 工作目錄=Path(__file__).parent.parent)
         print(cs)
  
 if __name__ == '__main__':
