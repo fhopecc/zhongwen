@@ -95,16 +95,14 @@ def 複製文字(filepath):
 
 def 設定環境():
     from zhongwen.winman import 增加檔案右鍵選單功能, 建立傳送到項目, where
-    from zhongwen.office_document import 設定微軟辦公室軟體共用範本
     from shutil import copy
     import sys
-    設定微軟辦公室軟體共用範本()
 
-    cmd =  f'"{sys.executable}" -m zhongwen.office_document --print %* && pause'
-    建立傳送到項目('列印微軟文件', cmd)
+    # cmd =  f'"{sys.executable}" -m zhongwen.office_document --print %* && pause'
+    # 建立傳送到項目('列印微軟文件', cmd)
 
-    cmd =  f'"{sys.executable}" -m zhongwen.office_document --to_xlsx %* && pause'
-    建立傳送到項目('2xlsx', cmd)
+    # cmd =  f'"{sys.executable}" -m zhongwen.office_document --to_xlsx %* && pause'
+    # 建立傳送到項目('2xlsx', cmd)
 
     cmd = f'{sys.executable} -m zhongwen.office_document --doc2pdf "%1"' 
     增加檔案右鍵選單功能('2pdf', cmd, 'Word.Document.8')  # .doc
@@ -113,24 +111,20 @@ def 設定環境():
     cmd = f'{sys.executable} -m zhongwen.office_document --doc2docx "%1"' 
     增加檔案右鍵選單功能('2docx', cmd, 'Word.Document.8')
 
-    cmd = f'{sys.executable} -m zhongwen.office_document --to_text "%1"' 
-    增加檔案右鍵選單功能('2txt', cmd, 'Word.Document.8')
-    增加檔案右鍵選單功能('2txt', cmd, 'Word.Document.12') # .docx
-
     cmd = f'{sys.executable} -m zhongwen.office_document --copy_text "%1"' 
     增加檔案右鍵選單功能('複製文字', cmd, 'Word.Document.8') # .docx
     增加檔案右鍵選單功能('複製文字', cmd, 'Word.Document.12') # .docx
 
-    cmd = f'{sys.executable} -m zhongwen.office_document --save_highlight "%1"' 
-    增加檔案右鍵選單功能('另存醒目文字', cmd, 'Word.Document.8') # .docx
-    增加檔案右鍵選單功能('另存醒目文字', cmd, 'Word.Document.12') # .docx
+    # cmd = f'{sys.executable} -m zhongwen.office_document --save_highlight "%1"' 
+    # 增加檔案右鍵選單功能('另存醒目文字', cmd, 'Word.Document.8') # .docx
+    # 增加檔案右鍵選單功能('另存醒目文字', cmd, 'Word.Document.12') # .docx
     
     cmd = f'{sys.executable} -m zhongwen.office_document --md2docx "%1" && pause' 
 
-    增加檔案右鍵選單功能('markdown2docx', cmd, '.md') # .docx
-    gvim = where('gvim')[-1]
-    cmd = rf'"{gvim}" "%1"' 
-    增加檔案右鍵選單功能('open', cmd, '.md') # .docx
+    # 增加檔案右鍵選單功能('markdown2docx', cmd, '.md') # .docx
+    # gvim = where('gvim')[-1]
+    # cmd = rf'"{gvim}" "%1"' 
+    # 增加檔案右鍵選單功能('open', cmd, '.md') # .docx
 
 def setup_normal_dotm_dir():
     '設定 resource 為 Word 預設範本資料夾'
