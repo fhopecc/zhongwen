@@ -586,3 +586,49 @@ def python_re_to_vim_magic(py_pattern: str) -> str:
     vim_pattern = vim_pattern.replace(r'\(?:', r'\(')
 
     return vim_pattern.replace(r'\\', r'\\\\') # 確保反斜線在輸出時被正確表示
+
+def 保留首個最長重覆子字串(s: str) -> str:
+    """
+    找出字串中出現兩次或以上的最長子字串，並從字串中移除其所有出現。
+    """
+    n = len(s)
+    longest_lrs = ""  # 最長重複子字串
+    max_len = 0
+
+    # 暴力法：檢查所有可能的子字串
+    # LRS 的長度從 n-1 遞減到 1
+    for length in range(n - 1, 0, -1):
+        for i in range(n - length + 1):
+            substring = s[i : i + length]
+            
+            # 檢查這個子字串是否重複出現 (必須 >= 2 次)
+            if s.count(substring) >= 2:
+                if length > max_len:
+                    max_len = length
+                    longest_lrs = substring
+                    # 找到最長的後，立即跳出
+                    break
+        
+        if longest_lrs:
+            break
+            
+    if longest_lrs:
+        lrs_len = len(longest_lrs)
+        
+        # 找到第一次出現的位置
+        first_index = s.find(longest_lrs)
+        
+        # 構造新字串：
+        # A. 字串開頭到第一次出現的 LRS 結束為止
+        prefix_with_lrs = s[:first_index + lrs_len]
+        
+        # B. 第一次出現 LRS 之後的剩餘字串
+        suffix_to_process = s[first_index + lrs_len:]
+        
+        # C. 將剩餘字串 (suffix_to_process) 中所有 LRS 替換為空字串
+        # 由於我們只對 suffix 進行替換，prefix 中的 LRS (即第一次出現的那個) 會被保留。
+        remaining_cleaned = suffix_to_process.replace(longest_lrs, "")
+        
+        return prefix_with_lrs + remaining_cleaned
+    else:
+        return s
