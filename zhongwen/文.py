@@ -632,3 +632,18 @@ def 保留首個最長重覆子字串(s: str) -> str:
         return prefix_with_lrs + remaining_cleaned
     else:
         return s
+
+def 移除符號分隔值清單重覆子字串項目(字串:str, 分隔符號='；') -> list[str]:
+    # 將清單轉換為集合 (Set) 排除重覆並由長至短排序。
+    string_list = 字串.split(分隔符號)
+    unique_list = sorted(list(set(string_list)), key=len, reverse=True)
+    
+    filtered_list = [
+        item
+        for item in unique_list
+        # 排除 item == other 的情況 (自身不可能作為自身的真子字串)
+        if all(item not in other or item == other
+               for other in unique_list)
+    ]
+
+    return 分隔符號.join(filtered_list)
