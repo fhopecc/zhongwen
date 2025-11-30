@@ -308,6 +308,8 @@ def 取季別年數季數(季別):
 五年又一個月前 = 今日 - pd.DateOffset(months=61)
 本月 = pd.Period(今日, 'M')
 上月 = 本月 - 1
+本月數 = 本月.month
+上月數 = 上月.month
 本季 = pd.Period(今日, 'Q-DEC')
 上季 = 本季 - 1
 上季末 = 上季.end_time.normalize()
