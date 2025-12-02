@@ -3,13 +3,6 @@ import unittest
 
 class Test(unittest.TestCase):
     '依方法名稱字母順序測試'
-    def test刪除最長子字串(self):
-        from zhongwen.文 import 僅保留首個最長重覆子字串
-        s0 = '114年第3季淨利-4億餘元，由去年同季轉為損失，連減2季，係毛利率年減48%，應注意分析減少原因，及業外損失年增24%；114年10月營收年增19%，連續年增40個月，111年7月轉為成長，且114年2月以來平均按月增加9,188萬餘元；，應分析重貼現率；114年第3季股東權益報酬率1%，減少4個百分點，由去年同季轉為年減，自111年6月以來最小為-46%，主要係114年第3季淨利-4億餘元，由去年同季轉為損失，連減2季，係毛利率年減48%，應注意分析減少原因，及業外損失年增24%，權益乘數404%，資產周轉率32%'
-        s1 = 僅保留首個最長重覆子字串(s0)
-        print(s1)
-        self.assertEqual(s0, s1)
-
     def test轉樣式表字串(self):
         from zhongwen.text import 轉樣式表字串
         t = "1abcd\n2abcd"
@@ -177,6 +170,16 @@ class Test(unittest.TestCase):
         print(python_re_to_vim_magic(取分隔詞模式()))
         self.assertEqual(取分隔詞模式('vim'), python_re_to_vim_magic(取分隔詞模式()))
 
+    def test意見轉通知(self):
+        from zhongwen.文 import 審核意見轉通知
+        o = '花蓮縣政府函為所屬花蓮縣環境保護局經管縣有聲頻發生器電子鞭炮機(財產編號：310071004-001801)1個，因114年9月23日馬太鞍溪堰塞湖洪災遺失，擬予報損一案，謹擬具處理意見如說明二，簽請核示。'
+        i = '貴府函為所屬花蓮縣環境保護局經管縣有聲頻發生器電子鞭炮機(財產編號：310071004-001801)1個，因114年9月23日馬太鞍溪堰塞湖洪災遺失，擬予報損一案，既經貴府查明符合規定同意辦理，本室已予備查，請查照。'
+        self.assertEqual(審核意見轉通知(o), i)
+
+        o = '依該府114年11月28日府環空字第1140217596號函辦理。'
+        i = '復貴府114年11月28日府環空字第1140217596號函。'
+        self.assertEqual(審核意見轉通知(o), i)
+
 if __name__ == '__main__':
     import logging
     logging.basicConfig(level=logging.INFO)
@@ -185,5 +188,5 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test刪除最長子字串'))
+    suite.addTest(Test('test意見轉通知'))
     unittest.TextTestRunner().run(suite)
