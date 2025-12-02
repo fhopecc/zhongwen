@@ -1,4 +1,4 @@
-from pathlib import Path
+from PIL import Image, ImageChops
 from diskcache import Cache
 from pathlib import Path
 import logging
@@ -12,7 +12,10 @@ def 整理頁面(pdf):
     import time
     print(f'整理{pdf}頁面……')
 
-    操作 = input('1.請選擇操作：(e)擷取頁面；(d)刪除；(r)旋轉；(m)移動：')
+    操作 = input('1.請選擇操作：(e)擷取頁面；(d)刪除；(b)去空白頁；(r)旋轉；(m)移動)：')
+
+    if 操作 == 'b':
+        去空白頁(pdf)
 
     if 操作 == 'd':
         頁面 = input('2.請指定刪除頁面(示例1,3,4-5)：')
@@ -38,7 +41,9 @@ def 刪除(源檔, 頁碼, 目的檔=None):
     from zhongwen.文 import 臚列
     from pathlib import Path
     源檔 = Path(源檔)
-    頁碼 = 剖析頁碼字串(頁碼)
+    if isinstance(頁碼, str):
+        頁碼 = 剖析頁碼字串(頁碼)
+
     if not 目的檔:
         s = 源檔.stem
         目的檔 = 源檔.with_stem(f'原{s}刪除第{臚列(p+1 for p in 頁碼)}頁')
@@ -226,6 +231,7 @@ def 合併(pdfs, 合併檔名='合併檔案.pdf'):
     output = filedir / 合併檔名
     merger.write(output)
     merger.close()
+
 
 def 去空白頁(源檔, 轉換檔=None):
     if not 轉換檔: 
@@ -417,6 +423,101 @@ def 擷取頁面(源檔, 頁面=None, 目的檔=None):
 
     print(f"已將 {page_str} 頁輸出為：{output_pdf}")
 
+
+def 是否為視覺空白圖(page_image: Image.Image, threshold: int = 3) -> bool:
+    """
+    檢查 PIL 圖片是否視覺上為空白（即幾乎所有像素都是白色）。
+    
+    :param page_image: 待檢查的 PIL 圖片物件
+    :param threshold: 容忍的非白色像素的數量閾值（可調整）
+    :return: 如果圖片被視為空白，則返回 True
+    """
+    import fitz  # PyMuPDF
+    import io
+
+    try:
+        # 將圖片轉換為黑白模式 ('1')
+        # '1' 模式下，黑色為 0，白色為 255。
+        # 這裡我們使用 Image.convert('L') 轉為灰度圖，然後檢查其平均顏色
+        gray_image = page_image.convert('L')
+        
+        # 檢查是否有足夠的非白色像素（例如，平均灰度值很高）
+        # 這裡簡化為檢查是否有「顯著」的顏色差異
+        # 使用 ImageChops.difference 比較原圖和一張全白圖
+        white_bg = Image.new('RGB', page_image.size, color='white')
+        diff = ImageChops.difference(page_image.convert('RGB'), white_bg)
+        
+        # 取得差異圖的邊界框 (bounding box)，如果差異很小，邊界框可能很小或為 None
+        # 如果差異圖的亮度總和非常小，則視為空白
+        stat = diff.getbbox()
+        
+        if stat is None:
+            # 差異圖是全黑的（表示原圖是全白的）
+            return True
+        else:
+            # 如果差異圖中有很多非零像素，表示有內容
+            # 這裡可以根據實際需求設定更精確的像素計數或平均值檢查
+            # 例如：檢查非白色像素的數量是否小於某個百分比
+            
+            # 一種簡單的檢查：計算差異圖的平均亮度。如果很小，則認為是空白。
+            mean_intensity = sum(diff.convert('L').getdata()) / (page_image.width * page_image.height)
+            # 這裡的 5.0 是一個經驗值，可以調整。
+            return mean_intensity < threshold 
+            
+    except Exception as e:
+        print(f"處理圖片時發生錯誤: {e}")
+        return False
+
+def 取空白頁碼(pdf_path: str) -> list[int]:
+    """
+    一、頁碼從 1 開始。
+    """
+    import fitz  # PyMuPDF
+    from PIL import Image, ImageChops
+    import io
+    blank_page_numbers = []
+    doc = fitz.open(pdf_path)
+    print(f"文件共有 {doc.page_count} 頁。")
+
+    for page_num in range(doc.page_count):
+        page = doc.load_page(page_num)
+        
+        # (1)檢查是否有 PDF 內容物件
+        #    檢查是否有內容流 (Contents)
+        if page.get_contents() == []:
+            # 頁面沒有內容流，通常是真正的空白頁
+            blank_page_numbers.append(page_num + 1)
+            continue
+        
+        # (2)檢查是否有文字或圖形物件
+        #    檢查是否有文字
+        text = page.get_text().strip()
+        if text:
+            # 有文字內容，非空白
+            continue
+        
+        # 檢查是否有圖片
+        if page.get_images(full=True):
+            # 有圖片物件，非空白
+            # print(f"❌ 頁面 {page_num + 1}: 包含圖片物件")
+            # *注意：這裡的圖片可能是一張全白的圖片 (掃描件)
+            pass # 繼續進行視覺檢查
+
+        # (3)視覺檢查 (最準確但最慢的方法)
+        # 將頁面渲染為 PIL 圖片
+        pix = page.get_pixmap(dpi=150) # 可以調整 DPI 增加精確度或速度
+        img_data = pix.tobytes("ppm")
+        image = Image.open(io.BytesIO(img_data))
+        
+        if 是否為視覺空白圖(image):
+            blank_page_numbers.append(page_num)
+
+    doc.close()
+    return blank_page_numbers
+
+def 去空白頁(pdf):
+    空白頁碼 = 取空白頁碼(pdf) 
+    刪除(pdf, 空白頁碼)
 
 if __name__ == '__main__':
     import argparse
