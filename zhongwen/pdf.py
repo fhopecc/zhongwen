@@ -12,10 +12,14 @@ def 整理頁面(pdf):
     import time
     print(f'整理{pdf}頁面……')
 
-    操作 = input('1.請選擇操作：(e)擷取頁面；(d)刪除；(b)去空白頁；(r)旋轉；(m)移動)：')
+    操作 = input('1.請選擇操作：(e)擷取頁面(d)刪除(b)去空白頁(r)旋轉(m)移動(p)解密：')
 
     if 操作 == 'b':
         去空白頁(pdf)
+
+    if 操作 == 'p':
+        密碼 = input('2.請輸入密碼：')
+        解密(pdf, 密碼)
 
     if 操作 == 'd':
         頁面 = input('2.請指定刪除頁面(示例1,3,4-5)：')
@@ -518,6 +522,56 @@ def 取空白頁碼(pdf_path: str) -> list[int]:
 def 去空白頁(pdf):
     空白頁碼 = 取空白頁碼(pdf) 
     刪除(pdf, 空白頁碼)
+
+def 解密(input_pdf_path, password):
+    import pypdf
+    import os
+    from pathlib import Path
+    i = Path(input_pdf_path)
+    output_pdf_path = str(i.with_stem(f'{i.stem}_解密'))
+    try:
+        # 1. 以二進制讀取模式打開加密的 PDF 檔案
+        with open(input_pdf_path, 'rb') as input_file:
+            # 創建一個 PdfReader 物件
+            reader = pypdf.PdfReader(input_file)
+
+            # 2. 檢查檔案是否加密
+            if not reader.is_encrypted:
+                print(f"檔案 '{os.path.basename(input_pdf_path)}' 未加密，無需解密。")
+                return True # 如果未加密，也可以直接視為成功，或根據需求處理
+
+            print(f"正在嘗試使用密碼解密檔案 '{os.path.basename(input_pdf_path)}'...")
+
+            # 3. 嘗試解密
+            # decrypt() 方法會返回一個整數：
+            # 1: 密碼正確且成功解密
+            # 0: 密碼錯誤
+            # 2: 檔案已經解密 (這個在 if reader.is_encrypted 檢查後通常不會發生)
+            if reader.decrypt(password) in [1, 2]:
+                print("密碼正確，解密成功！")
+                
+                # 4. 創建一個 PdfWriter 物件用於寫入新檔案
+                writer = pypdf.PdfWriter()
+
+                # 5. 將所有頁面添加到 Writer
+                for page in reader.pages:
+                    writer.add_page(page)
+
+                # 6. 以二進制寫入模式打開輸出檔案，並寫入解密後的內容
+                with open(output_pdf_path, 'wb') as output_file:
+                    writer.write(output_file)
+                
+                print(f"解密後的檔案已成功儲存至: '{output_pdf_path}'")
+                return True
+            else:
+                print("密碼錯誤，解密失敗！")
+                return False
+    except FileNotFoundError:
+        print(f"錯誤：找不到檔案 '{input_pdf_path}'。請檢查路徑。")
+        return False
+    except Exception as e:
+        print(f"發生未知錯誤: {e}")
+        return False
 
 if __name__ == '__main__':
     import argparse
