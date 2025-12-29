@@ -38,7 +38,7 @@ def show_map(gdf):
     os.system(f'start {html}')
 
 @cache.memoize(tag='路網')
-def 取路網(區域名稱="Yilan County, Taiwan", 類型='drive'):
+def 取路網(區域名稱="Hualien County, Taiwan", 類型='drive'):
     """
     :param 類型: 路網類型，例如 'drive'（開車）、'walk'（步行）、'bike'（自行車）等
     :return: OSMnx 圖形物件
@@ -102,22 +102,28 @@ def 取開放街圖網路圖徵(識別碼):
         else:
             raise 轉換多邊形錯誤("非閉合網路無法轉換成多邊形。")
 
-def 取路口(查詢地點=None):
-    '取開放街圖路口'
-    import osmnx as ox
+@cache.memoize('取路口')
+def 取路口(地區="花蓮縣, 臺灣"):
+    '''
+    一、取開放街圖路口，即連接逾 3 條道路之交叉點。
+    二、欄位：osmid、x、y, street_count, name
+    三、座標系 WGS84, EPSG:4326
+    四、street_count：1.死巷；2.道路屬性、速限或路名變化，非真正路口；
+                      3.三叉路口，典型的 T 字或 Y 字路口；4.四條道路交會通常為十字路口；
+                      5或以上.多叉路口或圓環。
+    '''
+    from zhongwen.文 import 臚列
     import geopandas as gpd
-
-    # 指定花蓮市的位置名稱
-    place_name = "Hualien City, Taiwan"
+    import osmnx as ox
 
     # 從 OpenStreetMap 下載花蓮市的道路網絡數據
-    G = ox.graph_from_place(place_name, network_type='drive')
+    G = ox.graph_from_place(地區, network_type='drive')
 
     # 提取路口 (交叉點) 的資料
     nodes, edges = ox.graph_to_gdfs(G, nodes=True, edges=True)
 
     # 篩選出具有多個連接道路的路口 (即交叉點)
-    intersections = nodes[nodes['street_count'] > 1]
+    intersections = nodes[nodes['street_count'] > 2]
 
     def get_intersection_name(node, G):
         "根據路口連接的道路名稱推測路口名稱"
@@ -125,7 +131,7 @@ def 取路口(查詢地點=None):
         for u, v, key, data in G.edges(node, keys=True, data=True):
             if 'name' in data:
                 street_names.add(str(data['name']))
-        return "".join(sorted(street_names))
+        return 臚列(sorted(street_names))
 
     # 對每個路口推測名稱
     intersections['name'] = intersections.index.map(lambda node: get_intersection_name(node, G))
