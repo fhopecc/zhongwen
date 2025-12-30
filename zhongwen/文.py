@@ -248,10 +248,12 @@ def 刪除中文字間空白(文):
 def 臚列(項目):
     "['甲', '乙', '丙'] -> '甲、乙及丙'"
     項目 = [str(i) for i in 項目]
-    if type(項目) == list:
-        if len(項目) > 1:
-            return f"{'、'.join(項目[:-1])}及{項目[-1]}" if len(項目) else ''
-        return 項目[0]
+    try:
+        if type(項目) == list:
+            if len(項目) > 1:
+                return f"{'、'.join(項目[:-1])}及{項目[-1]}" if len(項目) else ''
+            return 項目[0]
+    except IndexError: pass
     return 項目
 
 def 刪除末尾句號(字串):
