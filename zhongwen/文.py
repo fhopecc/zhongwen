@@ -145,10 +145,10 @@ def 取最近詞首(字串, 欄數):
 
 @functools.cache
 def 取強調詞字首樹(文):
-    '強調詞係以「」、【】、[]等符號所夾註之詞'
+    '強調詞係以「」、【】、[]、''等符號所夾註之詞'
     from marisa_trie import Trie
     import re
-    pat = r'「(.+?)」|【(.+?)】|\[(.+?)\]'
+    pat = r'"(.+?)"|\'(.+?)\'|「(.+?)」|【(.+?)】|\[([^\'"]+?)\]'
     return Trie([''.join(r) for r in re.findall(pat, 文)])
 
 def 取強調詞補全選項(文:str, 行, 欄):

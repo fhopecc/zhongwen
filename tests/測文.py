@@ -156,10 +156,13 @@ class Test(unittest.TestCase):
         # 「強調甲」
         # 【強調乙】
         # [強調丙]
+        # '強調丁'
+        # "強調戊"
+        # ['強調己']
         # 強
         f = Path(__file__)
         words = 取強調詞字首樹(f.read_text(encoding='utf-8'))
-        print(words.keys('強調甲'))
+        print(words.keys('強調'))
         opts = 取強調詞補全選項(f.read_text(encoding='utf-8'), 157, 11)
         print(opts)
 
@@ -205,5 +208,5 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test意見轉通知'))
+    suite.addTest(Test('test取強調詞補全選項'))
     unittest.TextTestRunner().run(suite)
