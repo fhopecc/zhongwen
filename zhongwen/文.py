@@ -254,7 +254,7 @@ def 臚列(項目):
                 return f"{'、'.join(項目[:-1])}及{項目[-1]}" if len(項目) else ''
             return 項目[0]
     except IndexError: pass
-    return 項目
+    return str(項目)
 
 def 刪除末尾句號(字串):
     from zhongwen.text import 去除字串末句號
