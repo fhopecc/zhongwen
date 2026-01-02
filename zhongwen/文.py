@@ -8,6 +8,10 @@ cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 倉頡字根表 = str.maketrans("abcdefghijklmnopqrstuvwxy"
                           ,"日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜" )
 
+def 清理中文空格(text):
+    import re
+    return re.sub(r'(?<=[\u4e00-\u9fa5])[ \u3000]+(?=[\u4e00-\u9fa5])', '', text)   
+
 @functools.cache
 def 取停用詞():
     import pandas as pd
@@ -507,32 +511,6 @@ def 設定環境():
     cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.文 -o -c -f %* || pause"'
     建立傳送到項目('轉錄至文檔', cmd)
 
-if __name__ == "__main__":
-    from pyperclip import copy
-    from pathlib import Path
-    from zhongwen.數 import 取中文數字
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--setup', help="設定環境", action='store_true')
-    parser.add_argument('--output', '-o', help="轉錄文字儲存至檔案" ,action='store_true')
-    parser.add_argument('--clipboard', '-c', help="轉錄文字複製至剪貼簿", action='store_true')
-    parser.add_argument('--files', '-f', nargs='+', help='指定欲轉錄文字之源檔集')
-    args = parser.parse_args()
-    if args.setup:
-        設定環境()
-    elif sources := args.files:
-        text = 轉錄文字(sources)
-        if args.clipboard:
-            copy(text)
-        if args.output:
-            s1 = Path(sources[0])
-            if len(sources) > 1:
-                輸出文檔 = Path(s1).with_stem(f'{s1.stem[:6]}等{取中文數字(len(sources))}個文檔').with_suffix('.txt')
-            else:
-                輸出文檔 = Path(s1).with_suffix('.txt')
-            with open(str(輸出文檔), 'w', encoding='utf-8') as out_f:
-                out_f.write(text)
-        print(f"{' '.join(sources)} =~->> {輸出文檔}")
 
 def python_re_to_vim_magic(py_pattern: str) -> str:
     """
@@ -687,3 +665,30 @@ def 審核意見轉通知(意見:str) -> str:
     意見 = 意見.replace('擬復請', '請')
     意見 = 意見.replace('該府', '貴府')
     return 意見
+
+if __name__ == "__main__":
+    from pyperclip import copy
+    from pathlib import Path
+    from zhongwen.數 import 取中文數字
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--setup', help="設定環境", action='store_true')
+    parser.add_argument('--output', '-o', help="轉錄文字儲存至檔案" ,action='store_true')
+    parser.add_argument('--clipboard', '-c', help="轉錄文字複製至剪貼簿", action='store_true')
+    parser.add_argument('--files', '-f', nargs='+', help='指定欲轉錄文字之源檔集')
+    args = parser.parse_args()
+    if args.setup:
+        設定環境()
+    elif sources := args.files:
+        text = 轉錄文字(sources)
+        if args.clipboard:
+            copy(text)
+        if args.output:
+            s1 = Path(sources[0])
+            if len(sources) > 1:
+                輸出文檔 = Path(s1).with_stem(f'{s1.stem[:6]}等{取中文數字(len(sources))}個文檔').with_suffix('.txt')
+            else:
+                輸出文檔 = Path(s1).with_suffix('.txt')
+            with open(str(輸出文檔), 'w', encoding='utf-8') as out_f:
+                out_f.write(text)
+        print(f"{' '.join(sources)} =~->> {輸出文檔}")

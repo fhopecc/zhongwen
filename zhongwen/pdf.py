@@ -342,6 +342,7 @@ def 取內文(pdf, 圖內文語言='chi_tra'):
     提取 pdf 內文字並辨識圖內文字。
     """
     from zhongwen.圖 import 取圖內文
+    from zhongwen.文 import 清理中文空格
     from pdf2image import convert_from_path
     from PIL import Image
     import pytesseract
@@ -368,7 +369,7 @@ def 取內文(pdf, 圖內文語言='chi_tra'):
             # 將該頁轉為圖片，再進行 OCR
             images = convert_from_path(pdf_path, first_page=page_num+1, last_page=page_num+1
                                        ,dpi=300
-                                       ,poppler_path=r'C:\Program Files\poppler-24.08.0\Library\bin'
+                                       # ,poppler_path=r'C:\Program Files\poppler-24.08.0\Library\bin'
                                        )
             if images:
                 image = images[0]
@@ -377,7 +378,7 @@ def 取內文(pdf, 圖內文語言='chi_tra'):
             else:
                 results.append(f"第 {page_num+1} 頁：無法載入圖片")
 
-    return "\n\n".join(results)
+    return 清理中文空格("\n\n".join(results))
 
 def 剖析頁碼字串(頁碼字串):
     """

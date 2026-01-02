@@ -1,12 +1,14 @@
 'windows 系統管理工具'
 from pathlib import Path
 import logging
+import os
 
 logger = logging.getLogger(Path(__file__).stem)
 
+TEMP = Path(os.environ['TEMP'])
+
 def setenv(var, value):
     '設定 Windows 環境變數'
-    import os
     # setx 將環境變數寫入登錄檔，永久有效
     cmd = f'setx {var} "{value}"'
     if not (r:=os.system(cmd)) == 0:
@@ -19,7 +21,6 @@ def setenv(var, value):
     logger.info(f'setenv({var}, {value})')
 
 def addpath(p, path_var='PATH'):
-    import os
     import subprocess
     p = str(p)
     ps = os.environ[path_var].split(';')
@@ -46,7 +47,6 @@ def addpath(p, path_var='PATH'):
         ps = list(set(ps))
         setenv(path_var, ';'.join(ps))
 
-TEMP = Path(os.environ['TEMP'])
 
 def downloads():
     return Path.home() / 'Downloads'
@@ -85,7 +85,6 @@ def remove_cortan():
     powershell(cmd)    
 
 def 建立傳送到項目(名稱:str, 命令:str):
-    import os
     import winshell
     批次檔 = Path(winshell.sendto()) / f"{名稱}.bat"
     批次檔.write_text(命令)
@@ -93,7 +92,6 @@ def 建立傳送到項目(名稱:str, 命令:str):
 
 def 增加檔案右鍵選單功能(功能名稱:str, 指令:str, 副檔名='*'):
     import winreg as reg
-    import os
     import sys
 
     # 功能名稱
