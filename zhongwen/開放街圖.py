@@ -127,11 +127,18 @@ def 取路口(地區="花蓮縣, 臺灣"):
 
     def get_intersection_name(node, G):
         "根據路口連接的道路名稱推測路口名稱"
-        street_names = set()
+        street_names = []
         for u, v, key, data in G.edges(node, keys=True, data=True):
             if 'name' in data:
-                street_names.add(str(data['name']))
-        return 臚列(sorted(street_names))
+                street_names.append(data['name'])
+
+        def flatten_generator(nested_list):
+            for item in nested_list:
+                if isinstance(item, list):
+                    yield from flatten_generator(item)
+                else:
+                    yield item
+        return 臚列(sorted(list(flatten_generator(street_names))))
 
     # 對每個路口推測名稱
     intersections['name'] = intersections.index.map(lambda node: get_intersection_name(node, G))
