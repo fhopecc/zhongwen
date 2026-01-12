@@ -85,6 +85,7 @@ def 截圖辨字():
         if win32clipboard.IsClipboardFormatAvailable(win32con.CF_BITMAP):
             win32clipboard.CloseClipboard()
             im = ImageGrab.grabclipboard()
+            待識圖目錄.mkdir(parents=True, exist_ok=True)
             圖檔 = 待識圖目錄/ f'{time.time()}.png'
             im.save(圖檔, 'PNG')
             文字 = 取圖內文(圖檔)
