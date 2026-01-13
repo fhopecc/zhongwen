@@ -11,9 +11,12 @@ def 整理頁面(pdf):
     '整理頁面'
     import time
     print(f'整理{pdf}頁面……')
+    print('操作：(e)擷取頁面(d)刪除(b)去空白頁(r)旋轉(m)移動(p)解密')
+    print('      (x)擷取表格存成 xlsx 檔')
+    操作 = input('1.請輸入操作代號：')
 
-    操作 = input('1.請選擇操作：(e)擷取頁面(d)刪除(b)去空白頁(r)旋轉(m)移動(p)解密：')
-
+    if 操作 == 'x':
+        to_xlsx(pdf)
     if 操作 == 'b':
         去空白頁(pdf)
 
@@ -273,33 +276,35 @@ def 去空白頁(源檔, 轉換檔=None):
     doc.select(非空白頁碼清單)
     doc.save(output_file)
 
-def to_excel(pdfs):
-    from collections.abc import Iterable 
-    from pathlib import Path
+def to_xlsx(pdf):
+    '''
+    一、將指定 pdf 內表格轉成 excel 檔。
+    '''
     import pandas as pd
     import pdfplumber
-    if isinstance(pdfs, str) or not isinstance(pdfs, Iterable):
-        pdfs = [pdfs]
-
-    pdfs = [Path(pdf) for pdf in pdfs]
-
-    for pdf in pdfs:
-        with pdfplumber.open(pdf) as _pdf:
-            all_data = []
-            for page in _pdf.pages:
-                table = page.extract_table()
-                if table:
-                    df = pd.DataFrame(table[1:], columns=table[0])  # 使用表格第一行作為標題
-                    all_data.append(df)
-            final_df = pd.concat(all_data)
-            xlsx = pdf.with_suffix('.xlsx')
-            final_df.to_excel(xlsx, index=False)
-            print(f'{pdf.name}->{xlsx.name}')
+    from pathlib import Path
+    pdf = Path(pdf)
+    with pdfplumber.open(pdf) as _pdf:
+        all_data = []
+        for page in _pdf.pages:
+            table = page.extract_table()
+            if table:
+                df = pd.DataFrame(table[1:], columns=table[0])  # 使用表格第一行作為標題
+                all_data.append(df)
+        print(all_data)
+        xlsx = pdf.with_suffix('.xlsx')
+        with pd.ExcelWriter(xlsx, engine='openpyxl') as writer:
+            for i, df in enumerate(all_data):
+                # 如果你有自定義名稱就用 sheet_names[i]，沒有的話可以用 f'Sheet{i+1}'
+                name = f'Sheet{i+1}'
+                df.to_excel(writer, sheet_name=name, index=False)
+        print(f'{pdf.name}->{xlsx.name}')
 
 def 平分(文件路徑, 平分文件數=2, 平分文件大小=None):
-    '''平分文件，預設分半，即將文件平分為2個文件；
-    如指定平分文件數，即平分為該數個文件(尚未實現)；
-    如指定平分文件大小，即依該大小平分文件(尚未實現)。
+    '''
+    一、平分文件，預設分半，即將文件平分為2個文件；
+    二、如指定平分文件數，即平分為該數個文件(尚未實現)；
+    三、如指定平分文件大小，即依該大小平分文件(尚未實現)。
     '''
     import fitz
 
@@ -579,7 +584,6 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser()
     parser.add_argument("--setup", help="設定環境", action='store_true')
-    parser.add_argument('--to_excel', nargs='+', type=str, help='2excel')
     parser.add_argument('--merge_pdfs', nargs='+', type=str, help='合併PDF')
     parser.add_argument('--extract_pages', type=str, help='擷取頁面')
     parser.add_argument('--arrange', type=str, help='整理文件頁面')
@@ -588,7 +592,5 @@ if __name__ == '__main__':
         設定環境()
     elif pdfs := args.merge_pdfs:
         合併(pdfs)
-    elif pdfs := args.to_excel:
-        to_excel(pdfs)
     elif pdf := args.arrange:
         整理頁面(pdf)
