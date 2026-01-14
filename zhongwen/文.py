@@ -250,7 +250,9 @@ def 刪除中文字間空白(文):
     return new_text
 
 def 臚列(項目):
-    "['甲', '乙', '丙'] -> '甲、乙及丙'"
+    '''
+    一、清單轉為一個臚列字串，形式如：["甲", "乙", "丙"] -> "甲、乙及丙"
+    '''
     項目 = [str(i) for i in 項目]
     try:
         if type(項目) == list:
@@ -259,6 +261,29 @@ def 臚列(項目):
             return 項目[0]
     except IndexError: pass
     return str(項目)
+
+def 取清單(臚列字串):
+    '''
+    一、將臚列字串轉成各項字串清單。
+    二、臚列字串為其反操作。
+    '''
+    import re
+    x = 臚列字串
+    臚列字串 = re.split(r'、|及', x)
+    if len(臚列字串) > 1:
+        return 臚列字串
+
+    臚列字串 = re.split(',', x)
+    if len(臚列字串) > 1:
+        return 臚列字串
+
+    return 臚列字串
+
+def 取集合(臚列字串):
+    '''
+    一、將臚列字串轉成各項字串集合。
+    '''
+    return set(取清單(臚列字串))
 
 def 刪除末尾句號(字串):
     from zhongwen.text import 去除字串末句號

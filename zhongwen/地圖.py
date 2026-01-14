@@ -69,6 +69,12 @@ def 顯示地點(gdf, 編號欄位='編號'):
     # 我們利用 marker_options 讓它顯示為圓點 (CircleMarker)
     popup_fields = gdf.columns.drop('geometry').tolist() # 取得所有欄位名稱（排除幾何欄位）
 
+    for col in gdf.columns:
+        # 檢查該欄位中是否有任何值是 set 類型
+        if gdf[col].apply(lambda x: isinstance(x, set)).any():
+            gdf[col] = gdf[col].apply(lambda x: list(x) if isinstance(x, set) else x)
+            # 註：轉成 list 後 JSON 就能識別了；若要顯示好看，建議用上面方法一的 ', '.join()
+
     folium.GeoJson(
         gdf,
         marker=folium.CircleMarker(

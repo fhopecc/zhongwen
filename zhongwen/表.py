@@ -348,5 +348,5 @@ def 取名稱帶同名圖片超文件碼(名稱, 圖檔子目錄, 圖寬='100%',
     return html_content
 
 def 多級欄位扁平化(df):
-    df.columns = [f"{col[0]}_{col[1]}" for col in df.columns]
+    df.columns = [f"{col[0]}_{col[1]}" if col[1] else f"{col[0]}" for col in df.columns]
     return df

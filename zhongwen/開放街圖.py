@@ -112,7 +112,7 @@ def 取路口(地區="花蓮縣, 臺灣"):
                       3.三叉路口，典型的 T 字或 Y 字路口；4.四條道路交會通常為十字路口；
                       5或以上.多叉路口或圓環。
     '''
-    from zhongwen.文 import 臚列
+    from zhongwen.文 import 臚列, 取集合
     import geopandas as gpd
     import osmnx as ox
 
@@ -143,6 +143,7 @@ def 取路口(地區="花蓮縣, 臺灣"):
     # 對每個路口推測名稱
     intersections['路口名稱'] = intersections.index.map(
             lambda node: get_intersection_name(node, G))
+    intersections['交叉路集合'] = intersections.路口名稱.map(取集合)
     return intersections.rename(columns={'x':'路口x座標', 'y':'路口y座標'})
 
 def 繪路程(起點, 終點, 地圖, 路網=None, 色彩='blue'):
@@ -203,3 +204,18 @@ def 查詢最近路程節點(地點, 路網=None):
     # 使用 geocode 查詢地理位置
     location = ox.geocode(地點)
     print("位置座標：", location)
+
+if __name__ == '__main__':
+    import argparse
+    from zhongwen.表 import 顯示
+    from zhongwen.地圖 import 顯示地點
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--roads", nargs='+', help="交叉路集合")
+    args = parser.parse_args()
+    if rs2:=args.roads:
+        # from zhongwen.快取 import 刪除指定名稱快取
+        # 刪除指定名稱快取(cache, '取路口')
+        df = 取路口()
+        df = df[df.交叉路集合.map(lambda rs1: rs1.issuperset(set(rs2)))]
+        顯示(df)
+        顯示地點(df)
