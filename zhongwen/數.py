@@ -5,6 +5,17 @@ from zhongwen.number import 中文數字
 全數字表  = 半型數字表 + 全型數字表 + 小寫數字表 + 小寫位名表 + ','
 全數字表 += 大寫數字表 + 大写数字表 + 大寫位名表 + 組名表 + 组名表
 
+def 求值(公式) -> float:
+    '數學式求值'
+    import re
+    公式 = str(公式)
+    processed_expr = re.sub(r'([\d.]+)[%％]', r'(\1/100)', 公式)
+    try:
+        result = eval(processed_expr)
+        return result
+    except Exception as e: pass
+    return float('nan')
+
 def 取數值(n, 全取=False, 無法解析時產生例外=False):
     from zhongwen.number import 轉數值
     import numpy as np

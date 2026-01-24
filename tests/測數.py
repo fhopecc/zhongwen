@@ -2,10 +2,8 @@ import unittest
 
 class Test(unittest.TestCase):
     def test(self):
-        from zhongwen.數 import 取數值
-        from zhongwen.表 import show_html
+        from zhongwen.數 import 取數值, 求值
         import pandas as pd
-        import numpy as np
 
         self.assertEqual(取數值('-3,689'), -3689)
         self.assertEqual(取數值('(13,826)'), -13826)
@@ -13,9 +11,8 @@ class Test(unittest.TestCase):
         self.assertEqual(取數值('中間一二三數字246'), 123)
         self.assertEqual(取數值('中間一二三數字2.46', 全取=True), [123, 2.46])
         self.assertTrue(pd.isna(取數值('--')))
-        df = pd.DataFrame(['中間一二三數字', '中間一二三數字246'])
-        df = df.map(取數值)
-
+        self.assertAlmostEqual(求值('15/0.7%'), 2142.85, places=1)
+        self.assertAlmostEqual(求值('15/0.7％'), 2142.85, places=1)
 
 if __name__ == '__main__':
     import logging
@@ -24,6 +21,3 @@ if __name__ == '__main__':
     logging.getLogger('matplotlib').setLevel(logging.CRITICAL)
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     unittest.main()
-    suite = unittest.TestSuite()
-    suite.addTest(Test('test'))  # 指定測試
-    unittest.TextTestRunner().run(suite)
