@@ -136,6 +136,13 @@ def 取日期(d=None, 錯誤為空值=True, first=True, defaulttoday=True, defau
                 try:
                     return Timestamp(int(m[1])+1911, int(m[2]), int(m[3])).normalize()
                 except ValueError: return pd.NaT
+
+            pat = r'(\d+)\s*年\s*(\d+)\s*月\s*(\d+)\s*日'
+            if m:=re.match(pat, d):
+                try:
+                    return Timestamp(int(m[1])+1911, int(m[2]), int(m[3])).normalize()
+                except ValueError: return pd.NaT
+
             pat = r'(\d+)年\D*(\d+)月'
             if m:=re.match(pat, d):
                 try:

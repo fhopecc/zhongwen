@@ -2,11 +2,17 @@ import unittest
 
 class Test(unittest.TestCase):
 
-    def test_get_date(self):
-        from zhongwen.時 import 取日期, 今日
+    def test(self):
+        from zhongwen.時 import 取時間, 一分鐘
+        from zhongwen.時 import 取日期, 今日, 取小寫民國日期
         from pandas import Timestamp, Timedelta
         from datetime import datetime, date
         import pandas as pd
+        ms = (取時間('17:26') - 取時間('14:38')) / 一分鐘
+        昨今合計加五小時待補加分鐘數 = 5*60 - ms
+        今加班截止時間 = 取時間('14:11') + 昨今合計加五小時待補加分鐘數 * 一分鐘 
+        print(今加班截止時間)
+        self.assertEqual(取時間('14:38'), Timestamp('14:37'))
         self.assertEqual(取日期('1121231'), Timestamp('2023-12-31'))
         self.assertEqual(取日期("'24/01/19"), Timestamp(2024,1,19))
         self.assertEqual(取日期('2022/6/3 上午 12:00:00'), Timestamp(2022,6,3) )
@@ -40,6 +46,7 @@ class Test(unittest.TestCase):
         self.assertEqual(取日期(date(2022,7,29)), Timestamp(2022,7,29))
 
         self.assertEqual(今日, Timestamp.today().normalize())
+        self.assertEqual(取小寫民國日期('115年1月24日'), '一月二十四日')
 
     def test取期間(self):
         from zhongwen.時 import 取期間, 取民國期間
@@ -121,5 +128,5 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test取季別年數季數'))  # 指定測試
+    suite.addTest(Test('test'))  # 指定測試
     unittest.TextTestRunner().run(suite)

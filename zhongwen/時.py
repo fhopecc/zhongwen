@@ -5,6 +5,22 @@ from zhongwen.date import 全是日期嗎
 
 logger = logging.getLogger(Path(__file__).stem)
 
+def 取時間(時間=None):
+    '''
+    一、時間為表達時間之物件，如 "14:38" 字串。
+    二、未指定則為現在時間。
+    '''
+    import pandas as pd
+    import re
+    if not 時間:
+        return pd.Timestamp.now()
+
+    pat = r'^([01]\d|2[0-3]):[0-5]\d$'
+    if m:=re.match(pat, 時間):
+        return pd.Timestamp(時間)
+
+    return 時間
+
 def 是工作日(日期):
     import datetime
     import holidays
@@ -193,6 +209,17 @@ def 取正式民國日期(d=None):
         d = d.end_time.normalize()
     return 取民國日期(d, "%Y年%M月%D日")
 
+def 取小寫民國日期(日期, 本年度省略年=True):
+    '''
+    一、格式如：一百一十年一月一日。
+    二、預設本年度省略年。
+    '''
+    from zhongwen.數 import 取中文數字
+    日期 = 取日期(日期)
+    if 日期.year == 今年數:
+        return f'{取中文數字(日期.month)}月{取中文數字(日期.day)}日'
+    return f'{取中文數字(日期.year-1911)}年{取中文數字(日期.month)}月{取中文數字(日期.day)}日'
+
 def 自指定月份迄上月(月份):
     from pandas import Period
     月份 = 取期間(月份)
@@ -288,6 +315,7 @@ def 取季別年數季數(季別):
 
 一日 = pd.Timedelta(days=1)
 一週 = pd.Timedelta(days=7)
+一月 = pd.DateOffset(months=1)
 一季 = pd.DateOffset(months=3)
 半年 = pd.DateOffset(months=6)
 一年 = pd.DateOffset(year=1)
@@ -304,6 +332,7 @@ def 取季別年數季數(季別):
 一季前 = 今日 - 一季
 半年前 = 今日 - 半年
 一年前 = 今日 - 一年
+一月後 = 今日 + 一月 
 三月後 = 今日 + 一季 
 五年又一個月前 = 今日 - pd.DateOffset(months=61)
 本月 = pd.Period(今日, 'M')
@@ -317,3 +346,5 @@ def 取季別年數季數(季別):
 季末 = 本季.end_time.normalize()
 本年度 = pd.Period(今日, 'Y')
 上年度 = 本年度 - 1
+現在 = 取時間()
+一分鐘 = pd.Timedelta(minutes=1)
