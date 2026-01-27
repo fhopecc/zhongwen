@@ -72,7 +72,6 @@ def 字寬(字元):
     import re
     char = 字元
     return 2 if re.match(r'[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]', char) else 1
-
 def 顯示(df
         ,編號欄位=[]
         ,整數欄位=[], 實數欄位=[], 百分比欄位=[]
@@ -85,7 +84,41 @@ def 顯示(df
         ,百分比漸層按值區間欄位=[]
         ,顯示筆數=100, 採用民國日期格式=False, 標題=None
         ,傳回超文件內容=False
-        ,顯示索引=False
+        ,顯示索引=True
+        ,無格式=False
+        ,不顯示=False
+        ):
+    from warnings import warn
+    warn(f'【顯示】將廢棄，請使用【表示】', DeprecationWarning, stacklevel=2) 
+    return 表示(df
+        ,編號欄位
+        ,整數欄位, 實數欄位, 百分比欄位
+        ,日期欄位, 隱藏欄位
+        ,漸層欄位
+        ,指定漸層上下限欄位
+        ,漸層上限
+        ,漸層下限
+        ,百分比漸層欄位
+        ,百分比漸層按值區間欄位
+        ,顯示筆數, 採用民國日期格式, 標題
+        ,傳回超文件內容
+        ,顯示索引
+        ,無格式
+        ,不顯示) 
+
+def 表示(df
+        ,編號欄位=[]
+        ,整數欄位=[], 實數欄位=[], 百分比欄位=[]
+        ,日期欄位=[], 隱藏欄位=[]
+        ,漸層欄位=[]
+        ,指定漸層上下限欄位=[]
+        ,漸層上限=None
+        ,漸層下限=None
+        ,百分比漸層欄位=[]
+        ,百分比漸層按值區間欄位=[]
+        ,顯示筆數=100, 採用民國日期格式=False, 標題=None
+        ,傳回超文件內容=False
+        ,顯示索引=True
         ,無格式=False
         ,不顯示=False
         ):
@@ -209,7 +242,48 @@ def 顯示(df
 
     with tempfile.TemporaryDirectory() as tmpdirname:
         html = os.path.join(tmpdirname, "tempfile.html")
-        df.to_html(html)
+        html_content = df.to_html(classes='data-table', index=False)
+        desc = 可顯示資料框.describe(include='all')
+        desc.index = desc.index.map(lambda n: {
+                                     'count':'有效值數'
+                                    ,'unique':'唯一值數'
+                                    ,'top':'眾數'
+                                    ,'freq':'最高頻次'
+                                    ,'mean':'平均'
+                                    ,'std':'標準差'
+                                    ,'min':'最小值'
+                                    ,'25%':'第一四分位數'
+                                    ,'50%':'中位數'
+                                    ,'75%':'第三四分位數'
+                                    ,'max':'最大值'
+                                    }.get(n, n))
+        desc = 表示(desc, 不顯示=True)[0]
+        html_describe = desc.to_html(
+                classes='describe-table'
+               ,float_format=lambda x: f'{x:.2f}'
+               )
+        final_html = f"""
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial; margin: 20px; }}
+                .data-table {{ border: 1px solid #ccc; margin-bottom: 40px; }}
+                .describe-table {{ border: 1px solid #000; background-color: #f9f9f9; }}
+                h2 {{ color: #333; }}
+            </style>
+        </head>
+        <body>
+            {html_content}
+            
+            <hr>
+            
+            <h2>資料型態</h2>
+            {html_describe}
+        </body>
+        </html>
+        """
+        with open(html, mode='w', encoding='utf8') as f:
+            f.write(final_html)
         os.system(f'start {html}')
         time.sleep(10)
 
