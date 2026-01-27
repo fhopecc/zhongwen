@@ -233,7 +233,7 @@ def 取英文單字補全選項(文:str, 行, 欄):
 def geturl(文):
     '找出文中的 url，如找不到傳回空白'
     import re
-    url_pattern = re.compile(r'https?://[a-zA-Z0-9-.]+(?:/[^\s()<>]+|)')
+    url_pattern = re.compile(r'https?://[a-zA-Z0-9-.]+(?:/[^]\s()<>]+|)')
     urls = url_pattern.findall(文)
     if urls:
         for url in urls:

@@ -3,6 +3,13 @@ import unittest
 
 class Test(unittest.TestCase):
     '依方法名稱字母順序測試'
+    def test_geturl(self):
+        from zhongwen.文 import geturl
+        orgmode_url = 'https://news.ltn.com.tw/news/Hualien/breakingnews/5256071][abcd]]'
+        self.assertEqual('https://news.ltn.com.tw/news/Hualien/breakingnews/5256071', 
+                         geturl(orgmode_url))
+
+
     def test轉樣式表字串(self):
         from zhongwen.text import 轉樣式表字串
         t = "1abcd\n2abcd"
@@ -208,5 +215,5 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test取強調詞補全選項'))
+    suite.addTest(Test('test_geturl'))
     unittest.TextTestRunner().run(suite)

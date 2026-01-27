@@ -61,17 +61,17 @@ def org2docx(org):
     document = Document(str(docx))
 
     def 取中文階層編號(編號, 階層):
-        # if 階層==0:
-            # return ''
         if 階層==0:
+            return ''
+        if 階層==1:
             return f'{取大寫中文數字(編號)}、'
-        elif 階層==1: 
-            return f'{取中文數字(編號)}、'
         elif 階層==2: 
-            return f'({取中文數字(編號)})'
+            return f'{取中文數字(編號)}、'
         elif 階層==3: 
-            return f'{編號}.'
+            return f'({取中文數字(編號)})'
         elif 階層==4: 
+            return f'{編號}.'
+        elif 階層==5: 
             return f'({編號})'
         return 編號
 
@@ -93,7 +93,6 @@ def org2docx(org):
                 paragraph.style = f'內文{階層+1}'
     document.save(str(docx))
     os.system(f'start {docx}')
-
 
 if __name__ == '__main__':
     import argparse
