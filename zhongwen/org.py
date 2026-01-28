@@ -98,9 +98,13 @@ if __name__ == '__main__':
     import argparse
     import sys
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--file", type=str, help="指定處理的 org 檔")
+    parser.add_argument("-f", "--file", type=str, help="指定將處理之 org")
+    parser.add_argument("-d", "--docx", action='store_true', help="匯出成 docx")
     args = parser.parse_args()
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
     elif f := args.file:
-        取超文本(f)
+        if args.docx:
+            org2docx(f)
+        else:
+            取超文本(f)
