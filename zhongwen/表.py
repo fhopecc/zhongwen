@@ -4,6 +4,23 @@ from pathlib import Path
 import logging
 logger = logging.getLogger(Path(__file__).stem)
 
+def 取數據輪廓(df):
+    desc = df.describe(include='all')
+    desc.index = desc.index.map(lambda n: {
+                                 'count':'有效值數'
+                                ,'unique':'唯一值數'
+                                ,'top':'眾數'
+                                ,'freq':'最高頻次'
+                                ,'mean':'平均'
+                                ,'std':'標準差'
+                                ,'min':'最小值'
+                                ,'25%':'第一四分位數'
+                                ,'50%':'中位數'
+                                ,'75%':'第三四分位數'
+                                ,'max':'最大值'
+                                }.get(n, n))
+    return desc.T
+
 def read_mhtml(mhtml:str):
     from pathlib import Path
     import pandas as pd 
@@ -243,21 +260,8 @@ def 表示(df
     with tempfile.TemporaryDirectory() as tmpdirname:
         html = os.path.join(tmpdirname, "tempfile.html")
         html_content = df.to_html(classes='data-table', index=False)
-        desc = 可顯示資料框.describe(include='all')
-        desc.index = desc.index.map(lambda n: {
-                                     'count':'有效值數'
-                                    ,'unique':'唯一值數'
-                                    ,'top':'眾數'
-                                    ,'freq':'最高頻次'
-                                    ,'mean':'平均'
-                                    ,'std':'標準差'
-                                    ,'min':'最小值'
-                                    ,'25%':'第一四分位數'
-                                    ,'50%':'中位數'
-                                    ,'75%':'第三四分位數'
-                                    ,'max':'最大值'
-                                    }.get(n, n))
-        desc = 表示(desc, 不顯示=True)[0]
+        desc = 取數據輪廓(可顯示資料框)
+        desc = 表示(desc.fillna(0), 不顯示=True)[0]
         html_describe = desc.to_html(
                 classes='describe-table'
                ,float_format=lambda x: f'{x:.2f}'

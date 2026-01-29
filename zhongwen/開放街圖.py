@@ -2,6 +2,33 @@ from pathlib import Path
 from diskcache import Cache
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 
+def 取鄉鎮市(緯度, 經度):
+    # 初始化定位器，user_agent 可以自定義一個名稱
+    from geopy.geocoders import Nominatim
+    geolocator = Nominatim(user_agent="zhongwen")
+    
+    try:
+        # 進行逆向地理編碼，座標格式為 (緯度, 經度)
+        location = geolocator.reverse((緯度, 經度), language='zh-tw')
+        
+        if location:
+            address = location.raw.get('address', {})
+            
+            # 在台灣，鄉鎮市區名稱通常出現在以下欄位
+            # 優先順序視地區而定：市區通常是 'suburb'，鄉鎮可能是 'town' 或 'district'
+            district = (
+                address.get('suburb') or 
+                address.get('town') or 
+                address.get('district') or 
+                address.get('city_district') or
+                "未知地區"
+            )
+            
+            city = address.get('city') or address.get('county') or ""
+            return f"{city}{district}"
+    except Exception as e:
+        return f"發生錯誤: {e}"
+
 def 取地點座標(地點):
     '地點格式如次：宜蘭縣審計室, 宜蘭縣, 台灣，座標系是4326。'
     import osmnx as ox

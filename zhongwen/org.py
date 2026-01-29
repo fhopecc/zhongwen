@@ -44,13 +44,42 @@ def 取超文本(org, 預覽=True) -> str:
             time.sleep(10)
     return 內容
 
-def org2docx(org):
+
+def 取一階節點(org, 節點序號):
+    '取指定一階節點'
+    import re
+    import sys
+    with open(str(org), 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    # 正規表示式解析：
+    # ^\* +   : 行首必須是一顆星加空格（一階節點）
+    # (.*?)   : 標題文字（非貪婪匹配）
+    # (?=\n\* +|\Z) : 停止點：遇到下一行的一階節點，或是檔案結尾 (\Z)
+    # flags=re.DOTALL : 讓點號 (.) 包含換行符
+    pattern = re.compile(r'(^\* +.*?(?=\n\* +|\Z))', re.MULTILINE | re.DOTALL)
+    
+    nodes = pattern.findall(content)
+
+    if 1 <= 節點序號 <= len(nodes):
+        return nodes[節點序號 - 1]
+    else:
+        print(f"Error: 找不到第 {節點序號} 個節點 (總共有 {le節點序號(nodes)} 個)", file=sys.stderr)
+        return None
+
+def org2docx(org, 節點序號=0):
+    '節點序號 0 指取全部節點。'
     from zhongwen.數 import 取中文數字, 取大寫中文數字
     from docx import Document
     from pathlib import Path
     import re
     import os
     org = Path(org)
+    if 節點序號 > 0:
+        原始檔 = org
+        節點內容 = 取一階節點(org, 節點序號)
+        org = org.with_stem(f'{org.stem}_{節點序號}')
+        org.write_text(節點內容, encoding='utf8')
     docx = Path(__file__).parent / org.with_suffix('.docx')
     temp = r'c:\GitHub\zhongwen\zhongwen\resource\審核報告範本.docx'
     # cmd = f'pandoc -f markdown+east_asian_line_breaks -t docx '
@@ -99,12 +128,17 @@ if __name__ == '__main__':
     import sys
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", type=str, help="指定將處理之 org")
+    parser.add_argument('-n', '--node', type=int, help='指定要處理之節點')
     parser.add_argument("-d", "--docx", action='store_true', help="匯出成 docx")
     args = parser.parse_args()
+    print(args)
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
     elif f := args.file:
         if args.docx:
-            org2docx(f)
+            if args.node:
+                org2docx(f, args.node)
+            else:
+                org2docx(f)
         else:
             取超文本(f)
