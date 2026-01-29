@@ -5,8 +5,8 @@ class Test(unittest.TestCase):
         from pathlib import Path
         self.甲 = (Path(__file__).parent / '表測例甲.txt').read_text(encoding='utf-8')
 
-    def test顯示(self):
-        from zhongwen.表 import 顯示
+    def test表示(self):
+        from zhongwen.表 import 表示
         from zhongwen.文 import 隨機中文 
         import pandas as pd
         import numpy as np
@@ -34,8 +34,14 @@ class Test(unittest.TestCase):
                 df.iat[row, df.columns.get_loc(col)] = pd.NaT  # 日期欄位插入 pd.NaT
             else:
                 df.iat[row, df.columns.get_loc(col)] = np.nan  # 其他欄位插入 np.nan
+        print(df.columns)
+        print(type(df))
         df = df.rename(columns={"日期欄位":"日期\A欄位"})
-        顯示(df, 整數欄位=['整數欄位'], 百分比欄位=['百分比欄位'], 隱藏欄位=['隱藏欄位'])
+        s, dfn = 表示(df, 顯示索引=True, 不顯示=True
+                     ,整數欄位=['整數欄位'], 百分比欄位=['百分比欄位']
+                     ,隱藏欄位=['隱藏欄位'])
+         
+        表示(s.to_html())
     
     def test_char_width(self):
         from zhongwen.表 import 字寬
@@ -47,5 +53,5 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test顯示'))
+    suite.addTest(Test('test表示'))
     unittest.TextTestRunner().run(suite)
