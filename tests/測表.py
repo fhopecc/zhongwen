@@ -36,12 +36,13 @@ class Test(unittest.TestCase):
                 df.iat[row, df.columns.get_loc(col)] = np.nan  # 其他欄位插入 np.nan
         print(df.columns)
         print(type(df))
-        df = df.rename(columns={"日期欄位":"日期\A欄位"})
+        df = df.rename(columns={"日期欄位":r"日期\A欄位"})
         s, dfn = 表示(df, 顯示索引=True, 不顯示=True
                      ,整數欄位=['整數欄位'], 百分比欄位=['百分比欄位']
                      ,隱藏欄位=['隱藏欄位'])
          
         表示(s.to_html())
+        表示(df)
     
     def test_char_width(self):
         from zhongwen.表 import 字寬

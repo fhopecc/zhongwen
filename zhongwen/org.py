@@ -97,7 +97,6 @@ def 取超文本(org, 預覽=True) -> str:
             time.sleep(10)
     return 內容
 
-
 def 取一階節點(org, 節點序號):
     '取指定一階節點'
     import re

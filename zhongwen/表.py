@@ -5,21 +5,69 @@ import logging
 logger = logging.getLogger(Path(__file__).stem)
 
 def 取數據輪廓(df):
-    desc = df.describe(include='all')
-    desc.index = desc.index.map(lambda n: {
-                                 'count':'有效值數'
-                                ,'unique':'唯一值數'
-                                ,'top':'眾數'
-                                ,'freq':'最高頻次'
-                                ,'mean':'平均'
-                                ,'std':'標準差'
-                                ,'min':'最小值'
-                                ,'25%':'第一四分位數'
-                                ,'50%':'中位數'
-                                ,'75%':'第三四分位數'
-                                ,'max':'最大值'
-                                }.get(n, n))
-    return desc.T
+    import pandas as pd
+    import numpy as np
+    import pathlib
+    import argparse
+    from datetime import datetime
+    results = []
+    for col in df.columns:
+        series = df[col]
+        # 基礎資訊
+        info = {
+            "欄位名稱": col,
+            "資料型別": str(series.dtype),
+            "總筆數": len(df),
+            "空值數": series.isnull().sum(),
+            "唯一值數": series.nunique(),
+        }
+
+        # 數值型分析 (Numeric)
+        if pd.api.types.is_numeric_dtype(series):
+            info.update({
+                "最大值": series.max(),
+                "最小值": series.min(),
+                "平均值": round(series.mean(), 2),
+                "總計": series.sum(),
+                "正值數": (series > 0).sum(),
+                "負值數": (series < 0).sum(),
+                "零值數": (series == 0).sum()
+            })
+        
+        # 日期型分析 (Datetime)
+        elif pd.api.types.is_datetime64_any_dtype(series):
+            info.update({
+                "最早日期": series.min(),
+                "最晚日期": series.max(),
+                "週末交易數": series.dt.dayofweek.isin([5, 6]).sum()
+            })
+
+        # 字串型分析 (Object/String)
+        else:
+            str_series = series.astype(str)
+            info.update({
+                "最大長度": str_series.str.len().max(),
+                "平均長度": round(str_series.str.len().mean(), 2)
+            })
+        
+        results.append(info)
+    return pd.DataFrame(results)
+
+    # desc = df.describe(include='all')
+    # desc.index = desc.index.map(lambda n: {
+    #                              'count':'有效值數'
+    #                             ,'unique':'唯一值數'
+    #                             ,'top':'眾數'
+    #                             ,'freq':'最高頻次'
+    #                             ,'mean':'平均'
+    #                             ,'std':'標準差'
+    #                             ,'min':'最小值'
+    #                             ,'25%':'第一四分位數'
+    #                             ,'50%':'中位數'
+    #                             ,'75%':'第三四分位數'
+    #                             ,'max':'最大值'
+    #                             }.get(n, n))
+    # return desc.T
 
 def read_mhtml(mhtml:str):
     from pathlib import Path
@@ -261,6 +309,7 @@ def 表示(df
         html = os.path.join(tmpdirname, "tempfile.html")
         html_content = df.to_html(classes='data-table', index=False)
         desc = 取數據輪廓(可顯示資料框)
+        print(desc)
         desc = 表示(desc.fillna(0), 不顯示=True)[0]
         html_describe = desc.to_html(
                 classes='describe-table'
