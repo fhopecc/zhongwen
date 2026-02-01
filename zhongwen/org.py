@@ -1,3 +1,56 @@
+def 取待辦事項(d):
+    '''
+    一、取目錄下所有 org 之待辦事項。
+    二、欄位：狀態、標題、期限
+    三、按期限先後排序。
+    '''
+    from zhongwen.時 import 取民國日期
+    from tabulate import tabulate
+    import pandas as pd
+    import orgparse
+    表頭 = ['狀態', '標題', '期限']
+    表身 = []
+    for org in d.glob(r'**\*.org'):
+        data = orgparse.load(org)    
+        for node in data[1:]: # 遍歷所有點
+            # 檢查是否為具 TODO 狀態之點)
+            if node.todo:
+                # 提取資訊
+                status = node.todo          # 例如: TODO, DONE, STARTED
+                title = node.heading        # 標題內容
+                deadline = 取民國日期(node.deadline.start) if node.deadline else None
+                tags = node.tags            # 標籤集合 (set)
+                priority = node.priority    # 優先級 (A, B, C)
+                表身.append([status, title[:35], deadline])  
+    df = pd.DataFrame(表身, columns=表頭)
+    df = df.sort_values('期限')
+    return df
+
+def 顯示待辦事項(org):
+    '顯示指定 org 之待辦事項'
+    from tabulate import tabulate
+    from zhongwen.時 import 取民國日期
+    import orgparse
+
+    表頭 = ['狀態', '標題', '期限']
+    表身 = []
+
+    data = orgparse.load(org)
+    for node in data[1:]: # 遍歷所有點
+        # 檢查是否為具 TODO 狀態之點)
+        if node.todo:
+            # 提取資訊
+            status = node.todo          # 例如: TODO, DONE, STARTED
+            title = node.heading        # 標題內容
+            deadline = 取民國日期(node.deadline.start) if node.deadline else None
+            tags = node.tags            # 標籤集合 (set)
+            priority = node.priority    # 優先級 (A, B, C)
+
+            # deadline_str = str(deadline.start) if deadline else "未設定"
+            表身.append([status, title[:10], deadline])  
+    print(tabulate(表身, 表頭))
+
+
 def 取超文本(org, 預覽=True) -> str: 
     '''
     一、傳回表達指定 org 文件之超文本字串。
@@ -81,7 +134,7 @@ def org2docx(org, 節點序號=0):
         org = org.with_stem(f'{org.stem}_{節點序號}')
         org.write_text(節點內容, encoding='utf8')
     docx = Path(__file__).parent / org.with_suffix('.docx')
-    temp = r'c:\GitHub\zhongwen\zhongwen\resource\審核報告範本.docx'
+    temp = Path(__file__).parent / r'resource\審核報告範本.docx'
     # cmd = f'pandoc -f markdown+east_asian_line_breaks -t docx '
     cmd = f'pandoc -t docx '
     cmd += f'--reference-doc="{temp}" --number-sections '
@@ -124,16 +177,25 @@ def org2docx(org, 節點序號=0):
     os.system(f'start {docx}')
 
 if __name__ == '__main__':
+    from zhongwen.表 import 表示
+    from pathlib import Path
     import argparse
     import sys
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--file", type=str, help="指定將處理之 org")
+    parser.add_argument("-f", "--file", type=str, help="輸入路徑 f 之 org")
+    parser.add_argument("-d", "--dir", type=Path, help="輸入 dir 目錄內所有 org")
     parser.add_argument('-n', '--node', type=int, help='指定要處理之節點')
-    parser.add_argument("-d", "--docx", action='store_true', help="匯出成 docx")
+    parser.add_argument("-w", "--docx", action='store_true', help="匯出成 docx")
+    parser.add_argument("-t", "--todo", action='store_true', help="列出待辦事項")
     args = parser.parse_args()
-    print(args)
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
+    elif args.todo:
+        if args.dir and args.dir.is_dir():
+            todos = 取待辦事項(args.dir)
+        else:
+            todos = 取待辦事項(Path.cwd())
+        表示(todos)
     elif f := args.file:
         if args.docx:
             if args.node:
