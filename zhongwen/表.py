@@ -11,6 +11,14 @@ def 取數據輪廓(df):
     import argparse
     from datetime import datetime
     results = []
+    def get_top_n(series, n=5):
+            """計算前 N 名出現頻率最高的數值與次數"""
+            # 排除空值後進行計數
+            counts = series.value_counts().head(n)
+            if counts.empty:
+                return "-"
+            # 格式化為 "值:次數" 的字串列表
+            return r"<br/>".join([f"{str(val)[:10]}:{count}" for val, count in counts.items()])
     for col in df.columns:
         series = df[col]
         # 基礎資訊
@@ -20,6 +28,7 @@ def 取數據輪廓(df):
             "總筆數": len(df),
             "空值數": series.isnull().sum(),
             "唯一值數": series.nunique(),
+            "前五高頻值(值:次數)": get_top_n(series, 5)
         }
 
         # 數值型分析 (Numeric)
@@ -28,6 +37,7 @@ def 取數據輪廓(df):
                 "最大值": series.max(),
                 "最小值": series.min(),
                 "平均值": round(series.mean(), 2),
+                "中位數": series.median(),
                 "總計": series.sum(),
                 "正值數": (series > 0).sum(),
                 "負值數": (series < 0).sum(),
@@ -52,22 +62,6 @@ def 取數據輪廓(df):
         
         results.append(info)
     return pd.DataFrame(results)
-
-    # desc = df.describe(include='all')
-    # desc.index = desc.index.map(lambda n: {
-    #                              'count':'有效值數'
-    #                             ,'unique':'唯一值數'
-    #                             ,'top':'眾數'
-    #                             ,'freq':'最高頻次'
-    #                             ,'mean':'平均'
-    #                             ,'std':'標準差'
-    #                             ,'min':'最小值'
-    #                             ,'25%':'第一四分位數'
-    #                             ,'50%':'中位數'
-    #                             ,'75%':'第三四分位數'
-    #                             ,'max':'最大值'
-    #                             }.get(n, n))
-    # return desc.T
 
 def read_mhtml(mhtml:str):
     from pathlib import Path
