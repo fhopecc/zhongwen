@@ -45,6 +45,7 @@ dependencies = ['aiofiles'
                ,'opencc-python-reimplemented'  # 中文簡繁轉換
                ,'openpyxl'
                ,'orjson'
+               ,'orgparse' # orgmode 檔解析器
                ,'osmnx' # 開放街圖路網
                ,"pandas"
                ,"pdf2image"
