@@ -22,12 +22,18 @@ def 取數據輪廓(df):
     for col in df.columns:
         series = df[col]
         # 基礎資訊
+
+        try:
+            唯一值數 = series.nunique()
+        except:
+            唯一值數 = np.nan
+
         info = {
             "欄位名稱": col,
             "資料型別": str(series.dtype),
             "總筆數": len(df),
             "空值數": series.isnull().sum(),
-            "唯一值數": series.nunique(),
+            "唯一值數": 唯一值數,
             "前五高頻值(值:次數)": get_top_n(series, 5)
         }
 
@@ -240,7 +246,9 @@ def 表示(df
     odf = df
     for c in 實數欄位+百分比欄位+整數欄位:
         df[c] = pd.to_numeric(df[c])
-    if not 無格式:
+    if 無格式:
+        可顯示資料框 = df.copy()
+    else:
         try:
             df.columns = 重名加序(df.columns)
             整數欄位 = set(整數欄位).union(df.select_dtypes(include=['int']).columns)
@@ -303,8 +311,7 @@ def 表示(df
         html = os.path.join(tmpdirname, "tempfile.html")
         html_content = df.to_html(classes='data-table', index=False)
         desc = 取數據輪廓(可顯示資料框)
-        print(desc)
-        desc = 表示(desc.fillna(0), 不顯示=True)[0]
+        desc = 表示(desc.fillna(0), 顯示索引=False, 不顯示=True)[0]
         html_describe = desc.to_html(
                 classes='describe-table'
                ,float_format=lambda x: f'{x:.2f}'

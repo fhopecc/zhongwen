@@ -2,6 +2,14 @@ from pathlib import Path
 from diskcache import Cache
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 
+@cache.memoize('取路段')
+def 取路段(地區="花蓮縣, 臺灣"):
+    'crs=3826'
+    import osmnx as ox
+    graph = ox.graph_from_place(地區, network_type='drive')
+    edges = ox.graph_to_gdfs(graph, nodes=False).to_crs(epsg=3826)
+    return edges
+
 def 取鄉鎮市(緯度, 經度):
     # 初始化定位器，user_agent 可以自定義一個名稱
     from geopy.geocoders import Nominatim

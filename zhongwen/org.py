@@ -137,10 +137,9 @@ def org2docx(org, 節點序號=0):
         節點內容 = 取一階節點(org, 節點序號)
         org = org.with_stem(f'{org.stem}_{節點序號}')
         org.write_text(節點內容, encoding='utf8')
-    docx = Path(__file__).parent / org.with_suffix('.docx')
+    docx = org.with_suffix('.docx')
     temp = Path(__file__).parent / r'resource\審核報告範本.docx'
-    # cmd = f'pandoc -f markdown+east_asian_line_breaks -t docx '
-    cmd = f'pandoc -t docx '
+    cmd = f'pandoc -f org+east_asian_line_breaks -t docx '
     cmd += f'--reference-doc="{temp}" --number-sections '
     cmd += f'-o "{docx}" {org}'
     os.system(cmd)

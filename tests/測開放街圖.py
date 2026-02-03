@@ -6,8 +6,11 @@ class Test(unittest.TestCase):
         from zhongwen.開放街圖 import 取地點座標
         from zhongwen.開放街圖 import 取地點最近車程網節點
         from zhongwen.開放街圖 import 取鄉鎮市
-        
-        print(取鄉鎮市(23.9794533, 121.6106910)) 
+        from zhongwen.開放街圖 import 取路段
+        from zhongwen.表 import 表示
+        df = 取路段() 
+        表示(df, 無格式=True)
+        # print(取鄉鎮市(23.9794533, 121.6106910)) 
         # print(取地點座標('宜蘭縣審計室, 宜蘭縣, 台灣')) 
         # print(取地點最近車程網節點('宜蘭縣審計室, 宜蘭縣, 台灣')) 
 
