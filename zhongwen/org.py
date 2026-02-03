@@ -1,4 +1,4 @@
-def 取待辦事項(d):
+def 取待辦事項(ds):
     '''
     一、取目錄下所有 org 之待辦事項。
     二、欄位：狀態、標題、期限
@@ -8,20 +8,25 @@ def 取待辦事項(d):
     from tabulate import tabulate
     import pandas as pd
     import orgparse
+    from collections.abc import Iterable 
+    if isinstance(ds, str) or not isinstance(ds, Iterable):
+        ds = [ds]
+    
     表頭 = ['狀態', '標題', '期限']
     表身 = []
-    for org in d.glob(r'**\*.org'):
-        data = orgparse.load(org)    
-        for node in data[1:]: # 遍歷所有點
-            # 檢查是否為具 TODO 狀態之點)
-            if node.todo:
-                # 提取資訊
-                status = node.todo          # 例如: TODO, DONE, STARTED
-                title = node.heading        # 標題內容
-                deadline = 取民國日期(node.deadline.start) if node.deadline else None
-                tags = node.tags            # 標籤集合 (set)
-                priority = node.priority    # 優先級 (A, B, C)
-                表身.append([status, title[:35], deadline])  
+    for d in ds:
+        for org in d.glob(r'**\*.org'):
+            data = orgparse.load(org)    
+            for node in data[1:]: # 遍歷所有點
+                # 檢查是否為具 TODO 狀態之點)
+                if node.todo:
+                    # 提取資訊
+                    status = node.todo          # 例如: TODO, DONE, STARTED
+                    title = node.heading        # 標題內容
+                    deadline = 取民國日期(node.deadline.start) if node.deadline else None
+                    tags = node.tags            # 標籤集合 (set)
+                    priority = node.priority    # 優先級 (A, B, C)
+                    表身.append([status, title[:35], deadline])  
     df = pd.DataFrame(表身, columns=表頭)
     df = df.sort_values('期限')
     return df
@@ -182,7 +187,7 @@ if __name__ == '__main__':
     import sys
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", type=str, help="輸入路徑 f 之 org")
-    parser.add_argument("-d", "--dir", type=Path, help="輸入 dir 目錄內所有 org")
+    parser.add_argument("-d", "--dirs", type=Path, nargs="+", help="輸入 dir 目錄內所有 org")
     parser.add_argument('-n', '--node', type=int, help='指定要處理之節點')
     parser.add_argument("-w", "--docx", action='store_true', help="匯出成 docx")
     parser.add_argument("-t", "--todo", action='store_true', help="列出待辦事項")
@@ -190,8 +195,8 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
     elif args.todo:
-        if args.dir and args.dir.is_dir():
-            todos = 取待辦事項(args.dir)
+        if args.dirs:
+            todos = 取待辦事項(args.dirs)
         else:
             todos = 取待辦事項(Path.cwd())
         表示(todos)
