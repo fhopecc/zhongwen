@@ -16,6 +16,9 @@ class Test(unittest.TestCase):
                          取路徑(orgmode_path)[0].group())
         self.assertEqual(2,取路徑(orgmode_path)[0].start())
         self.assertEqual(41,取路徑(orgmode_path)[0].end())
+        pathes = r'c:\abc\def d:\def.txt e:\abcd\d1\c.txt' 
+        self.assertEqual(r'e:\abcd\d1\c.txt', 取路徑(pathes, 23))
+        self.assertEqual('', 取路徑(pathes, 40))
 
     def test轉樣式表字串(self):
         from zhongwen.text import 轉樣式表字串

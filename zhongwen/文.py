@@ -241,12 +241,21 @@ def geturl(文):
     else:
         return ''
 
-def 取路徑(文):
-    # 這個 Pattern 考慮了磁碟代號、反斜線以及路徑中可能存在的空白
-    # r'...' 代表原始字串，避免反斜線被 Python 轉義
+def 取路徑(文, 光標位置=None):
+    '''
+    一、取單行字串中路徑。
+    二、支援 orgmode link 語法，不比對包含 ] 之路徑。
+    三、指定游標欄號為數值，僅傳回欄號下之路徑。
+    '''
     import re
     pattern = r'[a-zA-Z]:\\(?:[^]\\\/:*?"<>|\r\n]+\\)*[^]\\\/:*?"<>|\r\n]*'
-    return list(re.finditer(pattern, 文))
+    if not 光標位置:
+        return list(re.finditer(pattern, 文))
+    for m in re.finditer(pattern, 文):
+        start, end = m.span()
+        if start <= 光標位置 < end:
+            return m.group(0)
+    return ''
 
 def 刪除空行(文):
     return "\n".join(line for line in 文.splitlines() if line.strip())
