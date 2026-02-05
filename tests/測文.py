@@ -9,6 +9,13 @@ class Test(unittest.TestCase):
         self.assertEqual('https://news.ltn.com.tw/news/Hualien/breakingnews/5256071', 
                          geturl(orgmode_url))
 
+    def test取路徑(self):
+        from zhongwen.文 import 取路徑
+        orgmode_path = r'[[g:\我的雲端硬碟\文件\用品說明書\汽車CCrossHV2025手冊.pdf][說明書]'
+        self.assertEqual(r'g:\我的雲端硬碟\文件\用品說明書\汽車CCrossHV2025手冊.pdf', 
+                         取路徑(orgmode_path)[0].group())
+        self.assertEqual(2,取路徑(orgmode_path)[0].start())
+        self.assertEqual(41,取路徑(orgmode_path)[0].end())
 
     def test轉樣式表字串(self):
         from zhongwen.text import 轉樣式表字串
@@ -215,5 +222,5 @@ if __name__ == '__main__':
     logging.getLogger('faker').setLevel(logging.CRITICAL)
     # unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test_geturl'))
+    suite.addTest(Test('test取路徑'))
     unittest.TextTestRunner().run(suite)

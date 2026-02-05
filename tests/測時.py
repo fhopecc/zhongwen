@@ -5,6 +5,7 @@ class Test(unittest.TestCase):
     def test(self):
         from zhongwen.時 import 取時間, 一分鐘
         from zhongwen.時 import 取日期, 今日, 取小寫民國日期
+        from zhongwen.時 import 取正式民國日期
         from pandas import Timestamp, Timedelta
         from datetime import datetime, date
         import pandas as pd
@@ -12,7 +13,7 @@ class Test(unittest.TestCase):
         昨今合計加五小時待補加分鐘數 = 5*60 - ms
         今加班截止時間 = 取時間('14:11') + 昨今合計加五小時待補加分鐘數 * 一分鐘 
         print(今加班截止時間)
-        self.assertEqual(取時間('14:38'), Timestamp('14:37'))
+        self.assertEqual(取時間('14:38'), Timestamp('14:38'))
         self.assertEqual(取日期('1121231'), Timestamp('2023-12-31'))
         self.assertEqual(取日期("'24/01/19"), Timestamp(2024,1,19))
         self.assertEqual(取日期('2022/6/3 上午 12:00:00'), Timestamp(2022,6,3) )
@@ -47,6 +48,7 @@ class Test(unittest.TestCase):
 
         self.assertEqual(今日, Timestamp.today().normalize())
         self.assertEqual(取小寫民國日期('115年1月24日'), '一月二十四日')
+        self.assertEqual(取正式民國日期('115年2月4日', 含星期=True), '115年2月4日(三)')
 
     def test取期間(self):
         from zhongwen.時 import 取期間, 取民國期間

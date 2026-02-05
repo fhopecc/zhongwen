@@ -241,6 +241,13 @@ def geturl(文):
     else:
         return ''
 
+def 取路徑(文):
+    # 這個 Pattern 考慮了磁碟代號、反斜線以及路徑中可能存在的空白
+    # r'...' 代表原始字串，避免反斜線被 Python 轉義
+    import re
+    pattern = r'[a-zA-Z]:\\(?:[^]\\\/:*?"<>|\r\n]+\\)*[^]\\\/:*?"<>|\r\n]*'
+    return list(re.finditer(pattern, 文))
+
 def 刪除空行(文):
     return "\n".join(line for line in 文.splitlines() if line.strip())
 

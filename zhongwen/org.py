@@ -1,10 +1,19 @@
+def 取排程表達文字(dl):
+    from zhongwen.時 import 取正式民國日期
+    import pandas as pd
+    tstr = ''
+    if dl:
+        tstr += 取正式民國日期(dl.start, 含星期=True)
+        if dl.has_time():
+            tstr += f'{dl.start:%H:%M}-{dl.end:%H:%M}'
+    return tstr
 def 取待辦事項(ds):
     '''
     一、取目錄下所有 org 之待辦事項。
     二、欄位：狀態、標題、期限
     三、按期限先後排序。
     '''
-    from zhongwen.時 import 取民國日期
+    from zhongwen.時 import 取正式民國日期, 取日期
     from tabulate import tabulate
     import pandas as pd
     import orgparse
@@ -12,7 +21,7 @@ def 取待辦事項(ds):
     if isinstance(ds, str) or not isinstance(ds, Iterable):
         ds = [ds]
     
-    表頭 = ['狀態', '標題', '期限']
+    表頭 = ['狀態', '標題', '期限', '排程']
     表身 = []
     for d in ds:
         for org in d.glob(r'**\*.org'):
@@ -23,12 +32,18 @@ def 取待辦事項(ds):
                     # 提取資訊
                     status = node.todo          # 例如: TODO, DONE, STARTED
                     title = node.heading        # 標題內容
-                    deadline = 取民國日期(node.deadline.start) if node.deadline else None
+                    deadline = node.deadline
+                    scheduled = node.scheduled
                     tags = node.tags            # 標籤集合 (set)
                     priority = node.priority    # 優先級 (A, B, C)
-                    表身.append([status, title[:35], deadline])  
+                    表身.append([status, title[:35], deadline, scheduled])  
     df = pd.DataFrame(表身, columns=表頭)
-    df = df.sort_values('期限')
+    df['key'] = df.期限.map(lambda d: 取日期(d.start, 無效值以今日填補=False)).fillna(
+            df.排程.map(lambda d:取日期(d.start, 無效值以今日填補=False)))
+    df = df.sort_values('key')
+    del df['key']
+    df['期限']= df.期限.map(取排程表達文字)
+    df['排程']= df.排程.map(取排程表達文字)
     return df
 
 def 顯示待辦事項(org):
@@ -198,7 +213,7 @@ if __name__ == '__main__':
             todos = 取待辦事項(args.dirs)
         else:
             todos = 取待辦事項(Path.cwd())
-        表示(todos)
+        表示(todos, 顯示索引=False)
     elif f := args.file:
         if args.docx:
             if args.node:

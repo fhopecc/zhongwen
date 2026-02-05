@@ -223,7 +223,6 @@ def 表示(df
         df = df.dropna(axis='columns', how='all')
         if not df.index.is_unique:
             df = df.reset_index(drop=True)
-
     try:
         if df.empty:
             logger.error('空表')

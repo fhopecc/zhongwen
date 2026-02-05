@@ -26,10 +26,13 @@ def 是工作日(日期):
     import holidays
     return 日期.weekday() < 5 and 日期 not in holidays.Taiwan()
 
-def 取日期(日期=None):
+def 取日期(日期=None, 無效值以今日填補=True):
     from zhongwen.date import 取日期
     if not 日期:
-        return pd.Timestamp.today().normalize()
+        if 無效值以今日填補:
+            return pd.Timestamp.today().normalize()
+        else:
+            return pd.NaT
     return 取日期(日期)
 
 def 取期間(期間, 全取=False):
@@ -200,14 +203,18 @@ def 取民國年數(日期=None):
     d = 取日期(日期)
     return d.year - 1911
 
-def 取正式民國日期(d=None):
+def 取正式民國日期(d=None, 含星期=False):
     '格式如：112年7月29日'
+    from zhongwen.數 import 取中文數字
     import pandas as pd
     if not d:
         d = 今日
     if isinstance(d, pd.Period):
         d = d.end_time.normalize()
-    return 取民國日期(d, "%Y年%M月%D日")
+    正式民國日期 = 取民國日期(d, "%Y年%M月%D日")
+    if 含星期:
+        正式民國日期 += f'({取中文數字(取日期(d).dayofweek+1)})'
+    return 正式民國日期
 
 def 取小寫民國日期(日期, 本年度省略年=True):
     '''
