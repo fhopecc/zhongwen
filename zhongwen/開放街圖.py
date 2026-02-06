@@ -4,10 +4,17 @@ cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 
 @cache.memoize('取路段')
 def 取路段(地區="花蓮縣, 臺灣"):
-    'crs=3826'
+    '''
+    一、路段名係為 name(ref) 字串，name 是一般名稱，ref 係官方道路編號，舉如：
+        花東縱谷公路係一般名稱，其道路編號係臺9線。
+    二、座標系為 EPSG 4326。
+    '''
+    from zhongwen.文 import 臚列
     import osmnx as ox
     graph = ox.graph_from_place(地區, network_type='drive')
-    edges = ox.graph_to_gdfs(graph, nodes=False).to_crs(epsg=3826)
+    edges = ox.graph_to_gdfs(graph, nodes=False)
+    edges['路段名'] = edges.name.map(臚列) + edges.ref.map(臚列).map(
+            lambda s: f'({s})' if s else '')
     return edges
 
 def 取鄉鎮市(緯度, 經度):

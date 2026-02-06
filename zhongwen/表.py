@@ -5,6 +5,9 @@ import logging
 logger = logging.getLogger(Path(__file__).stem)
 
 def 取數據輪廓(df):
+    '''
+    一、前五多值：係該欄位出現次數前五高值、次數及百分比。
+    '''
     import pandas as pd
     import numpy as np
     import pathlib
@@ -12,13 +15,15 @@ def 取數據輪廓(df):
     from datetime import datetime
     results = []
     def get_top_n(series, n=5):
-            """計算前 N 名出現頻率最高的數值與次數"""
+            """計算前 N 名出現頻率最高的數值、次數及百分比"""
             # 排除空值後進行計數
+            total = series.count()
             counts = series.value_counts().head(n)
             if counts.empty:
                 return "-"
-            # 格式化為 "值:次數" 的字串列表
-            return r"<br/>".join([f"{str(val)[:10]}:{count}" for val, count in counts.items()])
+            # 格式化為 "值:次數(百分比％)" 的字串列表
+            return r"<br/>".join([f"{str(val)[:10]}：{count}件({count/total:.0%})" 
+                                  for val, count in counts.items()])
     for col in df.columns:
         series = df[col]
         # 基礎資訊
@@ -34,7 +39,7 @@ def 取數據輪廓(df):
             "總筆數": len(df),
             "空值數": series.isnull().sum(),
             "唯一值數": 唯一值數,
-            "前五高頻值(值:次數)": get_top_n(series, 5)
+            "前五多值[值:次數(%)]": get_top_n(series, 5)
         }
 
         # 數值型分析 (Numeric)
@@ -190,6 +195,7 @@ def 表示(df
     '''
     一、字串視為超文件檔案直接顯示；序列、系列、集合、陣列及資料框以表格顯示。
     二、如設不顯示，傳回樣式及可顯示資料框，可顯示資料框用來設定工具提示。
+    二、原始資料是原始傳入之數據。
     '''
     from pathlib import Path
     import pandas as pd
@@ -237,12 +243,11 @@ def 表示(df
         df.reset_index(drop=True, inplace=True)
     df.columns.name = '編號'
     df.index = df.index+1
-
+    原始資料 = df
     df.dropna(how='all')
     df.dropna(how='all', axis=1)
-
     df = df.head(顯示筆數)
-    odf = df
+    odf = df 
     for c in 實數欄位+百分比欄位+整數欄位:
         df[c] = pd.to_numeric(df[c])
     if 無格式:
@@ -309,7 +314,7 @@ def 表示(df
     with tempfile.TemporaryDirectory() as tmpdirname:
         html = os.path.join(tmpdirname, "tempfile.html")
         html_content = df.to_html(classes='data-table', index=False)
-        desc = 取數據輪廓(可顯示資料框)
+        desc = 取數據輪廓(原始資料)
         desc = 表示(desc.fillna(0), 顯示索引=False, 不顯示=True)[0]
         html_describe = desc.to_html(
                 classes='describe-table'

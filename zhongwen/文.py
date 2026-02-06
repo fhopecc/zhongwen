@@ -265,11 +265,18 @@ def 刪除中文字間空白(文):
     new_text = re.sub(r'(?<=[\u4e00-\u9fff])\s+(?=[\u4e00-\u9fff])', '', 文)
     return new_text
 
-def 臚列(項目):
+def 臚列(清單):
     '''
     一、清單轉為一個臚列字串，形式如：["甲", "乙", "丙"] -> "甲、乙及丙"
     '''
-    項目 = [str(i) for i in 項目]
+    from collections.abc import Iterable 
+    import pandas as pd
+    if not isinstance(清單, Iterable) and pd.isna(清單):
+        return ''
+    if isinstance(清單, str) or not isinstance(清單, Iterable):
+        清單 = [清單]
+    
+    項目 = [str(i) for i in 清單 if pd.notna(i)]
     try:
         if type(項目) == list:
             if len(項目) > 1:
