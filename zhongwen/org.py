@@ -7,6 +7,7 @@ def 取排程表達文字(dl):
         if dl.has_time():
             tstr += f'{dl.start:%H:%M}-{dl.end:%H:%M}'
     return tstr
+
 def 取待辦事項(ds):
     '''
     一、取目錄下所有 org 之待辦事項。
@@ -195,8 +196,10 @@ def org2docx(org, 節點序號=0):
     os.system(f'start {docx}')
 
 if __name__ == '__main__':
+    from fhopecc.洄瀾打狗人札記 import 張貼
     from zhongwen.表 import 表示
     from pathlib import Path
+    import socket
     import argparse
     import sys
     parser = argparse.ArgumentParser()
@@ -213,7 +216,10 @@ if __name__ == '__main__':
             todos = 取待辦事項(args.dirs)
         else:
             todos = 取待辦事項(Path.cwd())
-        表示(todos, 顯示索引=False)
+        # 表示(todos, 顯示索引=False)
+        df, _ = 表示(todos, 顯示索引=False, 不顯示=True)
+        if socket.gethostname() == 'LAPTOP-6J3H5COA':
+            張貼('待辦事項', df.to_html())
     elif f := args.file:
         if args.docx:
             if args.node:
