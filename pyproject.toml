@@ -69,6 +69,7 @@ dependencies = ['aiofiles'
                ,"selenium"
                ,'sympy'
                ,'tabulate'
+               ,'tkcalendar'
                ,'torch'
                ,'torchvision'
                ,'torchaudio'
