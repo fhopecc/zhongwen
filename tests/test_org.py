@@ -9,9 +9,9 @@ class Test(unittest.TestCase):
         from pathlib import Path            
         import os
         # org = Path(r'g:\我的雲端硬碟\00.115-1警察局114年度決算抽查114.12.22-115.1.6\04.道安專調底稿115年4月15日查復\道安查核紀錄.org')
-        # d = Path(r'g:\我的雲端硬碟')
-        # 表示(取待辦事項(d), 顯示索引=False)
-        os.system('py -m zhongwen.org -t -d G:\我的雲端硬碟') 
+        d = Path(r'g:\我的雲端硬碟')
+        表示(取待辦事項(d), 顯示索引=False)
+        # os.system('py -m zhongwen.org -t -d G:\我的雲端硬碟') 
         # 顯示所有待辦事項(d)
  
 if __name__ == '__main__':

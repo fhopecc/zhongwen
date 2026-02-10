@@ -12,7 +12,8 @@ def 取待辦事項(ds):
     '''
     一、取目錄下所有 org 之待辦事項。
     二、欄位：狀態、標題、期限
-    三、按期限先後排序。
+    二、僅取狀態為 TODO 者。
+    三、按優先級及期限排序。
     '''
     from zhongwen.時 import 取正式民國日期, 取日期
     from tabulate import tabulate
@@ -22,7 +23,7 @@ def 取待辦事項(ds):
     if isinstance(ds, str) or not isinstance(ds, Iterable):
         ds = [ds]
     
-    表頭 = ['狀態', '標題', '期限', '排程']
+    表頭 = ['狀態', '標題', '優先級','期限', '排程', '首未完成項目']
     表身 = []
     for d in ds:
         for org in d.glob(r'**\*.org'):
@@ -32,45 +33,37 @@ def 取待辦事項(ds):
                 if node.todo:
                     # 提取資訊
                     status = node.todo          # 例如: TODO, DONE, STARTED
+                    if status == 'DONE':
+                        continue
                     title = node.heading        # 標題內容
                     deadline = node.deadline
                     scheduled = node.scheduled
                     tags = node.tags            # 標籤集合 (set)
                     priority = node.priority    # 優先級 (A, B, C)
-                    表身.append([status, title[:35], deadline, scheduled])  
+                    首未完成項目 = 取首未完成項目(node)
+                    表身.append([status, title[:35], priority
+                                ,deadline, scheduled
+                                ,首未完成項目])  
     df = pd.DataFrame(表身, columns=表頭)
     df['key'] = df.期限.map(lambda d: 取日期(d.start, 無效值以今日填補=False)).fillna(
             df.排程.map(lambda d:取日期(d.start, 無效值以今日填補=False)))
-    df = df.sort_values('key')
+    df = df.sort_values(['優先級', 'key'])
     del df['key']
     df['期限']= df.期限.map(取排程表達文字)
     df['排程']= df.排程.map(取排程表達文字)
     return df
 
-def 顯示待辦事項(org):
-    '顯示指定 org 之待辦事項'
-    from tabulate import tabulate
-    from zhongwen.時 import 取民國日期
-    import orgparse
-
-    表頭 = ['狀態', '標題', '期限']
-    表身 = []
-
-    data = orgparse.load(org)
-    for node in data[1:]: # 遍歷所有點
-        # 檢查是否為具 TODO 狀態之點)
-        if node.todo:
-            # 提取資訊
-            status = node.todo          # 例如: TODO, DONE, STARTED
-            title = node.heading        # 標題內容
-            deadline = 取民國日期(node.deadline.start) if node.deadline else None
-            tags = node.tags            # 標籤集合 (set)
-            priority = node.priority    # 優先級 (A, B, C)
-
-            # deadline_str = str(deadline.start) if deadline else "未設定"
-            表身.append([status, title[:10], deadline])  
-    print(tabulate(表身, 表頭))
-
+def 取首未完成項目(node):
+    # 1. 取得 Body 並拆分成行
+    lines = node.body.splitlines()
+    first_item = ''
+    # 2. 逐行尋找未完成項目 [ ]
+    for line in lines:
+        clean_line = line.lstrip() # 只修剪左側空格
+        # 檢查常見的 Org 清單符號
+        if clean_line.startswith(("- [ ]", "+ [ ]", "* [ ]")):
+            # 取得 [ ] 之後的文字內容
+            return clean_line.split("[ ]", 1)[1].strip()
 
 def 取超文本(org, 預覽=True) -> str: 
     '''
