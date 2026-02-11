@@ -320,6 +320,48 @@ def 取季別年數季數(季別):
         季別 = 取期間(季別)
     return 季別.year, 季別.quarter
 
+def 擇日():
+    '''
+    一、跳出日曆選單點選日期。
+    '''
+    from tkcalendar import Calendar
+    import tkinter as tk
+    import pandas as pd
+   
+    root = tk.Tk()
+    root.title("擇日")
+    # 視窗置頂
+    root.attributes('-topmost', True)
+    MY_FONT = ("Arial", 16)
+    cal = Calendar(root, selectmode='day', date_pattern='y-mm-dd',
+                   font=MY_FONT, 
+                   headersfont=MY_FONT,
+                   rowheight=40) # 增加行高以容納較大的字
+    cal.pack(padx=20, pady=20)
+    picked_date = pd.NaT
+    def on_ok():
+        try:
+            nonlocal picked_date
+            date_str = cal.get_date()
+            picked_date = 取日期(date_str)
+        except Exception as e:
+            logger.error(e)
+        root.quit()
+        root.destroy()
+
+    # 點擊視窗右上角 X 關閉
+    root.protocol("WM_DELETE_WINDOW", lambda: root.destroy())
+
+    btn = tk.Button(root, text="擇定", command=on_ok)
+    btn.pack(pady=5)
+    
+    # 綁定 Enter 鍵，注意 lambda 要能接收 event
+    root.bind('<Return>', lambda e: on_ok())
+    
+    # 執行視窗主循環（阻塞直到視窗關閉）
+    root.mainloop()
+    return picked_date
+
 一日 = pd.Timedelta(days=1)
 一週 = pd.Timedelta(days=7)
 一月 = pd.DateOffset(months=1)

@@ -3,7 +3,7 @@ import unittest
 class Test(unittest.TestCase):
 
     def test(self):
-        from zhongwen.時 import 取時間, 一分鐘
+        from zhongwen.時 import 取時間, 一分鐘, 擇日
         from zhongwen.時 import 取日期, 今日, 取小寫民國日期
         from zhongwen.時 import 取正式民國日期
         from pandas import Timestamp, Timedelta
@@ -49,6 +49,9 @@ class Test(unittest.TestCase):
         self.assertEqual(今日, Timestamp.today().normalize())
         self.assertEqual(取小寫民國日期('115年1月24日'), '一月二十四日')
         self.assertEqual(取正式民國日期('115年2月4日', 含星期=True), '115年2月4日(三)')
+
+        d = 擇日()
+        print(d)
 
     def test取期間(self):
         from zhongwen.時 import 取期間, 取民國期間
