@@ -1,3 +1,76 @@
+
+def 排日程(ds):
+    from collections import defaultdict
+    from collections.abc import Iterable 
+    from zhongwen.時 import 今日, 取日期, 取正式民國日期
+    from orgparse import load
+    import os
+    if isinstance(ds, str) or not isinstance(ds, Iterable):
+        ds = [ds]
+    ds = [str(d) for d in ds]
+    daily_tasks = defaultdict(list)
+    overdue_tasks = defaultdict(list)
+    no_date_tasks = []
+    # 1. 資料抓取與解析
+    for abs_target_dir in ds:
+        for root, dirs, files in os.walk(os.path.abspath(abs_target_dir)):
+            for file in files:
+                if file.endswith(".org"):
+                    path = os.path.join(root, file)
+                    root_node = load(path)
+                    for node in root_node[1:]:
+                        if node.todo:
+                            date_obj = node.deadline.start if node.deadline else \
+                                       (node.scheduled.start if node.scheduled else None)
+                            
+                            task_info = {
+                                "title": node.get_heading(),
+                                "link": f"[[file:{path}::*{node.get_heading()}]]",
+                                "priority": node.priority or "B",
+                                "status": node.todo,
+                                "file": file,
+                            }
+
+                            if date_obj:
+                                date_str = date_obj.strftime("%Y-%m-%d %A")
+                                if 取日期(date_obj) < 今日:
+                                    overdue_tasks[date_str].append(task_info)
+                                else:
+                                    daily_tasks[date_str].append(task_info)
+                            else:
+                                no_date_tasks.append(task_info)
+
+    # 2. 字串構建 (使用 List 效率較高)
+    lines = []
+    lines.append(f"#+TITLE: {取正式民國日期()}日程表\n")
+    # 逾期
+    lines.append(f"* 逾期")
+    for date in sorted(overdue_tasks.keys()):
+        lines.append(f"** {date}")
+        # 同日任務按優先級排序
+        sorted_day_tasks = sorted(overdue_tasks[date], key=lambda x: x["priority"])
+        for task in sorted_day_tasks:
+            lines.append(f"  - {task['status']} [# {task['priority']}] {task['link']}")
+        lines.append("") # 換行美化
+
+    lines.append(f"* 日程")
+    for date in sorted(daily_tasks.keys()):
+        lines.append(f"** {date}")
+        # 同日任務按優先級排序
+        sorted_day_tasks = sorted(daily_tasks[date], key=lambda x: x["priority"])
+        for task in sorted_day_tasks:
+            lines.append(f"  - {task['status']} [# {task['priority']}] {task['link']}")
+        lines.append("") # 換行美化
+
+    lines.append("* 待辦")
+    if no_date_tasks:
+        sorted_backlog = sorted(no_date_tasks, key=lambda x: x["priority"])
+        for task in sorted_backlog:
+            lines.append(f"  - {task['status']} [# {task['priority']}] {task['link']}")
+
+    # 3. 合併並回傳
+    return "\n".join(lines)
+
 def 取排程表達文字(dl):
     from zhongwen.時 import 取正式民國日期
     import pandas as pd
@@ -209,7 +282,7 @@ if __name__ == '__main__':
             todos = 取待辦事項(args.dirs)
         else:
             todos = 取待辦事項(Path.cwd())
-        # 表示(todos, 顯示索引=False)
+        表示(todos, 顯示索引=False)
         df, _ = 表示(todos, 顯示索引=False, 不顯示=True)
         if socket.gethostname() == 'LAPTOP-6J3H5COA':
             張貼('待辦事項', df.to_html())
@@ -221,3 +294,5 @@ if __name__ == '__main__':
                 org2docx(f)
         else:
             取超文本(f)
+
+
