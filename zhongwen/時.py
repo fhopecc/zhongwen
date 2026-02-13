@@ -213,7 +213,7 @@ def 取正式民國日期(d=None, 含星期=False):
         d = d.end_time.normalize()
     正式民國日期 = 取民國日期(d, "%Y年%M月%D日")
     if 含星期:
-        正式民國日期 += f'({取中文數字(取日期(d).dayofweek+1)})'
+        正式民國日期 += f'({取中文數字(取日期(d).dayofweek+1).replace("七", "日")})'
     return 正式民國日期
 
 def 取小寫民國日期(日期, 本年度省略年=True):

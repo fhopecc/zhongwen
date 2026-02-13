@@ -8,6 +8,31 @@ cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 倉頡字根表 = str.maketrans("abcdefghijklmnopqrstuvwxy"
                           ,"日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜" )
 
+def 取行內連結(行):
+    '''
+    一、取單行字串之首個連結。
+    二、連結係指參照到某個位置。
+    三、傳回類型、路徑、定位點
+    三、類型：檔案搜尋連結。
+    '''
+    import re
+    import os
+
+    # 檔案搜尋連結
+    pattern = r"\[\[file:(.*?)::\*(.*?)\](\[.*\])?\]"
+    match = re.search(pattern, 行)
+    if match:
+        full_path = match.group(1)
+        search_target = match.group(2)
+        # 使用 os.path.basename 取得純檔名
+        file_name = os.path.basename(full_path)
+        return {"類型":"檔案搜尋連結"
+               ,"路徑": full_path
+               ,"定位點": f"{search_target}" # 保留原本要求的星號
+        }
+    else:
+        return None
+
 def 清理中文空格(text):
     import re
     return re.sub(r'(?<=[\u4e00-\u9fa5])[ \u3000]+(?=[\u4e00-\u9fa5])', '', text)   

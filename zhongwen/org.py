@@ -19,18 +19,17 @@ def 排日程(ds):
                     path = os.path.join(root, file)
                     root_node = load(path)
                     for node in root_node[1:]:
-                        if node.todo:
+                        if node.todo == "TODO":
                             date_obj = node.deadline.start if node.deadline else \
                                        (node.scheduled.start if node.scheduled else None)
                             
                             task_info = {
                                 "title": node.get_heading(),
-                                "link": f"[[file:{path}::*{node.get_heading()}]]",
+                                "link": f"[[file:{path}::*{node.get_heading()}][{node.get_heading()}]]",
                                 "priority": node.priority or "B",
                                 "status": node.todo,
                                 "file": file,
                             }
-
                             if date_obj:
                                 date_str = date_obj.strftime("%Y-%m-%d %A")
                                 if 取日期(date_obj) < 今日:
@@ -42,11 +41,11 @@ def 排日程(ds):
 
     # 2. 字串構建 (使用 List 效率較高)
     lines = []
-    lines.append(f"#+TITLE: {取正式民國日期()}日程表\n")
+    lines.append(f"#+TITLE: {取正式民國日期(含星期=True)}日程表\n")
     # 逾期
     lines.append(f"* 逾期")
     for date in sorted(overdue_tasks.keys()):
-        lines.append(f"** {date}")
+        lines.append(f"** {取正式民國日期(date, 含星期=True)}")
         # 同日任務按優先級排序
         sorted_day_tasks = sorted(overdue_tasks[date], key=lambda x: x["priority"])
         for task in sorted_day_tasks:
@@ -55,7 +54,7 @@ def 排日程(ds):
 
     lines.append(f"* 日程")
     for date in sorted(daily_tasks.keys()):
-        lines.append(f"** {date}")
+        lines.append(f"** {取正式民國日期(date, 含星期=True)}")
         # 同日任務按優先級排序
         sorted_day_tasks = sorted(daily_tasks[date], key=lambda x: x["priority"])
         for task in sorted_day_tasks:

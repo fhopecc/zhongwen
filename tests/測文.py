@@ -10,7 +10,7 @@ class Test(unittest.TestCase):
                          geturl(orgmode_url))
 
     def test取路徑(self):
-        from zhongwen.文 import 取路徑
+        from zhongwen.文 import 取路徑, 取行內連結
         orgmode_path = r'[[g:\我的雲端硬碟\文件\用品說明書\汽車CCrossHV2025手冊.pdf][說明書]'
         self.assertEqual(r'g:\我的雲端硬碟\文件\用品說明書\汽車CCrossHV2025手冊.pdf', 
                          取路徑(orgmode_path)[0].group())
@@ -19,6 +19,20 @@ class Test(unittest.TestCase):
         pathes = r'c:\abc\def d:\def.txt e:\abcd\d1\c.txt' 
         self.assertEqual(r'e:\abcd\d1\c.txt', 取路徑(pathes, 23))
         self.assertEqual('', 取路徑(pathes, 40))
+        link = r"- TODO [#B] [[file:g:\我的雲端硬碟\文件\理財.org::*信用卡消費優惠比較][信用卡消費優惠比較]]"
+        link = 取行內連結(link)
+        print(link)
+        self.assertEqual(link['類型'], '檔案搜尋連結')
+        self.assertEqual(link['路徑'], r'g:\我的雲端硬碟\文件\理財.org')
+        self.assertEqual(link['定位點'], '信用卡消費優惠比較')
+
+
+
+        link = r"- TODO [# A] [[file:g:\我的雲端硬碟\00.115-1警察局114年度決算抽查114.12.22-115.1.6\04.道安專調底稿115年4月15日查復\道安查核紀錄.org::*彙辦報告]]"
+        link = 取行內連結(link)
+        self.assertEqual(link['類型'], '檔案搜尋連結')
+        self.assertEqual(link['路徑'], r'g:\我的雲端硬碟\00.115-1警察局114年度決算抽查114.12.22-115.1.6\04.道安專調底稿115年4月15日查復\道安查核紀錄.org')
+        self.assertEqual(link['定位點'], '彙辦報告')
 
     def test轉樣式表字串(self):
         from zhongwen.text import 轉樣式表字串
