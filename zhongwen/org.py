@@ -137,7 +137,7 @@ def 取首未完成項目(node):
             # 取得 [ ] 之後的文字內容
             return clean_line.split("[ ]", 1)[1].strip()
 
-def 取超文本(org, 預覽=True) -> str: 
+def 取超文本(org, 預覽=True, 不補全完整超文本格式=False) -> str: 
     '''
     一、傳回表達指定 org 文件之超文本字串。
     二、預設以系統browser預覽。
@@ -159,6 +159,9 @@ def 取超文本(org, 預覽=True) -> str:
                                ,text=True
                                ,check=True
                                ,encoding='utf-8')
+
+        if 不補全完整超文本格式: return result.stdout
+
         內容 = f'''<html>
 </head>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7516968926110807" crossorigin="anonymous"></script>

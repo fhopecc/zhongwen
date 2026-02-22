@@ -70,8 +70,6 @@ def tesseract(png):
 def 取圖內文(圖檔):
     return tesseract(圖檔)
 
-
-
 待識圖目錄 = Path(os.environ['TEMP']) / 'to_ocr'
 
 def 截圖辨字():

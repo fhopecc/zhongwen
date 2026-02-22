@@ -21,10 +21,22 @@ class Test(unittest.TestCase):
         r = 取年報摘要(c)[:200]
         print(r)
 
-    def test詢問(self):
-        from zhongwen.智 import 詢問
-        詢問('富林-KY市占率、主要營收組成、主要客戶占比、外銷占比、主要競爭對手及最近財報分析')
-        
+    def test諮詢(self):
+        from zhongwen.智 import 諮詢
+        問題 = ('我有台新 Richard 卡、台新大全聯卡、玉山unicard、玉山數位保險卡、'
+                '中信中油卡、中信和泰卡、富邦momo卡'
+                '等，請比較以上卡片繳保費優惠。'
+               )
+        回答 = 諮詢(問題, '')
+        對話歷史 = (f'user: {問題}\n'
+                    f'model: {回答}')
+        問題 = "請簡化成一張表"
+        回答 = 諮詢新(問題, 對話歷史)
+        對話歷史 += (f'\nuser: {問題}\n'
+                     f'model: {回答}')
+        from zhongwen.表 import 表示
+        表示(對話歷史)
+
     def test諮詢谷歌雙子星(self):
         from zhongwen.智 import 諮詢谷歌雙子星
         from clipboard import copy 
@@ -39,5 +51,5 @@ if __name__ == '__main__':
     # unittest.main()
     suite = unittest.TestSuite()
     # suite.addTest(Test('test取年報摘要'))
-    suite.addTest(Test('test詢問'))
+    suite.addTest(Test('test諮詢'))
     unittest.TextTestRunner().run(suite)

@@ -100,6 +100,62 @@ def 諮詢智譜(問題):
     except Exception as e:
         print(f"發生錯誤: {e}")
 
+def 諮詢(問題, 對話歷史=''):
+    from google import genai
+    from google.genai.types import (
+        GenerateContentConfig,
+        GoogleSearch,
+        HttpOptions,
+        Tool,
+    )
+    from fhopecc import 金鑰
+    服務金鑰 = 金鑰.__gemini_api_key__
+    client = genai.Client(api_key=服務金鑰)
+    MODEL_ID="gemini-2.5-flash"
+
+    def process_history_and_summarize():
+        """讀取歷史紀錄，若超過 10 項則進行摘要並重寫檔案"""
+        lines = 對話歷史.splitlines()
+
+        # 計算對話組數（一組包含 使用者 + Gemini，所以行數除以 2）
+        # 這裡簡單判定：每行如果是以「使用者: 」開頭算一項
+        user_entries = [l for l in lines if l.startswith("使用者: ")]
+        
+        if len(user_entries) > 10:
+            print(f">> 偵測到歷史紀錄已有 {len(user_entries)} 項，正在自動摘要...")
+            full_history = "".join(lines)
+            
+            # 請求摘要（不使用搜尋，單純總結）
+            summary_response = client.models.generate_content(
+                model=MODEL_ID,
+                contents=f"請將以下對話紀錄總結成一段簡短的純文字背景摘要：\n\n{full_history}",
+                config=GenerateContentConfig(system_instruction="你是一個摘要助手，只輸出純文字。")
+            )
+            
+            summary_text = f"[前情提要摘要]: {summary_response.text.strip()}\n"
+            return summary_text
+        return "".join(lines)
+
+    完整問題 = 問題
+    if (對話歷史 := process_history_and_summarize()):
+        完整問題 = f'{對話歷史}\n以上是歷史對話，問題如次：\n{問題}' 
+    
+    response = client.models.generate_content(
+        model=MODEL_ID,
+        contents=完整問題,
+        config=GenerateContentConfig(
+            system_instruction=(
+                "你是一個純文字助手。"
+                "嚴禁使用任何 Markdown 格式（如 **、#、```）。"
+                "請直接輸出文字內容。",
+            ),
+            tools=[
+                Tool(google_search=GoogleSearch())
+            ],
+        ),
+    )
+    return response.text
+
 def 諮詢谷歌雙子星(問題, 服務金鑰=None, 不輸出回答=False):
     from clipboard import copy
     from google import genai
@@ -136,6 +192,7 @@ def 諮詢谷歌雙子星(問題, 服務金鑰=None, 不輸出回答=False):
 
 def 詢問(問題, 服務金鑰=None, 不輸出回答=False):
     return 諮詢谷歌雙子星(問題, 服務金鑰=None, 不輸出回答=不輸出回答)
+
 
 def 取搜尋連結(字串):
     '取字串的 Google 搜尋連結'
