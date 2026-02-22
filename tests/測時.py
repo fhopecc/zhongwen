@@ -9,10 +9,9 @@ class Test(unittest.TestCase):
         from pandas import Timestamp, Timedelta
         from datetime import datetime, date
         import pandas as pd
-        ms = (取時間('17:26') - 取時間('14:38')) / 一分鐘
-        昨今合計加五小時待補加分鐘數 = 5*60 - ms
-        今加班截止時間 = 取時間('14:11') + 昨今合計加五小時待補加分鐘數 * 一分鐘 
+        今加班截止時間 = 取時間('14:23') + (60*3-32)* 一分鐘 
         print(今加班截止時間)
+        self.assertFalse(True)
         self.assertEqual(取時間('14:38'), Timestamp('14:38'))
         self.assertEqual(取日期('1121231'), Timestamp('2023-12-31'))
         self.assertEqual(取日期("'24/01/19"), Timestamp(2024,1,19))

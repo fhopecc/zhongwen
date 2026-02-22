@@ -48,6 +48,8 @@ class FileLocation:
 
 def 最新檔(目錄, 檔案樣式="*"):
     import os
+    from pathlib import Path
+    目錄=Path(目錄)
     fs = [f for f in 目錄.glob(檔案樣式)]
     try:
         return max(fs, key=os.path.getmtime)
