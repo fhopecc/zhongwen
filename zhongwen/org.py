@@ -38,14 +38,12 @@ def 排日程(ds):
                                     daily_tasks[date_str].append(task_info)
                             else:
                                 no_date_tasks.append(task_info)
-
-    # 2. 字串構建 (使用 List 效率較高)
     lines = []
-    lines.append(f"#+TITLE: {取正式民國日期(含星期=True)}日程表\n")
+    lines.append(f"#+TITLE: {取正式民國日期(含星期=True)}日程表")
     # 逾期
     lines.append(f"* 逾期")
     for date in sorted(overdue_tasks.keys()):
-        lines.append(f"** {取正式民國日期(date, 含星期=True)}")
+        lines.append(f"- {取正式民國日期(date, 含星期=True)}")
         # 同日任務按優先級排序
         sorted_day_tasks = sorted(overdue_tasks[date], key=lambda x: x["priority"])
         for task in sorted_day_tasks:
@@ -54,20 +52,17 @@ def 排日程(ds):
 
     lines.append(f"* 日程")
     for date in sorted(daily_tasks.keys()):
-        lines.append(f"** {取正式民國日期(date, 含星期=True)}")
-        # 同日任務按優先級排序
+        lines.append(f"- {取正式民國日期(date, 含星期=True)}")
         sorted_day_tasks = sorted(daily_tasks[date], key=lambda x: x["priority"])
         for task in sorted_day_tasks:
             lines.append(f"  - {task['status']} [# {task['priority']}] {task['link']}")
-        lines.append("") # 換行美化
+        lines.append("")
 
     lines.append("* 待辦")
     if no_date_tasks:
         sorted_backlog = sorted(no_date_tasks, key=lambda x: x["priority"])
         for task in sorted_backlog:
-            lines.append(f"  - {task['status']} [# {task['priority']}] {task['link']}")
-
-    # 3. 合併並回傳
+            lines.append(f"- {task['status']} [# {task['priority']}] {task['link']}")
     return "\n".join(lines)
 
 def 取排程表達文字(dl):
@@ -297,4 +292,26 @@ if __name__ == '__main__':
         else:
             取超文本(f)
 
+def 標記完成(任務):
+    """
+    一、任務狀態由 TODO 轉為 DONE。
+    二、期限及排程時間戳記從活躍 <...> 轉為非活躍 [...]，同時加入 CLOSED 時間。
+    """
+    from datetime import datetime
+    import re
+    if isinstance(任務, list):
+        任務 = '\n'.join(任務)
+    now = datetime.now()
+    closed_timestamp = now.strftime("[%Y-%m-%d %a %H:%M]")
+    content = re.sub(r'^(\*+)\s+TODO', r'\1 DONE', 任務, flags=re.MULTILINE)
+    lines = content.splitlines()
+    if lines:
+        lines.insert(1, f"CLOSED: {closed_timestamp}")
+    content = "\n".join(lines)
 
+    def to_inactive(match):
+        prefix = match.group(1) # DEADLINE: 或 SCHEDULED:
+        timestamp = match.group(2) # 內部的日期字串
+        return f"{prefix} [{timestamp}]"
+    content = re.sub(r'(DEADLINE:|SCHEDULED:)\s+<([^>]+)>', to_inactive, content)
+    return content
