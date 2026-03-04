@@ -26,13 +26,17 @@ class Test(unittest.TestCase):
         self.assertEqual(link['路徑'], r'g:\我的雲端硬碟\文件\理財.org')
         self.assertEqual(link['定位點'], '信用卡消費優惠比較')
 
-
-
         link = r"- TODO [# A] [[file:g:\我的雲端硬碟\00.115-1警察局114年度決算抽查114.12.22-115.1.6\04.道安專調底稿115年4月15日查復\道安查核紀錄.org::*彙辦報告]]"
         link = 取行內連結(link)
         self.assertEqual(link['類型'], '檔案搜尋連結')
         self.assertEqual(link['路徑'], r'g:\我的雲端硬碟\00.115-1警察局114年度決算抽查114.12.22-115.1.6\04.道安專調底稿115年4月15日查復\道安查核紀錄.org')
         self.assertEqual(link['定位點'], '彙辦報告')
+
+        link = r"** [[file:01.1150302提供資料\花蓮縣消防局無人機作業手冊(1140110).doc][花蓮縣消防局無人機作業手冊]]"
+        link = 取行內連結(link)
+        self.assertEqual(link['類型'], '檔案連結')
+        self.assertEqual(link['路徑'], r'01.1150302提供資料\花蓮縣消防局無人機作業手冊(1140110).doc')
+        self.assertEqual(link['副檔名'], '.doc')
 
     def test轉樣式表字串(self):
         from zhongwen.text import 轉樣式表字串

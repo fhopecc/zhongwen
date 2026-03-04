@@ -13,8 +13,9 @@ def 取行內連結(行):
     一、取單行字串之首個連結。
     二、連結係指參照到某個位置。
     三、傳回類型、路徑、定位點
-    三、類型：檔案搜尋連結。
+    三、類型：檔案搜尋連結、檔案連結、URL
     '''
+    from pathlib import Path
     import re
     import os
 
@@ -30,8 +31,29 @@ def 取行內連結(行):
                ,"路徑": full_path
                ,"定位點": f"{search_target}" # 保留原本要求的星號
         }
-    else:
-        return None
+
+
+    # 檔案連結
+    pattern = r"\[\[file:(.*?)\](\[.*\])?\]"
+    match = re.search(pattern, 行)
+    if match:
+        p = match.group(1)
+        s = Path(p).suffix
+        return {"類型":"檔案連結"
+               ,"路徑": p
+               ,"副檔名": s
+        }
+ 
+    pattern = r'https?://[a-zA-Z0-9-.]+(?:/[^]\s()<>]+|)'
+    match = re.search(pattern, 行)
+    if match:
+        url = match.group(0)
+        return {"類型":"URL"
+               ,"路徑": url
+               ,"定位點": ""
+        }
+
+    return None
 
 def 清理中文空格(text):
     import re
@@ -256,7 +278,9 @@ def 取英文單字補全選項(文:str, 行, 欄):
     return []
 
 def geturl(文):
-    '找出文中的 url，如找不到傳回空白'
+    '''
+    一、找出文中首個 url，如找不到傳回空白。
+    '''
     import re
     url_pattern = re.compile(r'https?://[a-zA-Z0-9-.]+(?:/[^]\s()<>]+|)')
     urls = url_pattern.findall(文)

@@ -33,6 +33,11 @@ class Test(unittest.TestCase):
                            ,11, 工作目錄=Path(__file__).parent.parent)
         cs = 取檔名補全選項(Path(__file__).read_text(encoding='utf8'), 29
                            ,66, 工作目錄=Path(__file__).parent.parent)
+        # g:\我的雲端硬碟\01.115-1消防局114年度決算抽查115.3.9\04.無人機\01.1150302提供資料\花蓮縣消防局無人機作業手冊(1140110).doc"
+        # 01.1150302提供資料\
+        cs = 取檔名補全選項(Path(__file__).read_text(encoding='utf8')
+                           ,37, 33
+                           ,工作目錄=Path(r"g:\我的雲端硬碟\01.115-1消防局114年度決算抽查115.3.9\04.無人機"))
         print(cs)
  
 if __name__ == '__main__':

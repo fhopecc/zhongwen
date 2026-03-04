@@ -42,11 +42,11 @@ def 列印(docs):
         doc.Close(False)
     word.Quit()
 
-def read_docx(doc):
-    '讀取word文件文字'
+def read_docx(docx) -> str:
+    '讀取 docx 之文字'
     from docx import Document
-    doc = Document(doc)
-    return "\n".join([p.text for p in doc.paragraphs])
+    docx = Document(docx)
+    return "\n".join([p.text for p in docx.paragraphs])
 
 def fread_docx(doc):
     from file import 最新符合檔 
@@ -86,11 +86,16 @@ def 轉文字檔(filepath):
     cmd = f'pandoc -t plain "{filepath}" -o "{output_txt}"'
     os.system(cmd)
 
-def 複製文字(filepath):
+def 複製文字(檔):
     '複製文字至剪貼簿'
+    from pathlib import Path
     import clipboard
-    with open(args.copy_text, 'r', encoding='utf8') as f:
-        clipboard.copy(f.read())
+    檔 = Path(檔)  
+    if 檔.suffix == '.docx':
+        clipboard.copy(read_docx(檔))
+    else:     
+        with open(檔, 'r', encoding='utf8') as f:
+            clipboard.copy(f.read())
     print(clipboard.paste())
 
 def 設定環境():
