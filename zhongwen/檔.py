@@ -7,6 +7,15 @@ logger = logging.getLogger(Path(__file__).stem)
 
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 
+def 取最新檔(檔案清單):
+    from pathlib import Path
+    import os
+    檔案清單 = list(檔案清單)
+    try:
+        return max(檔案清單, key=os.path.getmtime)
+    except:
+        raise FileNotFoundError(檔案清單)
+
 def 取檔名補全選項(文:str, 行, 欄, 工作目錄=None):
     '行及欄是以1起始'
     from glob import glob

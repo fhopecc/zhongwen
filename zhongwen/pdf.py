@@ -13,10 +13,15 @@ def 整理頁面(pdf):
     print(f'整理{pdf}頁面……')
     print('操作：(e)擷取頁面(d)刪除(b)去空白頁(r)旋轉(m)移動(p)解密')
     print('      (x)擷取表格存成 xlsx 檔')
+    print('      (h)另存 html 檔')
     操作 = input('1.請輸入操作代號：')
 
     if 操作 == 'x':
         to_xlsx(pdf)
+
+    if 操作 == 'h':
+        to_html(pdf)
+
     if 操作 == 'b':
         去空白頁(pdf)
 
@@ -299,6 +304,20 @@ def to_xlsx(pdf):
                 name = f'Sheet{i+1}'
                 df.to_excel(writer, sheet_name=name, index=False)
         print(f'{pdf.name}->{xlsx.name}')
+
+
+def to_html(pdf_path):
+    import fitz
+    from pathlib import Path
+    pdf_path = Path(pdf_path)
+    html_path = pdf_path.with_suffix('.html')
+    doc = fitz.open(pdf_path)
+    with open(str(html_path), "w", encoding="utf-8") as f:
+        for page in doc:
+            # "html" 模式會保留字體、顏色與位置資訊
+            html_content = page.get_text("html")
+            f.write(html_content)
+    doc.close()
 
 def 平分(文件路徑, 平分文件數=2, 平分文件大小=None):
     '''
