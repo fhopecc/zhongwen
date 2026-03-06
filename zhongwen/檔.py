@@ -16,12 +16,13 @@ def 取最新檔(檔案清單):
     except:
         raise FileNotFoundError(檔案清單)
 
-def 取檔名補全選項(文:str, 行, 欄, 工作目錄=None):
+def 取檔名補全選項(文:str, 行, 欄, 工作目錄=None, debug=False):
     '行及欄是以1起始'
     from glob import glob
     l = 文.splitlines()[行-1]
     prefix = l[:欄]
     while prefix:
+        if debug: print(prefix)
         if (p:=Path(prefix)).exists():
             cs = [c + ('\\' if Path(c).is_dir() and c[-1] != '\\' else '')
                   for c in glob(rf"{prefix}*")]
@@ -35,7 +36,7 @@ def 取檔名補全選項(文:str, 行, 欄, 工作目錄=None):
             try:
                 cs = [c.name + ('\\' if Path(c).is_dir() else '')
                       for c in p.glob(rf"{prefix}*")]
-                cs = [{'word':c[len(prefix):], 'abbr':c
+                cs = [{'word':c[len(prefix.split('\\')[-1]):], 'abbr':c
                       ,'kind': '目錄' if (p / c).is_dir() else '檔案'
                       } for c in cs]
                 if len(cs)>0:

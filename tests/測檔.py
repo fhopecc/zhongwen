@@ -38,7 +38,13 @@ class Test(unittest.TestCase):
         cs = 取檔名補全選項(Path(__file__).read_text(encoding='utf8')
                            ,37, 33
                            ,工作目錄=Path(r"g:\我的雲端硬碟\01.115-1消防局114年度決算抽查115.3.9\04.無人機"))
+        # [[03.相關規定\附
+        cs = 取檔名補全選項(Path(__file__).read_text(encoding='utf8')
+                           ,41, 29
+                           ,debug=True
+                           ,工作目錄=Path(r"g:\我的雲端硬碟\01.115-1消防局114年度決算抽查115.3.9\04.無人機"))
         print(cs)
+
  
 if __name__ == '__main__':
     import logging
