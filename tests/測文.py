@@ -211,6 +211,12 @@ class Test(unittest.TestCase):
         i = '原通知建議事項一(一)，有關長期缺乏文物維護專業人力，致迭有策展後未能整飭入庫保存，或典藏櫃溫濕度監控警示設定值逾控制範圍等情事，允宜向原發中心提出專業人力需求，以維護原住民族文化資產1項，承復：目前缺乏文物維護與保存專業之人力，致策展作業完成後，文物入庫整飭、編目管理及典藏環境監控等工作無法即時辦理，實有必要檢視並補強相關專業人力等情，請將檢視並補強專業人力結果函復本室。'
         self.assertEqual(審核意見轉通知(o), i)
 
+    def test辨識項目(self):
+        from zhongwen.文 import 辨詞
+        s = '日期 1979-7-29 是我的生日，金額500元。'
+        self.assertEqual(辨詞(s)[1]['類'], '金額')
+    
+
 if __name__ == '__main__':
     import logging
     logging.basicConfig(level=logging.INFO)

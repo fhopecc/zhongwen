@@ -314,12 +314,12 @@ def 取路徑(文, 光標位置=None):
             return m.group(0)
     return ''
 
-def 辨識項目(行):
+def 辨詞(行):
     '''
-    辨識字串中的數字、日期、URL、檔案路徑，並傳回其類型與起迄位置。
+    辨識字串中的數字、日期、URL、檔案路徑等詞項，並傳回其類與起迄位置。
     '''
-    import re
     from zhongwen.數 import 全數字表
+    import re
     
     結果 = []
     
@@ -336,28 +336,28 @@ def 辨識項目(行):
     for 類型, 模式 in 模式集.items():
         for m in re.finditer(模式, 行):
             結果.append({
-                "類型": 類型,
-                "內容": m.group(0),
-                "始": m.start(),
+                "類": 類型,
+                "詞": m.group(0),
+                "起": m.start(),
                 "迄": m.end()
             })
             
     # 過濾掉被包含在其他項目內的子項目
     # 先按長度降序排序，長度相同則按起始位置排序
-    排序結果 = sorted(結果, key=lambda x: (x['迄'] - x['始'], -x['始']), reverse=True)
+    排序結果 = sorted(結果, key=lambda x: (x['迄'] - x['起'], -x['起']), reverse=True)
     
     最終結果 = []
     for 項目 in 排序結果:
         是否被包含 = False
         for 已保項目 in 最終結果:
-            if 項目['始'] >= 已保項目['始'] and 項目['迄'] <= 已保項目['迄']:
+            if 項目['起'] >= 已保項目['起'] and 項目['迄'] <= 已保項目['迄']:
                 是否被包含 = True
                 break
         if not 是否被包含:
             最終結果.append(項目)
 
     # 最後按起始位置排序回傳
-    return sorted(最終結果, key=lambda x: x['始'])
+    return sorted(最終結果, key=lambda x: x['起'])
 
 def 刪除空行(文):
     return "\n".join(line for line in 文.splitlines() if line.strip())
