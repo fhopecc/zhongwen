@@ -341,8 +341,22 @@ def 辨識項目(行):
                 "迄": m.end()
             })
             
-    # 按起始位置排序
-    return sorted(結果, key=lambda x: x['始'])
+    # 過濾掉被包含在其他項目內的子項目
+    # 先按長度降序排序，長度相同則按起始位置排序
+    排序結果 = sorted(結果, key=lambda x: (x['迄'] - x['始'], -x['始']), reverse=True)
+    
+    最終結果 = []
+    for 項目 in 排序結果:
+        是否被包含 = False
+        for 已保項目 in 最終結果:
+            if 項目['始'] >= 已保項目['始'] and 項目['迄'] <= 已保項目['迄']:
+                是否被包含 = True
+                break
+        if not 是否為包含:
+            最終結果.append(項目)
+
+    # 最後按起始位置排序回傳
+    return sorted(最終結果, key=lambda x: x['始'])
 
 def 刪除空行(文):
     return "\n".join(line for line in 文.splitlines() if line.strip())
