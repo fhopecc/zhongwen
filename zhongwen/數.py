@@ -66,49 +66,8 @@ def 取中文數字(
     異體零: bool = False,
     兩: bool = False
 ) -> str:
-    import re
-    位名表 = 大寫位名表 if 大寫 else 小寫位名表
-    _組名表 = 组名表 if 簡體 else 組名表
-    數字表 = 大寫數字表 if 大寫 else 小寫數字表 
-    數字表 = 大写数字表 if 大寫 and 簡體 else 數字表 
-    數字表 = re.sub('二', '兩', 數字表) if 兩 else 數字表 
-    點 =  '点' if 簡體 else '點' 
-    
-    n:str = str(數)
-    i:str = n
-    d = ""
-
-    if "." in n:
-        i, d= n.split(".", 1)
-        d = d.rstrip("0")
-    cn = ''
-    i = list(reversed(i))
-
-    def 轉中文數字(i):
-        cn = ''
-        for pos, digit in enumerate(i):
-            位名 = ""
-            if digit != '0' and pos > 0:
-                位名 = 位名表[pos-1]
-            cn = 數字表[int(digit)] + 位名 + cn
-        return cn
-
-    for pos, 一組阿拉伯數字 in enumerate([i[idx:idx + 4] for idx in range(0, len(i), 4)]):
-        _cn = 轉中文數字(一組阿拉伯數字)
-        if pos > 0: 
-            _cn = _cn + _組名表[pos-1]
-        cn = _cn + cn 
-    #一萬零六百零零 -> 一萬零六百
-    cn = re.sub('零+$', '', cn)
-    #一十六 -> 十六
-    cn = re.sub('^一十', '十', cn)
-    #一千六百 -> 一千六
-    cn = re.sub(f'(千[{數字表}])百$', r'\1', cn)
-    #一百一十 -> 一百一
-    cn = re.sub(f'(百[{數字表}])十$', r'\1', cn)
-    if d != "":
-        cn += 點 + d.translate(str.maketrans('0123456789', 數字表))
-    return cn    
+    from zhongwen.number import 中文數字 as _中文數字
+    return _中文數字(數, 大寫=大寫, 簡體=簡體, 異體零=異體零, 兩=兩)
 
 def 取中文数字(数):
     return 取中文數字(数, 簡體=True)

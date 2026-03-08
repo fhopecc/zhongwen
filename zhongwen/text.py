@@ -154,7 +154,7 @@ def 翻譯(word):
 正體字+='立異理狀'
 
 def 是否為重碼字(字串:str):
-    return 字串[0] in 重碼字 
+    return bool(字串) and 字串[0] in 重碼字
 
 def 校正中文字(字串:str):
     t = str.maketrans(重碼字, 正體字)
