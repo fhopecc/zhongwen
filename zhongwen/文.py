@@ -55,6 +55,14 @@ def 取行內連結(行):
 
     return None
 
+def 加總文內金額(文) -> int:
+    '''文內形如「110元」之金額數加總'''
+    import re
+    pattern = r'(\d+)元'
+    prices = re.findall(pattern, 文)
+    total = sum(int(price) for price in prices)
+    return total
+
 def 清理中文空格(text):
     import re
     return re.sub(r'(?<=[\u4e00-\u9fa5])[ \u3000]+(?=[\u4e00-\u9fa5])', '', text)   

@@ -18,6 +18,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = ['aiofiles'
+               ,'aider-install'
                ,'backupy'
                ,'beautifulsoup4'
                ,'build'

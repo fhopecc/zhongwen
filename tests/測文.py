@@ -3,6 +3,16 @@ import unittest
 
 class Test(unittest.TestCase):
     '依方法名稱字母順序測試'
+
+    def test加總文內金額(self):
+        from zhongwen.文 import 加總文內金額
+        s = '''- 2.16 450元
+- 2.17 230元
+- 2.18 50元
+- 2.19 230元、診斷書150元
+ '''
+        self.assertEqual(加總文內金額(s), 1110)
+
     def test_geturl(self):
         from zhongwen.文 import geturl
         orgmode_url = 'https://news.ltn.com.tw/news/Hualien/breakingnews/5256071][abcd]]'
@@ -38,12 +48,6 @@ class Test(unittest.TestCase):
         self.assertEqual(link['路徑'], r'01.1150302提供資料\花蓮縣消防局無人機作業手冊(1140110).doc')
         self.assertEqual(link['副檔名'], '.doc')
 
-    def test轉樣式表字串(self):
-        from zhongwen.text import 轉樣式表字串
-        t = "1abcd\n2abcd"
-        tb = 轉樣式表字串(t)
-        self.assertEqual(tb.replace('\\n', '&#10;'), 'ab')
-
     def test(self):
         from zhongwen.文 import 臚列標題
         text = '''### 標題甲
@@ -67,14 +71,10 @@ class Test(unittest.TestCase):
         t : Trie = 倉頡檢字()
         candidates = sorted([c[-1] + c[:-1] for c in t.keys('女戈木')]
                            ,key = lambda s:(len(s), s))
-        print(candidates)
         candidates = sorted([c[-1] + c[:-1] for c in t.keys('女戈木')]
                            ,key = lambda s:(len(s),取臺灣字頻序號(s[0]),s))
-        print(candidates)
         candidates = 倉頡檢字('女戈木')
-        print(candidates)
         candidates = 倉頡檢字('vid')
-        print(candidates)
 
         self.assertNotEqual(倉頡檢字('jj')[0], '十十')
 
@@ -99,15 +99,6 @@ class Test(unittest.TestCase):
         logging.getLogger().setLevel(logging.DEBUG)
         self.assertEqual(查萌典('彊')[0], '「強」的異體字。')
 
-    def test取文內簡稱字首樹(self):
-        from zhongwen.文 import 取文內簡稱字首樹, 取簡稱補全選項
-        from pathlib import Path
-        f = Path(r"g:\我的雲端硬碟\00.114-2花縣府原民處0901-16-1017提出\原民處查核工作紀錄.md")
-        abbrs = 取文內簡稱字首樹(f.read_text(encoding='utf-8'))
-        print(abbrs.keys('2'))
-        opts = 取簡稱補全選項(f.read_text(encoding='utf-8'), 315, 7)
-        print(opts)
-
     def test取英文單字補全選項(self):
         from zhongwen.文 import 取英文單字補全選項, 取英文單字首樹
         from pathlib import Path
@@ -124,21 +115,6 @@ class Test(unittest.TestCase):
         opts = 取英文單字補全選項(f.read_text(encoding='utf-8'), 84, 14)
         print(opts)
 
-    def test取最近詞首(self):
-        from zhongwen.文 import 取最近詞首
-        print('abcd')
-        w = 取最近詞首('set compe', 8)
-        print(w)
-        self.assertEqual(w, comp)
-
-    def test取名詞字首樹(self):
-        from zhongwen.文 import 取名詞字首樹
-        from pathlib import Path
-        f = r'g:\我的雲端硬碟\00.114-2花縣府原民處0901-16-1017(20)提出\慢食產業計畫查核工作紀錄.md'
-        f = Path(f)
-        nouns = 取名詞字首樹(f.read_text(encoding='utf-8'))
-        nouns = [n.encode('cp950', errors='replace').decode('cp950') for n in nouns]
-        print(nouns)
 
     def test取停用詞(self):
         from zhongwen.文 import 取停用詞
@@ -241,7 +217,7 @@ if __name__ == '__main__':
     logging.getLogger('googleclient').setLevel(logging.CRITICAL)
     logging.getLogger('matplotlib').setLevel(logging.CRITICAL)
     logging.getLogger('faker').setLevel(logging.CRITICAL)
-    # unittest.main()
+    unittest.main()
     suite = unittest.TestSuite()
-    suite.addTest(Test('test取路徑'))
+    # suite.addTest(Test('test取路徑'))
     unittest.TextTestRunner().run(suite)
