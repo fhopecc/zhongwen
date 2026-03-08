@@ -314,6 +314,36 @@ def 取路徑(文, 光標位置=None):
             return m.group(0)
     return ''
 
+def 辨識項目(行):
+    '''
+    辨識字串中的數字、日期、URL、檔案路徑，並傳回其類型與起迄位置。
+    '''
+    import re
+    from zhongwen.數 import 全數字表
+    
+    結果 = []
+    
+    # 模式定義
+    模式集 = {
+        "URL": r'https?://[a-zA-Z0-9-.]+(?:/[^]\s()<>]+|)',
+        "檔案路徑": r'[a-zA-Z]:\\(?:[^]\\\/:*?"<>|\r\n]+\\)*[^]\\\/:*?"<>|\r\n]*',
+        "日期": r'\d{2,4}[-/年]\d{1,2}[-/月]\d{1,2}日?',
+        "數字": fr'\(?-?[{全數字表}]+[點.]?[{全數字表}]*[%]?\)?'
+    }
+
+    # 為了避免重疊，依特定順序或長度比對，此處採簡單逐一比對
+    for 類型, 模式 in 模式集.items():
+        for m in re.finditer(模式, 行):
+            結果.append({
+                "類型": 類型,
+                "內容": m.group(0),
+                "始": m.start(),
+                "迄": m.end()
+            })
+            
+    # 按起始位置排序
+    return sorted(結果, key=lambda x: x['始'])
+
 def 刪除空行(文):
     return "\n".join(line for line in 文.splitlines() if line.strip())
 
