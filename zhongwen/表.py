@@ -279,7 +279,8 @@ def 表示(df
             浮動提示 = df.copy()
             可顯示資料框 = df.copy()
             for c in df.columns: 浮動提示[c] = c
-            if pd.__version__.startswith('2.'):
+            pd_major_version = int(pd.__version__.split('.')[0])
+            if pd_major_version >= 2:
                 df = df.style.map(lambda _:'text-align:right')
                 df = df.map_index(lambda _:'text-align:center', axis=1)
             else:
