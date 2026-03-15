@@ -490,3 +490,25 @@ def 取名稱帶同名圖片超文件碼(名稱, 圖檔子目錄, 圖寬='100%',
 def 多級欄位扁平化(df):
     df.columns = [f"{col[0]}_{col[1]}" if col[1] else f"{col[0]}" for col in df.columns]
     return df
+
+def 增加合計(df, 標記欄位=None, 合計欄名="合計"):
+    """
+    一、插入各數值欄位之合計數於表首。
+    """
+    import pandas as pd
+    import numpy as np
+    if not 標記欄位:
+        字串欄位 = df.select_dtypes(include=['object', 'string']).columns
+        if len(字串欄位) > 0:
+            標記欄位 = 字串欄位[0]
+        else:
+            標記欄位 = df.columns[0]
+    數值欄位 = df.select_dtypes(include=[np.number]).columns
+    原欄位順序 = df.columns
+    total_row = df[數值欄位].sum()
+    new_row_data = {col: total_row[col] for col in 數值欄位}
+    new_row_data[標記欄位] = 合計欄名
+    new_row = pd.DataFrame([new_row_data])
+    df = pd.concat([new_row, df], ignore_index=True)
+    df = df[原欄位順序]
+    return df
