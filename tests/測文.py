@@ -213,10 +213,23 @@ class Test(unittest.TestCase):
 
     def test辨識項目(self):
         from zhongwen.文 import 辨詞
-        s = '日期 1979-7-29 是我的生日，金額500元。'
-        self.assertEqual(辨詞(s)[1]['類'], '金額')
+        s = '1979-7-29 是我生日。'
+        self.assertEqual(辨詞(s, 4)['類'], '日期')
+        s = r'd:\github\zhongwen\README.md 是一個檔案'
+        self.assertEqual(辨詞(s, 1)['類'], '檔案路徑')
+        self.assertEqual(辨詞(s, 1)['詞'], 'd:\github\zhongwen\README.md')
+        s = r'字串 github\zhongwen\README.md 是一個檔案相對路徑'
+        self.assertEqual(辨詞(s, 4)['類'], '檔案路徑')
+        self.assertEqual(辨詞(s, 4)['詞'], 'github\zhongwen\README.md')
+        s = r'字串 "github\zhongwen\My README.md" 是一個"標記檔案相對路徑'
+        self.assertEqual(辨詞(s, 5)['類'], '檔案路徑')
+        self.assertEqual(辨詞(s, 5)['詞'], '"github\zhongwen\My README.md"')
+        s = r'py 333 << EOS'
+        self.assertEqual(辨詞(s, 4)['類'], '數字')
+        self.assertEqual(辨詞(s, 4)['詞'], '333')
+        self.assertEqual(辨詞(s, 3)['起'], 3)
     
-
+    
 if __name__ == '__main__':
     import logging
     logging.basicConfig(level=logging.INFO)
