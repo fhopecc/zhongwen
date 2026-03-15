@@ -314,9 +314,10 @@ def 取路徑(文, 光標位置=None):
             return m.group(0)
     return ''
 
-def 辨詞(行):
+def 辨詞(行, 游標位置=None):
     '''
     辨識字串中的數字、日期、URL、檔案路徑等詞項，並傳回其類與起迄位置。
+    若指定游標位置，則僅傳回該位置下之詞項，無則傳回 None。
     '''
     from zhongwen.數 import 全數字表
     import re
@@ -356,8 +357,16 @@ def 辨詞(行):
         if not 是否被包含:
             最終結果.append(項目)
 
+    排序後的結果 = sorted(最終結果, key=lambda x: x['起'])
+
+    if 游標位置 is not None:
+        for 項目 in 排序後的結果:
+            if 項目['起'] <= 游標位置 < 項目['迄']:
+                return 項目
+        return None
+
     # 最後按起始位置排序回傳
-    return sorted(最終結果, key=lambda x: x['起'])
+    return 排序後的結果
 
 def 刪除空行(文):
     return "\n".join(line for line in 文.splitlines() if line.strip())
