@@ -183,10 +183,17 @@ def 抓取(url:str
             time.sleep(等待秒數)
         return c.page_source
     if not headers:
-        fake = Faker()
-        headers = {'user-agent': fake.user_agent()
-                  ,"accept-language": "zh-TW,zh;q=0.9,en;q=0.8,zh-CN;q=0.7"
-                  }
+        # fake = Faker()
+        # headers = {'user-agent': fake.user_agent()
+                  # ,"accept-language": "zh-TW,zh;q=0.9,en;q=0.8,zh-CN;q=0.7"
+                  # }
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'Accept-Language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Referer': 'https://www.tpex.org.tw/zh-tw/afterTrading/dailyQuotes.html',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
     r = requests.session()
     if 會話識別網址=='網站網址':
         p = urlparse(url)
@@ -194,6 +201,7 @@ def 抓取(url:str
 
     if 會話識別網址:
         r = requests.get(會話識別網址, headers=headers, verify=False)
+        # r = requests.get(會話識別網址, headers=headers)
 
     if 抓取方式=='post':
         headers["content-type"] = "application/x-www-form-urlencoded"
