@@ -9,8 +9,10 @@ class Test(unittest.TestCase):
         from pandas import Timestamp, Timedelta
         from datetime import datetime, date
         import pandas as pd
+        print(擇日().strftime("<%Y-%m-%d %a>"))
+        self.assertFalse(True)
+
         今加班截止時間 = 取時間('14:23') + (60*3-32)* 一分鐘 
-        print(今加班截止時間)
         self.assertFalse(True)
         self.assertEqual(取時間('14:38'), Timestamp('14:38'))
         self.assertEqual(取日期('1121231'), Timestamp('2023-12-31'))
@@ -49,10 +51,7 @@ class Test(unittest.TestCase):
         self.assertEqual(取小寫民國日期('115年1月24日'), '一月二十四日')
         self.assertEqual(取正式民國日期('115年2月4日', 含星期=True), '115年2月4日(三)')
 
-        d = 擇日()
-        print(d)
 
-    def test取期間(self):
         from zhongwen.時 import 取期間, 取民國期間
         from zhongwen.時 import 上月, 上年度
         from pandas import Period, Timestamp
@@ -82,12 +81,10 @@ class Test(unittest.TestCase):
         self.assertIsInstance(上月, Period)
         self.assertIsInstance(上年度, Period)
 
-    def test取季別年數季數(self):
         from zhongwen.時 import 取季別年數季數, 取日期
         self.assertEqual(取季別年數季數(取日期('20231101')), (2023, 4))
         self.assertEqual(取季別年數季數('2023Q2'), (2023, 2))
 
-    def test_cut_period(self):
         from zhongwen.時 import 全年期別分割, 取期間
         from pandas import period_range
         import pandas as pd
@@ -96,32 +93,21 @@ class Test(unittest.TestCase):
         print(rps)
         # print(period_range('2024Q1', periods=3, freq='Q'))
 
-    def test_YOY(self):
         from zhongwen.時 import 去年同期, 取期間
-        import pandas as pd
         p = 取期間('2024Q3')
         self.assertEqual(去年同期(p), 取期間('2023Q3'))
         p = pd.Period('2024-06', freq='6M')
         self.assertEqual(去年同期(p), pd.Period('2023-06', freq='6M'))
 
-    def test_iter_yearly(self):
         from zhongwen.時 import 自起始年底按年列舉至本年底
         from zhongwen.時 import 取日期
-        import pandas as pd
         ds = 自起始年底按年列舉至本年底(111)
         ys = pd.date_range(取日期('1111231'), 取日期('1131231'), freq='YE')
         # self.assertEqual(ds
                         # ,list(pd.date_range(取日期('1111231'), 取日期('1131231'), freq='YE')))
 
-    def test_roc_date(self):
         from zhongwen.時 import 取民國年月
         self.assertEqual(取民國年月('11311'), '11311')
-
-    def test_workaround(self):
-        import pandas as pd
-        p = pd.Period('2024Q4', '2Q-DEC')
-        # print(p.start_time)
-        # print(p.end_time)
 
 
 if __name__ == '__main__':
@@ -130,7 +116,4 @@ if __name__ == '__main__':
     logging.getLogger('googleclient').setLevel(logging.CRITICAL)
     logging.getLogger('matplotlib').setLevel(logging.CRITICAL)
     logging.getLogger('faker').setLevel(logging.CRITICAL)
-    # unittest.main()
-    suite = unittest.TestSuite()
-    suite.addTest(Test('test'))  # 指定測試
-    unittest.TextTestRunner().run(suite)
+    unittest.main()

@@ -327,40 +327,43 @@ def 擇日():
     from tkcalendar import Calendar
     import tkinter as tk
     import pandas as pd
-   
+    
     root = tk.Tk()
     root.title("擇日")
-    # 視窗置頂
     root.attributes('-topmost', True)
-    MY_FONT = ("Arial", 16)
-    cal = Calendar(root, selectmode='day', date_pattern='y-mm-dd',
-                   font=MY_FONT, 
-                   headersfont=MY_FONT,
-                   rowheight=40) # 增加行高以容納較大的字
+    
+    cal = Calendar(root, selectmode='day', date_pattern='y-mm-dd', font=("Arial", 16))
     cal.pack(padx=20, pady=20)
-    picked_date = pd.NaT
-    def on_ok():
+    
+    # 建立一個容器來存日期，這樣即便視窗毀滅了，值還在記憶體裡
+    data = {'picked': pd.NaT}
+
+    def on_ok(event=None):
         try:
-            nonlocal picked_date
+            # 1. 先抓取數值
             date_str = cal.get_date()
-            picked_date = 取日期(date_str)
-        except Exception as e:
-            logger.error(e)
-        root.quit()
-        root.destroy()
+            data['picked'] = pd.to_datetime(date_str)
+        except:
+            pass
+        finally:
+            # 2. 直接強行關閉視窗，這會強迫 mainloop 結束
+            root.destroy()
 
-    # 點擊視窗右上角 X 關閉
-    root.protocol("WM_DELETE_WINDOW", lambda: root.destroy())
-
+    # 綁定按鈕與視窗關閉行為
     btn = tk.Button(root, text="擇定", command=on_ok)
     btn.pack(pady=5)
     
-    # 綁定 Enter 鍵，注意 lambda 要能接收 event
-    root.bind('<Return>', lambda e: on_ok())
+    # 綁定 Enter 鍵 (注意這裡要帶 event 參數)
+    root.bind('<Return>', on_ok)
     
-    # 執行視窗主循環（阻塞直到視窗關閉）
+    # 處理右上角打叉
+    root.protocol("WM_DELETE_WINDOW", root.destroy)
+
+    # 啟動迴圈
     root.mainloop()
-    return picked_date
+    
+    # 當 root.destroy() 執行後，控制權會回到這裡
+    return data['picked']
 
 一日 = pd.Timedelta(days=1)
 一週 = pd.Timedelta(days=7)

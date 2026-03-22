@@ -244,6 +244,9 @@ def 表示(df
     if 顯示索引:
         df.reset_index(inplace=True)
     else:
+        try:
+            del df['index']
+        except KeyError: pass
         df.reset_index(drop=True, inplace=True)
     df.columns.name = '編號'
     df.index = df.index+1
@@ -421,7 +424,8 @@ def _可顯示(函數=object(), 顯示筆數=100, 隱藏欄位=[], 整數欄位=
                 elif 選項=='實數欄位': 
                     實數欄位 = 選項值
         df = 查詢資料函數(*args, **kargs)
-        if 以表顯示: 顯示(df, 顯示筆數=顯示筆數
+        if 以表顯示: 表示(df
+                         ,顯示筆數=顯示筆數
                          ,隱藏欄位=隱藏欄位
                          ,整數欄位=整數欄位
                          ,實數欄位=實數欄位
