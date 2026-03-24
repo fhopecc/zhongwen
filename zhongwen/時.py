@@ -323,46 +323,93 @@ def 取季別年數季數(季別):
 def 擇日():
     '''
     一、跳出日曆選單點選日期。
+    二、支援鍵盤快捷鍵：d/D, w/W, m/M, y/Y, t。
+    三、配色：黑底淺綠字 (Dark Mode)。
     '''
     from tkcalendar import Calendar
+    from datetime import timedelta, datetime
     import tkinter as tk
     import pandas as pd
-    
+
     root = tk.Tk()
     root.title("擇日")
     root.attributes('-topmost', True)
+    root.configure(bg='#121212') # 設定視窗背景為深黑
     
-    cal = Calendar(root, selectmode='day', date_pattern='y-mm-dd', font=("Arial", 16))
+    # 設定日曆配色
+    cal = Calendar(root, 
+                   selectmode='day', 
+                   date_pattern='y-mm-dd', 
+                   font=("Arial", 16),
+                   background='#121212',      # 整體背景
+                   foreground='#90EE90',      # 淺綠色文字 (LightGreen)
+                   bordercolor='#333333',     # 邊框顏色
+                   headersbackground='#1E1E1E', # 上方星期欄背景
+                   headersforeground='#90EE90', # 上方星期欄文字
+                   selectbackground='#006400',  # 選中時的深綠色背景
+                   selectforeground='white',    # 選中時的文字顏色
+                   normalbackground='#121212',  # 普通日期背景
+                   normalforeground='#90EE90',  # 普通日期文字
+                   weekendbackground='#121212', # 週末背景
+                   weekendforeground='#32CD32', # 週末文字 (稍深的綠)
+                   othermonthforeground='#444444', # 非本月日期的文字
+                   othermonthbackground='#121212'  # 非本月日期的背景
+                  )
     cal.pack(padx=20, pady=20)
     
-    # 建立一個容器來存日期，這樣即便視窗毀滅了，值還在記憶體裡
     data = {'picked': pd.NaT}
 
     def on_ok(event=None):
         try:
-            # 1. 先抓取數值
             date_str = cal.get_date()
             data['picked'] = pd.to_datetime(date_str)
         except:
             pass
         finally:
-            # 2. 直接強行關閉視窗，這會強迫 mainloop 結束
             root.destroy()
 
-    # 綁定按鈕與視窗關閉行為
-    btn = tk.Button(root, text="擇定", command=on_ok)
-    btn.pack(pady=5)
+    def on_cancel(event=None):
+        root.destroy()
+
+    def move_date(event):
+        current_date = cal.selection_get()
+        key = event.char
+        
+        # 處理日期邏輯
+        if key == 'd': new_date = current_date + timedelta(days=1)
+        elif key == 'D': new_date = current_date - timedelta(days=1)
+        elif key == 'w': new_date = current_date + timedelta(weeks=1)
+        elif key == 'W': new_date = current_date - timedelta(weeks=1)
+        elif key == 'm': new_date = current_date + pd.DateOffset(months=1)
+        elif key == 'M': new_date = current_date - pd.DateOffset(months=1)
+        elif key == 'y': new_date = current_date + pd.DateOffset(years=1)
+        elif key == 'Y': new_date = current_date - pd.DateOffset(years=1)
+        elif key == 't': new_date = datetime.now().date() # 回到今天
+        else: return
+
+        # 更新選取並讓視圖跳轉
+        cal.selection_set(new_date.date() if hasattr(new_date, 'date') else new_date)
+        cal.see(new_date)
+
+    # 按鈕也改成黑底綠字
+    btn = tk.Button(root, text="擇定", 
+                    command=on_ok, 
+                    bg='#1E1E1E', 
+                    fg='#90EE90', 
+                    activebackground='#90EE90', 
+                    activeforeground='#121212',
+                    font=("Arial", 12))
+    btn.pack(pady=10)
     
-    # 綁定 Enter 鍵 (注意這裡要帶 event 參數)
+    # 綁定鍵盤
     root.bind('<Return>', on_ok)
+    root.bind('<Escape>', on_cancel) # 按 Esc 退出
+    root.bind('<Key>', move_date)
     
-    # 處理右上角打叉
     root.protocol("WM_DELETE_WINDOW", root.destroy)
 
-    # 啟動迴圈
     root.mainloop()
     
-    # 當 root.destroy() 執行後，控制權會回到這裡
     return data['picked']
 
 一日 = pd.Timedelta(days=1)
