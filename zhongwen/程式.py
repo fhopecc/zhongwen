@@ -11,7 +11,7 @@ def 通知執行時間(f):
     二、以上並將函數及其執行時間寫入模組變數「函數執行時間表」，
         可在程式結束時，運用「列出函數執行時間表」將函數依執行時間由長至短列出。
     '''
-    from functools import wraps
+    from functools import wraps, update_wrapper
     from time import time
     @wraps(f)
     def wrap(*args, **kw):
@@ -22,7 +22,7 @@ def 通知執行時間(f):
         __函數執行時間表__.append({"函數":f.__name__, "執行時間":runtime})
         logger.info(f'{f.__name__}費時{runtime:.2f}秒。')
         return result
-    return wrap
+    return update_wrapper(wrap, f)
 
 def 列出函數執行時間表():
     from zhongwen.表 import 顯示

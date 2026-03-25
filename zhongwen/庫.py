@@ -1,6 +1,7 @@
 from zhongwen.batch_data import 取資料庫, 結果批次寫入
 from zhongwen.batch_data import 增加定期更新, 批次刪除
 from pathlib import Path
+import functools
 import logging
 
 logger = logging.getLogger(Path(__file__).stem)
