@@ -503,6 +503,7 @@ def 轉錄文字(源檔集):
     from zhongwen.音 import 轉錄文字 as 音訊轉錄文字
     from zhongwen.office_document import get_doc_text
     from zhongwen.pdf import 取內文
+    from zhongwen.信 import 取信函內文
     from pyperclip import paste
     import os
     源檔集 = 取完整路徑(源檔集)
@@ -510,6 +511,8 @@ def 轉錄文字(源檔集):
     for s in 源檔集:
         if s.suffix == ".txt":
             text += s.read_text(encoding='utf8')
+        elif s.suffix == ".eml":
+            text += 取信函內文(s)
         elif s.suffix == ".docx":
             text += get_pandoc_text(s)
         elif s.suffix == ".doc":

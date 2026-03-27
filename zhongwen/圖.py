@@ -117,6 +117,35 @@ def 截圖辨字():
     while th.is_alive():
         th.join(0.25)
 
+def 取圖內表(圖檔, 服務金鑰=None):
+    from google import genai
+    from google.genai import types
+    import PIL.Image
+
+    try:
+        from fhopecc import 金鑰
+        服務金鑰 = 金鑰.__gemini_api_key__
+    except Exception:
+        if not 服務金鑰:
+            raise ValueError('請提供服務金鑰！')
+
+    # 1. 初始化 Client (填入您的 API Key)
+    client = genai.Client(api_key=服務金鑰)
+
+    # 2. 載入圖片
+    image = PIL.Image.open(圖檔)
+
+    # 3. 呼叫模型進行解析
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=[
+            "請精確解析圖中表格並轉換為 OrgMode 表格格式，"
+            "同時確保每列數據對齊，如有合併格，請盡量還原其邏輯結構。",
+            image
+        ]
+    )
+    return response.text
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
