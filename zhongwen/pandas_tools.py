@@ -1,4 +1,4 @@
-'輔助PANDAS工具'
+'輔助PANDAS工具，將廢棄以表模組取代。'
 from pathlib import Path
 import logging
 logger = logging.getLogger(Path(__file__).stem)
