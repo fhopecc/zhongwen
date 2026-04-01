@@ -7,6 +7,19 @@ class Test(unittest.TestCase):
         from zhongwen.帳 import 取日記帳紀錄
         text = "115.4.1借公教貸款1000元借利息20元貸土銀1020元，繳公教貸款第84之2期。"
         d = 取日記帳紀錄(text)
+        print(text)
+        print(d)
+        text = "昨借新光優利貸利息20元，新光優貸利息。"
+        d = 取日記帳紀錄(text)
+        print(text)
+        print(d)
+        text = "借新光優利貸利息20元，新光優貸利息。"
+        d = 取日記帳紀錄(text)
+        print(text)
+        print(d)
+        text = "15借新光優利20元貸利息20元，新光優貸利息。"
+        d = 取日記帳紀錄(text)
+        print(text)
         print(d)
 
  
