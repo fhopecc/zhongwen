@@ -2,76 +2,43 @@ from lark import Transformer
 
 def 取日記帳紀錄(交易紀錄):
     '''
-    一、日記帳交易紀錄：日期、科目、備註、借、貸
-    
+    一、日記帳交易紀錄：日期、科目、備註、借、貸。
+    二、交易紀錄借貸不平衡會引發錯誤。    
     '''
     from lark import Lark
-    import re
-    parser = Lark(accounting_grammar, start='start', parser='earley')
+    parser = Lark(accounting_grammar, parser='earley')
     transformer = AccountingTransformer()
-    tree = parser.parse(交易紀錄)
-    d = transformer.transform(tree)
-    output = []
-    date = d['交易日期']
-    summary = d['摘要']
-    
-    # 定義內部處理邏輯：提取名稱與金額
-    def parse_item(item_str):
-        # 匹配「科目名稱」與「數字」
-        match = re.match(r"(.+?)(\d+)元", item_str)
-        if match:
-            return match.group(1), int(match.group(2))
-        return item_str, 0
+    parsed_data = transformer.transform(parser.parse(交易紀錄))
+    final_list = transform_and_validate(parsed_data)
+    return final_list
+         
 
-    for item in d['借項科目']:
-        name, amount = parse_item(item)
-        output.append([date, name, summary, amount, 0])
-    for item in d['貸項科目']:
-        name, amount = parse_item(item)
-        output.append([date, name, summary, 0, amount])
-    return output
-
-# 基礎交易語法規則
+# --- 1. 定義 Lark 語法 (同前述版本) ---
 accounting_grammar = r"""
     start: date items summary
-
     date: YEAR "." MONTH "." DAY
-    
-    # 這裡讓 items 可以包含多個借或貸，順序不限更靈活
     items: (debit_item | credit_item)+
-    
-    # 使用 ? 做非貪婪匹配，直到遇見「數字+元」為止
     debit_item: "借" NAME AMOUNT "元"
     credit_item: "貸" NAME AMOUNT "元"
-    
-    # 摘要由逗號開始，抓取剩餘所有文字
     summary: "，" ANY_TEXT
-    
     YEAR: /\d+/
     MONTH: /\d+/
     DAY: /\d+/
     AMOUNT: /\d+/
-    
-    # 核心修正：NAME 不包含數字，且遇到「借/貸 + 數字」前就會停止
-    # 使用負向預覽 (negative lookahead) 確保不把作為標記的「借/貸」吃進去
     NAME: /.+?(?=\d+元)/
-    
     ANY_TEXT: /.+/
-
     %import common.WS
     %ignore WS
 """
 
 class AccountingTransformer(Transformer):
     def start(self, children):
-        # 初始化結構
-        res = {"交易日期": children[0], "借項科目": [], "貸項科目": [], "摘要": children[2]}
-        items = children[1]
-        for item in items:
+        res = {"date": children[0], "debit": [], "credit": [], "summary": children[2]}
+        for item in children[1]:
             if item['type'] == 'debit':
-                res["借項科目"].append(f"{item['name']}{item['amount']}元")
+                res["debit"].append(item)
             else:
-                res["貸項科目"].append(f"{item['name']}{item['amount']}元")
+                res["credit"].append(item)
         return res
 
     def date(self, children):
@@ -81,12 +48,39 @@ class AccountingTransformer(Transformer):
         return children
 
     def debit_item(self, children):
-        return {"type": "debit", "name": str(children[0]).strip(), "amount": str(children[1])}
+        return {"type": "debit", "name": str(children[0]).strip(), "amount": int(children[1])}
 
     def credit_item(self, children):
-        return {"type": "credit", "name": str(children[0]).strip(), "amount": str(children[1])}
+        return {"type": "credit", "name": str(children[0]).strip(), "amount": int(children[1])}
 
     def summary(self, children):
         return str(children[0])
 
+# --- 2. 轉換與檢核函數 ---
+def transform_and_validate(result_dict):
+    output = []
+    date = result_dict['date']
+    summary = result_dict['summary']
+    
+    total_debit = 0
+    total_credit = 0
+
+    # 處理借方
+    for item in result_dict['debit']:
+        amt = item['amount']
+        total_debit += amt
+        output.append([date, item['name'], summary, amt, 0])
+        
+    # 處理貸方
+    for item in result_dict['credit']:
+        amt = item['amount']
+        total_credit += amt
+        output.append([date, item['name'], summary, 0, amt])
+
+    # --- 檢核邏輯 ---
+    if total_debit != total_credit:
+        # 你可以選擇拋出異常 (Exception) 或回傳錯誤訊息
+        raise ValueError(f"【分錄不平衡】借方總額：{total_debit} / 貸方總額：{total_credit} (差額：{total_debit - total_credit})")
+    
+    return output
 
