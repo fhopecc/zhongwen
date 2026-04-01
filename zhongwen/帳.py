@@ -42,7 +42,8 @@ class AccountingTransformer(Transformer):
         return res
 
     def date(self, children):
-        return f"{children[0]}.{children[1]}.{children[2]}"
+        from zhongwen.時 import 取日期
+        return 取日期(f"{children[0]}.{children[1]}.{children[2]}")
 
     def items(self, children):
         return children
