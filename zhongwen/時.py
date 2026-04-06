@@ -417,7 +417,7 @@ def 擇日():
 一月 = pd.DateOffset(months=1)
 一季 = pd.DateOffset(months=3)
 半年 = pd.DateOffset(months=6)
-一年 = pd.DateOffset(year=1)
+一年 = pd.DateOffset(years=1)
 今日 = 取日期()
 今年數 = 今日.year
 上年數 = 今年數-1
@@ -431,8 +431,9 @@ def 擇日():
 一季前 = 今日 - 一季
 半年前 = 今日 - 半年
 一年前 = 今日 - 一年
-一月後 = 今日 + 一月 
-三月後 = 今日 + 一季 
+一月後 = 今日 + 一月
+三月後 = 今日 + 一季
+一年後 = 今日 + 一年
 五年又一個月前 = 今日 - pd.DateOffset(months=61)
 本月 = pd.Period(今日, 'M')
 上月 = 本月 - 1

@@ -23,7 +23,6 @@ def 取日記帳紀錄(交易):
         transformer = AccountingTransformer()
         parsed_data = transformer.transform(parser.parse(交易))
         final_list = transform_and_validate(parsed_data)
-        print('一般交易')
         return final_list
     except Exception as e: pass
     try:
