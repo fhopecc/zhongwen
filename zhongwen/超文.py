@@ -1,3 +1,6 @@
+'''
+處理超文件 hypertext 模組
+'''
 def 取表單數據(html):
     '傳回 form 的名稱值對'
     from lxml import etree
