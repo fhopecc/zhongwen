@@ -517,7 +517,7 @@ def 轉錄文字(源檔集):
             text += get_pandoc_text(s)
         elif s.suffix == ".doc":
             text += get_doc_text(s)
-        elif s.suffix == ".pdf":
+        elif s.suffix.lower() == ".pdf":
             text += 取內文(s)
         elif s.suffix == ".m4a":
             text += 音訊轉錄文字(s)

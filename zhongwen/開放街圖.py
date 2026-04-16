@@ -247,6 +247,33 @@ def 查詢最近路程節點(地點, 路網=None):
     location = ox.geocode(地點)
     print("位置座標：", location)
 
+
+
+def 取地址(地點名稱):
+    from geopy.geocoders import Nominatim
+    # 初始化 Nominatim，請更換為你自定義的 user_agent
+    geolocator = Nominatim(user_agent="my_multi_search_app", timeout=10)
+    location_name = 地點名稱    
+    try:
+        # 設定 exactly_one=False 會回傳一個 list，包含所有匹配的結果
+        locations = geolocator.geocode(location_name, exactly_one=False)
+        
+        if locations:
+            results = []
+            for loc in locations:
+                results.append({
+                    "地址": loc.address,
+                    "緯度": loc.latitude,
+                    "經度": loc.longitude
+                })
+            return results
+        else:
+            return "找不到任何相關地址。"
+            
+    except Exception as e:
+        return f"發生錯誤: {e}"
+
+
 if __name__ == '__main__':
     import argparse
     from zhongwen.表 import 顯示
