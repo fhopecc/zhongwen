@@ -5,6 +5,11 @@ class Test(unittest.TestCase):
     '依方法名稱字母順序測試'
     def test(self):
         from zhongwen.帳 import 取日記帳紀錄
+        text = "115.4.11借國旅卡分期-114年度車險貸國旅卡617元，旺旺友聯產物保分12期之第12期。"
+        print(text)
+        d = 取日記帳紀錄(text)
+        print(d)
+
         text = "郵局網銀"
         print(text)
         d = 取日記帳紀錄(text)

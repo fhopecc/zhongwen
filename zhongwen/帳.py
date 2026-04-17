@@ -29,7 +29,8 @@ def 取日記帳紀錄(交易):
         return 取日記帳紀錄(取沖帳交易(交易))
     except Exception as e: pass
     try:
-        return 取日記帳紀錄(自備註取交易(交易))
+        # return 取日記帳紀錄(自備註取交易(交易))
+        pass
     except Exception as e: pass
     
     d = 取日期(交易)
@@ -54,11 +55,11 @@ accounting_grammar = r"""
     ?items: shorthand_items | standard_items
     
     # 1 借 1 貸 1 金額模式
-    shorthand_items: "借" NAME "貸" NAME AMOUNT "元"
+    shorthand_items: "借" DNAME "貸" CNAME AMOUNT "元"
 
     standard_items: (debit_item | credit_item)+
-    debit_item: "借" NAME AMOUNT "元"
-    credit_item: "貸" NAME AMOUNT "元"
+    debit_item: "借" DNAME AMOUNT "元"
+    credit_item: "貸" CNAME AMOUNT "元"
     
     summary: "，" SUMMARY_CONTENT
     
@@ -66,7 +67,8 @@ accounting_grammar = r"""
     # 匹配任何非特殊字元。
     # 遇到「貸」字時，只有在後面「不是」款、項、、字、數字、元、逗號時才停止。
     # 這確保了「公教貸款」會被完整抓取。
-    NAME: /([^\d借貸元，\s]|(貸(?=[款項])))++/
+    DNAME: /([^借貸元，\s]|(貸(?=[款項])))++/
+    CNAME: /([^\d借貸元，\s]|(貸(?=[款項])))++/
     
     AMOUNT: /\d+/
     SUMMARY_CONTENT: /.+/
