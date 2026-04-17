@@ -53,10 +53,8 @@ def 取期間(期間, 全取=False):
     else:
         logger.error(f'期間型態必須為字串、期間或整數，而非{type(期間)}！')
         return pd.NaT
-
-    if ms:=re.findall(r'(\d{4})([01]\d)', s):
-        ps = [Period(f'{int(m[0])}{int(m[1]):02}', 'M') for m in ms]
-    elif ms:=re.findall(r'(\d{4})-([01]?\d)', s):
+    
+    if ms:=re.findall(r'(\d{4})-([01]?\d)', s):
         ps = [Period(f'{int(m[0])}{int(m[1]):02}', 'M') for m in ms]
     elif qs:=re.findall(r'\d{4}Q[1234]', s):
         ps = [Period(q) for q in qs]

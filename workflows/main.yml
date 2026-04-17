@@ -1,0 +1,16 @@
+name: My Auto Scraper
+on:
+  schedule:
+    - cron: '0 0 * * *' # 每天執行一次
+  workflow_dispatch:     # 這行很重要，讓你能在網頁上手動點擊執行
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Run Script
+        run: python your_script.py # 換成你的檔名

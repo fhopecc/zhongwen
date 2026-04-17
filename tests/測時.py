@@ -9,8 +9,10 @@ class Test(unittest.TestCase):
         from pandas import Timestamp, Timedelta
         from datetime import datetime, date
         import pandas as pd
-        print(擇日().strftime("<%Y-%m-%d %a>"))
+        self.assertEqual(取日期('1'), Timestamp('2026-4-1'))
+
         self.assertFalse(True)
+        print(擇日().strftime("<%Y-%m-%d %a>"))
 
         今加班截止時間 = 取時間('14:23') + (60*3-32)* 一分鐘 
         self.assertFalse(True)

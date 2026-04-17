@@ -1,5 +1,5 @@
-
 def 排日程(ds):
+    '傳回日程 orgmode'
     from collections import defaultdict
     from collections.abc import Iterable 
     from zhongwen.時 import 今日, 取日期, 取正式民國日期
@@ -315,3 +315,9 @@ def 標記完成(任務):
         return f"{prefix} [{timestamp}]"
     content = re.sub(r'(DEADLINE:|SCHEDULED:)\s+<([^>]+)>', to_inactive, content)
     return content
+
+def 提醒日程(目錄):
+    from zhongwen.偶 import 傳訊
+    傳訊(排日程(目錄))
+
+

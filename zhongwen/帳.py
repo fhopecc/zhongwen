@@ -26,11 +26,10 @@ def 取日記帳紀錄(交易):
         return final_list
     except Exception as e: pass
     try:
-        return 取日記帳紀錄(取沖帳交易(交易))
+        return 取沖帳交易(交易)
     except Exception as e: pass
     try:
-        # return 取日記帳紀錄(自備註取交易(交易))
-        pass
+        return 取日記帳紀錄(自備註取交易(交易))
     except Exception as e: pass
     
     d = 取日期(交易)
@@ -67,8 +66,8 @@ accounting_grammar = r"""
     # 匹配任何非特殊字元。
     # 遇到「貸」字時，只有在後面「不是」款、項、、字、數字、元、逗號時才停止。
     # 這確保了「公教貸款」會被完整抓取。
-    DNAME: /([^借貸元，\s]|(貸(?=[款項])))++/
-    CNAME: /([^\d借貸元，\s]|(貸(?=[款項])))++/
+    DNAME: /((?!\d+元)\d+|[^\d借貸元，\s]|貸(?=款))++/
+    CNAME: /((?!\d+元)\d+|[^\d借貸元，\s]|貸(?=款))++/
     
     AMOUNT: /\d+/
     SUMMARY_CONTENT: /.+/
@@ -205,8 +204,12 @@ class Accounting2Transformer(Transformer):
         return res
 
 def 取沖帳交易(沖帳交易):
-    '取沖帳交易'
+    '''
+    一、傳回日期、沖轉科目及金額。
+    '''
     from zhongwen.數 import 取數值
+    from zhongwen.時 import 取日期
+    import pandas as pd
     parser = Lark(accounting2, parser='earley') 
     tree = parser.parse(沖帳交易)
     日期 = 沖轉科目 = 借項科目 = 貸項科目 = 金額 = ''
@@ -215,34 +218,39 @@ def 取沖帳交易(沖帳交易):
     for subtree in tree.children:
         if not isinstance(subtree, Tree): continue
         if subtree.data == 'date':
-            日期 = str(subtree.children[0])
+            日期 = 取交易日(str(subtree.children[0]))
         elif subtree.data == 'account':
             沖轉科目 = str(subtree.children[0]).strip()
         elif subtree.data == 'amount':
             # 結合數字與單位
             金額 = "".join([str(c) for c in subtree.children if c])
-    if '應付' in 沖轉科目:
-        借項科目 = 沖轉科目
-        貸項科目 = 沖轉科目.split('應')[0]
-        from 財務.日記帳 import 日記帳
-        try:
-            沖轉科目餘額 = 日記帳().應付餘額明細().loc[沖轉科目].餘額
-        except KeyError:
-            raise ValueError(f'「{沖帳交易}」無該項沖轉科目！')
-    if 借項科目 == '':
-        raise ValueError(f'「{沖帳交易}」推論借項科目為空！')
-    if 貸項科目 == '':
-        raise ValueError(f'「{沖帳交易}」推論貸項科目為空！')
-    if 沖轉科目餘額 == 0:
-        raise ValueError(f'「{沖帳交易}」沖轉科目無待沖轉金額即科目餘額為零！')
-    if 金額 == '':
-        金額 = f'{沖轉科目餘額:.0f}元'
-    else:
-        金額數 = 取數值(金額)
-        if 金額數 > 沖轉科目餘額:
-            raise ValueError(f'「{沖帳交易}」沖轉金額大於待沖轉金額{沖轉科目餘額:.0f}元！')
-    print('沖帳交易')
-    return f'{日期}借{借項科目}貸{貸項科目}{金額}，沖銷{沖轉科目}'
+    s = pd.Series()
+    s['日期'] = 日期
+    s['沖轉科目'] = 沖轉科目
+    s['金額'] = 金額
+    return s
+    # return f'{日期}借{借項科目}貸{貸項科目}{金額}，沖銷{沖轉科目}'
+    # if '應付' in 沖轉科目:
+    #     借項科目 = 沖轉科目
+    #     貸項科目 = 沖轉科目.split('應')[0]
+    #     from 財務.日記帳 import 日記帳
+    #     try:
+    #         沖轉科目餘額 = 日記帳().應付餘額明細().loc[沖轉科目].餘額
+    #     except KeyError:
+    #         raise ValueError(f'「{沖帳交易}」無該項沖轉科目！')
+    # if 借項科目 == '':
+    #     raise ValueError(f'「{沖帳交易}」推論借項科目為空！')
+    # if 貸項科目 == '':
+    #     raise ValueError(f'「{沖帳交易}」推論貸項科目為空！')
+    # if 沖轉科目餘額 == 0:
+    #     raise ValueError(f'「{沖帳交易}」沖轉科目無待沖轉金額即科目餘額為零！')
+    # if 金額 == '':
+    #     金額 = f'{沖轉科目餘額:.0f}元'
+    # else:
+    #     金額數 = 取數值(金額)
+    #     if 金額數 > 沖轉科目餘額:
+    #         raise ValueError(f'「{沖帳交易}」沖轉金額大於待沖轉金額{沖轉科目餘額:.0f}元！')
+    # print('沖帳交易')
 
 # 備註推論交易
 @lru_cache
