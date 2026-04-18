@@ -1,5 +1,51 @@
-def 排日程(ds):
-    '傳回日程 orgmode'
+def 提醒日程(目錄, 提醒=False):
+    '提醒逾期及當日日程'
+    from zhongwen.偶 import 傳訊
+    from zhongwen.時 import 取日期, 取正式民國日期
+    from zhongwen.時 import 今日, 取本週五
+    s = 排日程(目錄, 傳回物件=True)
+    m = []
+    for d in sorted(s.日程):
+        if 取日期(d) <= 取本週五():
+            for t in s.日程[d]:
+                m.append(f'V {取正式民國日期(d, 含星期=True)}{t['title']}')
+    for d in sorted(s.逾期.keys()):
+        for t in s.逾期[d]:
+            m.append(f'X {取正式民國日期(d)} {t['title']}')
+    m = '\n'.join(m)
+    if 提醒:
+        傳訊(m)
+    return m
+
+def 標記完成(任務):
+    """
+    一、任務狀態由 TODO 轉為 DONE。
+    二、期限及排程時間戳記從活躍 <...> 轉為非活躍 [...]，同時加入 CLOSED 時間。
+    """
+    from datetime import datetime
+    import re
+    if isinstance(任務, list):
+        任務 = '\n'.join(任務)
+    now = datetime.now()
+    closed_timestamp = now.strftime("[%Y-%m-%d %a %H:%M]")
+    content = re.sub(r'^(\*+)\s+TODO', r'\1 DONE', 任務, flags=re.MULTILINE)
+    lines = content.splitlines()
+    if lines:
+        lines.insert(1, f"CLOSED: {closed_timestamp}")
+    content = "\n".join(lines)
+
+    def to_inactive(match):
+        prefix = match.group(1) # DEADLINE: 或 SCHEDULED:
+        timestamp = match.group(2) # 內部的日期字串
+        return f"{prefix} [{timestamp}]"
+    content = re.sub(r'(DEADLINE:|SCHEDULED:)\s+<([^>]+)>', to_inactive, content)
+    return content
+
+def 排日程(ds, 傳回物件=False):
+    '''
+    一、傳回日程 orgmode 文字。
+    二、指定傳回物件，則回傳逾期、日程、待辦三個清單之物件。
+    '''
     from collections import defaultdict
     from collections.abc import Iterable 
     from zhongwen.時 import 今日, 取日期, 取正式民國日期
@@ -38,6 +84,13 @@ def 排日程(ds):
                                     daily_tasks[date_str].append(task_info)
                             else:
                                 no_date_tasks.append(task_info)
+    if 傳回物件:
+        import pandas as pd
+        s = pd.Series()
+        s['逾期'] = overdue_tasks
+        s['日程'] = daily_tasks
+        s['待辦'] = no_date_tasks
+        return s
     lines = []
     lines.append(f"#+TITLE: {取正式民國日期(含星期=True)}日程表")
     # 逾期
@@ -208,8 +261,10 @@ def org2docx(org, 節點序號=0):
     from zhongwen.數 import 取中文數字, 取大寫中文數字
     from docx import Document
     from pathlib import Path
-    import re
+    import subprocess
+    import shutil
     import os
+    import re
     org = Path(org)
     if 節點序號 > 0:
         原始檔 = org
@@ -217,11 +272,22 @@ def org2docx(org, 節點序號=0):
         org = org.with_stem(f'{org.stem}_{節點序號}')
         org.write_text(節點內容, encoding='utf8')
     docx = org.with_suffix('.docx')
+    pandoc = shutil.which('pandoc')
     temp = Path(__file__).parent / r'resource\審核報告範本.docx'
-    cmd = f'pandoc -f org+east_asian_line_breaks -t docx '
-    cmd += f'--reference-doc="{temp}" --number-sections '
-    cmd += f'-o "{docx}" {org}'
-    os.system(cmd)
+    temp = temp.resolve()
+    subprocess.run([pandoc
+                   ,'-f' ,'org+east_asian_line_breaks'
+                   ,'-t' ,'docx'
+                   ,f'--reference-doc={temp}'
+                   ,'--number-sections' 
+                   ,'-o' 
+                   ,docx
+                   ,org
+                   ])
+    # cmd = f'pandoc -f org+east_asian_line_breaks -t docx '
+    # cmd += f'--reference-doc="{temp}" --number-sections '
+    # cmd += f'-o "{docx}" {org}'
+    # os.system(cmd)
     document = Document(str(docx))
 
     def 取中文階層編號(編號, 階層):
@@ -291,33 +357,4 @@ if __name__ == '__main__':
                 org2docx(f)
         else:
             取超文本(f)
-
-def 標記完成(任務):
-    """
-    一、任務狀態由 TODO 轉為 DONE。
-    二、期限及排程時間戳記從活躍 <...> 轉為非活躍 [...]，同時加入 CLOSED 時間。
-    """
-    from datetime import datetime
-    import re
-    if isinstance(任務, list):
-        任務 = '\n'.join(任務)
-    now = datetime.now()
-    closed_timestamp = now.strftime("[%Y-%m-%d %a %H:%M]")
-    content = re.sub(r'^(\*+)\s+TODO', r'\1 DONE', 任務, flags=re.MULTILINE)
-    lines = content.splitlines()
-    if lines:
-        lines.insert(1, f"CLOSED: {closed_timestamp}")
-    content = "\n".join(lines)
-
-    def to_inactive(match):
-        prefix = match.group(1) # DEADLINE: 或 SCHEDULED:
-        timestamp = match.group(2) # 內部的日期字串
-        return f"{prefix} [{timestamp}]"
-    content = re.sub(r'(DEADLINE:|SCHEDULED:)\s+<([^>]+)>', to_inactive, content)
-    return content
-
-def 提醒日程(目錄):
-    from zhongwen.偶 import 傳訊
-    傳訊(排日程(目錄))
-
 

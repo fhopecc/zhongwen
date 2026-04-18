@@ -410,6 +410,31 @@ def 擇日():
     
     return data['picked']
 
+def 取本週五():
+    '周六為一週起始'
+    import pandas as pd
+    today = 今日
+    # Python weekday: Mon=0, Tue=1, Wed=2, Thu=3, Fri=4, Sat=5, Sun=6
+    current_weekday = today.weekday()
+    
+    # 定義距離「本週五」的天數差 (基於週六為一週起始)
+    # 週六(5) 到 下週五 差 6 天
+    # 週日(6) 到 下週五 差 5 天
+    # 週一(0) 到 本週五 差 4 天
+    # ...以此類推
+    wait_days = {
+        5: 6,  # Saturday
+        6: 5,  # Sunday
+        0: 4,  # Monday
+        1: 3,  # Tuesday
+        2: 2,  # Wednesday
+        3: 1,  # Thursday
+        4: 0   # Friday
+    }
+    
+    days_to_friday = wait_days[current_weekday]
+    return today + pd.Timedelta(days=days_to_friday)
+    
 一日 = pd.Timedelta(days=1)
 一週 = pd.Timedelta(days=7)
 一月 = pd.DateOffset(months=1)

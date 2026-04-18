@@ -6,12 +6,14 @@ class Test(unittest.TestCase):
         from zhongwen.時 import 取時間, 一分鐘, 擇日
         from zhongwen.時 import 取日期, 今日, 取小寫民國日期
         from zhongwen.時 import 取正式民國日期
+        from zhongwen.時 import 取本週五
         from pandas import Timestamp, Timedelta
         from datetime import datetime, date
         import pandas as pd
+        f = 取本週五()
+        print(f)
         self.assertEqual(取日期('1'), Timestamp('2026-4-1'))
 
-        self.assertFalse(True)
         print(擇日().strftime("<%Y-%m-%d %a>"))
 
         今加班截止時間 = 取時間('14:23') + (60*3-32)* 一分鐘 
