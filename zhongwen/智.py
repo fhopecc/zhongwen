@@ -1,7 +1,10 @@
 def 設定環境():
-    from zhongwen.python_dev import 安裝套件
-    for 套件 in ['zhipuai']:
-        安裝套件(套件)
+    from zhongwen.windows import 建立傳送到項目
+    from zhongwen.windows import 增加檔案右鍵選單功能
+    import sys
+    cmd = f"powershell.exe -NoExit -Command \"$env:Path += ';$env:LOCALAPPDATA\\Microsoft\\WinGet\\Links'; py -m zhongwen.文 -o -c -f '%1'\""
+    建立傳送到項目('產製摘要提問句', cmd)
+
 
 def deepseek():
     from openai import OpenAI
@@ -215,11 +218,49 @@ def 查詢關鍵字(關鍵字):
     print(cmd)
     os.system(cmd)
 
+def 取檔案摘要提問句(檔, 角色='秘書') -> str:
+    '''
+    一、取指定檔案摘要提問句。
+    二、一句概括全文主旨。
+    三、條列5個重點。
+    四、提取3個關鍵字。
+    '''
+    from zhongwen.文 import 轉錄文字
+    s = 轉錄文字(檔)
+    p = f'''
+請擔任{角色}摘要以下文本，
+須以繁體中文且無 markup 之純文字表達，
+先以一句概括全文主旨，
+次條列不逾 5 個核心重點，
+並提取 3 個關鍵字。
+
+以下為原始文本：
+「{s}」
+'''
+    return p
+
 if __name__ == '__main__':
     import argparse
+    import pyperclip
+    from pathlib import Path
     parser = argparse.ArgumentParser()
-    parser.add_argument("query", type=str, help="問題")
+    parser.add_argument("-q", "--query", type=str, help="問題")
     parser.add_argument("-k", "--keyword", action="store_true", help="查詢關鍵字")
+    parser.add_argument('-f', '--files', nargs='+', help='指定處理檔案集')
+    parser.add_argument("-a", "--abstract", action="store_true", help="取檔案摘要提問句")
     args = parser.parse_args()
     if args.keyword:
         查詢關鍵字(args.query)
+    elif 檔案集 := args.files:
+        if args.abstract: 
+            p = 取檔案摘要提問句(檔案集)
+            if len(p) > 20000:
+                f = Path(檔案集[0])
+                f = f.with_stem(f'{f.stem}等檔摘要提問句').with_suffix('.txt')
+                f.write_text(p, encoding='utf-8')
+                m = f"提問句大於2萬字，另存成提問句檔：{f}，請上傳該檔提問……"
+                print(m)
+            else:
+                pyperclip.copy(p)
+                print(p)
+                print('以上提問句已複製至剪貼簿，請貼至提問框……')

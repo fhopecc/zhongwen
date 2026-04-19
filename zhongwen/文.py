@@ -499,7 +499,7 @@ def get_pandoc_text(source):
     except FileNotFoundError:
         print("錯誤：Pandoc 未安裝或不在系統路徑中。")
 
-def 轉錄文字(源檔集):
+def 轉錄文字(源檔集) -> str:
     from zhongwen.音 import 轉錄文字 as 音訊轉錄文字
     from zhongwen.office_document import get_doc_text
     from zhongwen.pdf import 取內文
