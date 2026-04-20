@@ -132,3 +132,28 @@ def 設定預設右鍵選單():
     增加檔案右鍵選單功能('複製檔案文字', cmd, '*')
     cmd = f'"{sys.executable}" -m zhongwen.file --file2text "%1"' 
     增加檔案右鍵選單功能('轉文字檔', cmd, '*')
+
+def 建立處理檔案集傳送到項目(名稱:str, 模組:str, 選項=''):
+    '''
+    一、模組命令參數須設定 -f 指定處理檔案集。
+    '''
+    import win32com.client
+    from pathlib import Path
+    import os
+    if isinstance(選項, list):
+        選項 = ' '.join(選項)
+    if 選項:
+        選項 = f' {選項} '
+    args = f"-NoExit -Command \"py -m {模組}{選項}-f '%1'\""
+    print(args)
+    sendto_dir = os.path.join(os.environ['APPDATA'], 'Microsoft', 'Windows', 'SendTo')
+    shortcut_name = f"{名稱}.lnk"
+    shortcut_path = os.path.join(sendto_dir, shortcut_name)
+
+    shell = win32com.client.Dispatch("WScript.Shell")
+    shortcut = shell.CreateShortCut(shortcut_path)
+    shortcut.TargetPath = 'powershell.exe'
+    shortcut.Arguments = args
+    shortcut.WorkingDirectory = str(Path.home())
+    shortcut.Save()
+    print(f"捷徑已建立於: {shortcut_path}")

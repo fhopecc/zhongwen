@@ -1,10 +1,9 @@
 def 設定環境():
-    from zhongwen.windows import 建立傳送到項目
+    from zhongwen.windows import 建立處理檔案集傳送到項目
     from zhongwen.windows import 增加檔案右鍵選單功能
     import sys
-    cmd = f"powershell.exe -NoExit -Command \"$env:Path += ';$env:LOCALAPPDATA\\Microsoft\\WinGet\\Links'; py -m zhongwen.文 -o -c -f '%1'\""
-    建立傳送到項目('產製摘要提問句', cmd)
-
+    cmd = f"powershell.exe -NoExit -Command \"$env:Path += ';$env:LOCALAPPDATA\\Microsoft\\WinGet\\Links'; py -m zhongwen.文 -a -f '%1'\""
+    建立處理檔案集傳送到項目('產製摘要提問句', 'zhongwen.智', '-a')
 
 def deepseek():
     from openai import OpenAI
@@ -243,13 +242,18 @@ if __name__ == '__main__':
     import argparse
     import pyperclip
     from pathlib import Path
+    import sys
+    print(sys.argv)
     parser = argparse.ArgumentParser()
+    parser.add_argument("--setup", action="store_true", help="設定環境")
     parser.add_argument("-q", "--query", type=str, help="問題")
     parser.add_argument("-k", "--keyword", action="store_true", help="查詢關鍵字")
-    parser.add_argument('-f', '--files', nargs='+', help='指定處理檔案集')
     parser.add_argument("-a", "--abstract", action="store_true", help="取檔案摘要提問句")
+    parser.add_argument('-f', '--files', nargs='+', help='指定處理檔案集，檔名不可有空白')
     args = parser.parse_args()
-    if args.keyword:
+    if args.setup:
+        設定環境()
+    elif args.keyword:
         查詢關鍵字(args.query)
     elif 檔案集 := args.files:
         if args.abstract: 
