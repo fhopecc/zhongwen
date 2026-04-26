@@ -15,6 +15,7 @@ def 取日記帳紀錄(交易):
     一、日記帳交易紀錄：日期、科目、備註、借、貸。
     二、交易紀錄借貸不平衡會引發錯誤。    
     三、僅有日期則傳回日期物件。
+    四、沖帳交易傳回字典。
     '''
     from zhongwen.時 import 取日期
     import pandas as pd
@@ -213,7 +214,6 @@ def 取沖帳交易(沖帳交易):
     parser = Lark(accounting2, parser='earley') 
     tree = parser.parse(沖帳交易)
     日期 = 沖轉科目 = 借項科目 = 貸項科目 = 金額 = ''
-    沖轉科目餘額 = 0
     # 建立一個簡單的提取器
     for subtree in tree.children:
         if not isinstance(subtree, Tree): continue

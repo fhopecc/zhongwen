@@ -133,6 +133,44 @@ def 設定預設右鍵選單():
     cmd = f'"{sys.executable}" -m zhongwen.file --file2text "%1"' 
     增加檔案右鍵選單功能('轉文字檔', cmd, '*')
 
+def 建立模組捷徑(名稱:str, 模組:str, 選項='', 存放目錄=None):
+    '''
+    一、模組指定如 zhongwen.帳
+    二、選項 ['-i', '--setup', '-o']
+    二、捷徑存放目錄預設為桌面
+    '''
+    from pathlib import Path
+    import win32com.client
+    import winshell
+    import os
+
+    if not 存放目錄:
+        存放目錄 = winshell.desktop()
+
+    shortcut_name = f"{名稱}.lnk"
+    shortcut_path = os.path.join(存放目錄, shortcut_name)
+
+    shell = win32com.client.Dispatch("WScript.Shell")
+
+    shortcut = shell.CreateShortCut(shortcut_path)
+
+    shortcut.TargetPath = 'powershell.exe'
+
+    if isinstance(選項, list):
+        選項 = ' '.join(選項)
+    if 選項:
+        選項 = f' {選項} '
+    args = f"-NoExit -Command \"py -m {模組}{選項}"
+
+    shortcut.Arguments = args
+
+    shortcut.WorkingDirectory = str(Path.home())
+
+    shortcut.Save()
+    print(f"捷徑已建立於: {shortcut_path}")
+
+
+
 def 建立處理檔案集傳送到項目(名稱:str, 模組:str, 選項=''):
     '''
     一、模組命令參數須設定 -f 指定處理檔案集。
@@ -157,3 +195,8 @@ def 建立處理檔案集傳送到項目(名稱:str, 模組:str, 選項=''):
     shortcut.WorkingDirectory = str(Path.home())
     shortcut.Save()
     print(f"捷徑已建立於: {shortcut_path}")
+
+def 建立桌面捷徑(名稱, 模組, 選項='', 起始位置=None):
+    建立模組捷徑(名稱, 模組, 選項)
+
+建立桌面捷徑.__doc__ = 建立模組捷徑.__doc__
