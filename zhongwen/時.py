@@ -5,6 +5,97 @@ from zhongwen.date import 全是日期嗎
 
 logger = logging.getLogger(Path(__file__).stem)
 
+def 取日期(日期=None, 傳回全部日期=False, 包含位置=False):
+    '''
+    一、解析輸入字串所有日期字串並傳回 pd.Timestamp.normalize()，即不包含時間之日期。
+    二、預設傳回第一個日期 pd.Timestamp，但可指定「傳回全部日期」參數，傳回所有日期 list。
+    四、可指定含字串位置選項，就回傳成(日期, 起, 迄) list。
+    五、支援日期格式如次：
+        2026.5.2
+        2026/5/2
+        2026-5-2
+        20260502
+        2026年5月2日
+    六、支援包含星期格式：
+        2026/5/2 Sat
+        2026/5/2 週五
+    七、支援民國年：
+        115.5.2 -> 2026.5.2
+        115年5月2日 -> 2026.5.2
+        0680729 -> 1979.7.29
+    八、解析輸入數字之字串表達之日期字串，如20260502整數就解成 2026.5.2
+    九、解析輸入 date, datetime, Timestamp 等類日期物件，就回傳其對應之 Timestamp。
+'''
+    """
+    解析輸入字串或物件中的日期。
+    """
+    import re
+    import pandas as pd
+    from datetime import date, datetime
+    input_data, return_all, include_position = 日期, 傳回全部日期, 包含位置
+    if input_data is None:
+        return pd.Timestamp.now().normalize()
+
+    # 處理已經是日期物件的情況 (需求九)
+    if isinstance(input_data, (date, datetime, pd.Timestamp)):
+        ts = pd.Timestamp(input_data).normalize()
+        result = (ts, 0, 0) if include_position else ts
+        return [result] if return_all else result
+
+    if not isinstance(input_data, str):
+        input_data = str(input_data)
+
+    # 正規表達式設定
+    # 1. 支援 2026.5.2, 2026/5/2, 2026-5-2, 2026年5月2日, 115.5.2 等
+    # 2. 支援包含星期 (Sat, 週五)
+    # 3. 支援純數字 20260502 或 0680729
+    pattern = re.compile(r"""
+        (\d{2,4})                     # 年份 (民國或西元)
+        [\.\-/年]                     # 分隔符
+        (\d{1,2})                     # 月
+        [\.\-/月]                     # 分隔符
+        (\d{1,2})日?                  # 日
+        (?:\s*(?:Sat|Sun|Mon|Tue|Wed|Thu|Fri|週[一二三四五六日]))? # 星期(選填)
+        |
+        (?<!\d)(\d{7,8})(?!\d)         # 純數字格式 (如 20260502 或 0680729)
+    """, re.X)
+
+    results = []
+
+    for match in pattern.finditer(input_data):
+        groups = match.groups()
+        start, end = match.span()
+        
+        try:
+            if groups[3]:  # 處理純數字格式 (如 20260502)
+                s = groups[3]
+                if len(s) == 7: # 民國 0680729
+                    y, m, d = int(s[:3]) + 1911, int(s[3:5]), int(s[5:])
+                else: # 西元 20260502
+                    y, m, d = int(s[:4]), int(s[4:6]), int(s[6:])
+            else: # 處理帶分隔符的格式
+                y = int(groups[0])
+                m = int(groups[1])
+                d = int(groups[2])
+                if y < 1000: # 民國年轉換
+                    y += 1911
+            
+            # 轉為 Timestamp 並 normalize (需求一)
+            ts = pd.Timestamp(year=y, month=m, day=d).normalize()
+            
+            if include_position:
+                results.append((ts, start, end))
+            else:
+                results.append(ts)
+        except ValueError:
+            continue # 忽略非法的日期組合（如 2026/02/30）
+
+    if not results:
+        return [] if return_all else None
+    
+    # 根據參數回傳 (需求二、四)
+    return results if return_all else results[0]
+
 def 取時間(時間=None):
     '''
     一、時間為表達時間之物件，如 "14:38" 字串。
@@ -26,14 +117,14 @@ def 是工作日(日期):
     import holidays
     return 日期.weekday() < 5 and 日期 not in holidays.Taiwan()
 
-def 取日期(日期=None, 無效值以今日填補=True):
-    from zhongwen.date import 取日期
-    if not 日期:
-        if 無效值以今日填補:
-            return pd.Timestamp.today().normalize()
-        else:
-            return pd.NaT
-    return 取日期(日期)
+# def 取日期(日期=None, 無效值以今日填補=True):
+#     from zhongwen.date import 取日期
+#     if not 日期:
+#         if 無效值以今日填補:
+#             return pd.Timestamp.today().normalize()
+#         else:
+#             return pd.NaT
+#     return 取日期(日期)
 
 def 取期間(期間, 全取=False):
     '''
@@ -155,17 +246,17 @@ def 取民國日期(日期=None, 格式='%Y%m%d', 昨今明表達=False):
     d = 取日期(日期)
     fmt = 格式
 
-    if not d: d = 今日()
+    if not d: d = 今日
     if pd.isnull(d):
         return ''
     if 昨今明表達:
-        if d == 今日()-Timedelta(days=1):
+        if d == 今日-Timedelta(days=1):
             return '昨'
-        if d == 今日():
+        if d == 今日:
             return '今'
-        if d == 今日()+Timedelta(days=1):
+        if d == 今日+Timedelta(days=1):
             return '明'
-        if d == 今日()+Timedelta(days=2):
+        if d == 今日+Timedelta(days=2):
             return '後天'
 
     fmt = fmt.replace(
@@ -308,7 +399,7 @@ def 正式民國日期(d=None):
 
 def 取民國年月(年月):
     '取如民國113年11月之表達字串11311'
-    return 取民國日期(年月, 格式='%Y%m')
+    return 取民國日期(年月+"01", 格式='%Y%m')
 
 def 取季別年數季數(季別):
     import pandas as pd
