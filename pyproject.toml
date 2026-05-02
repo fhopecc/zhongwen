@@ -62,6 +62,7 @@ dependencies = ['aiofiles'
                ,'pyxirr'
                ,"pytesseract"
                ,"python-docx"
+               ,"python-telegram-bot"
                ,"pywin32"
                ,"PyMuPDF"
                ,"PyPDF2"

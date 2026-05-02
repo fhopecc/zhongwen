@@ -5,6 +5,110 @@ from pathlib import Path
 from functools import lru_cache
 cache = Cache(Path.home() / 'cache')
 
+def cjk_ljust(text, width, fillchar=' '):
+    from wcwidth import wcswidth
+    # 計算目前的視覺寬度
+    current_width = wcswidth(text)
+    if current_width == -1: # 處理無法識別的字元
+        current_width = len(text)
+
+    # 計算需要補多少個半形空白
+    padding_needed = width - current_width
+    if padding_needed <= 0:
+        return text
+    return text + (fillchar * padding_needed)
+
+def cjk_rjust(text, width):
+    """手動實現支援寬字元的右對齊，並保留原始空白"""
+    from wcwidth import wcswidth
+    cur_width = wcswidth(text)
+    if cur_width == -1: 
+        cur_width = len(text)
+    
+    padding_needed = width - cur_width
+    if padding_needed <= 0:
+        return text
+    # 將補位的空白加在左邊，達成右對齊，同時保留 text 本身右側的空白
+    return (' ' * padding_needed) + text
+
+def 取交易表示文字(交易, 行寬=30):
+    'telegram 約三十字寬'
+    from zhongwen.數 import 取中文數字 
+    import cjkwrap
+    金額寬 = 7
+    科目寛 = 行寬 // 2 - 金額寬 - 2 # 貸項會右縮2空白
+    首欄寬 = 行寬 - 科目寛 - 金額寬 - 2 - 1 # -1 是中間有空白
+
+    raw_data = 取日記帳紀錄(交易) if isinstance(交易, str) else 交易
+
+    d = raw_data[0][0]
+    d = cjk_ljust(f'{d.month}.{d.day}({取中文數字(d.dayofweek+1)})', 首欄寬)
+    content = raw_data[0][2]
+    m = f'{d}{content}'
+    left_lines = cjkwrap.wrap(m, width=首欄寬)
+    left_lines = [cjk_ljust(l, 首欄寬) for l in left_lines]
+
+    right_lines = []
+    for r in raw_data:
+        '金額係右齊，但借方向左移2個空白。'
+        if (debit:=r[3]) > 0:
+            rs = cjkwrap.wrap(r[1], 科目寛)
+            debit = f'{debit:,}'
+            right_lines.append(f"{cjk_ljust(rs[0], 科目寛)}{cjk_rjust(debit, 金額寬)}")
+            for r2 in rs[1:]:
+                right_lines.append(r2)
+        else:
+            rs = cjkwrap.wrap(r[1], 科目寛)
+            credit = r[4]
+            credit = f'{credit:,}'
+            right_lines.append(f"  {cjk_ljust(rs[0], 科目寛)}{cjk_rjust(credit, 金額寬)}")
+            for r2 in rs[1:]:
+                right_lines.append("  "+r2)
+
+    max_height = max(len(left_lines), len(right_lines))
+    combined_rows=[] 
+    for i in range(max_height):
+        l_part = left_lines[i] if i < len(left_lines) else ""
+        l_formatted = cjk_ljust(l_part, 首欄寬) + ' '
+        r_part = right_lines[i] if i < len(right_lines) else ""
+        r_part = cjk_ljust(r_part, 行寬-首欄寬-1)
+        combined_rows.append(l_formatted + r_part)
+
+    return "\n".join(combined_rows)
+
+def 取交易表示(交易):
+    '''
+    5.2(五)午餐美崙牛排550元，食 550 
+                                 現金  550
+    '''
+    from zhongwen.數 import 取中文數字 
+    ts = 取日記帳紀錄(交易) if isinstance(交易, str) else 交易
+    d = ts[0][0] 
+    t = ts[0][2]
+    content = ts[0][2]
+    debit = ts[0][1]
+    amount = ts[0][3]
+    others = ''
+    td_style = "max-width: 5em; word-break: break-all; vertical-align: top;"
+    for t in ts[1:]:
+        if t[3] > 0:
+            others += f'<tr><td></td><td style="{td_style}">{t[1]}</td>'
+            others += f'<td style="text-align: right">{t[3]:,}元</td>''' 
+        else:
+            others += f'<tr><td></td><td></td><td style="{td_style}">{t[1]}</td>'
+            others += f'<td style="text-align: right">{t[4]:,}元</td>'   
+    html = f'''
+    <table>
+    <tr><td style="max-width: 20em; word-break: break-all; vertical-align: top;">
+           {d.month}.{d.day}({取中文數字(d.dayofweek+1)}){content}
+        </td>
+        <td style="{td_style}">{debit}</td>
+        <td style="text-align: right">{amount:,.0f}元</td></tr>
+    {others}
+    </table>
+    '''
+    return html
+
 def 取交易日(日期):
     '將日期以日記帳交易語言表達，即115.4.4'
     from zhongwen.時 import 取民國日期
