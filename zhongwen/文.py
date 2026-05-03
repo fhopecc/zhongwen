@@ -8,6 +8,19 @@ cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 倉頡字根表 = str.maketrans("abcdefghijklmnopqrstuvwxy"
                           ,"日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜" )
 
+def 左補齊(文, 行寬=30):
+    from cjkwrap import cjklen
+    return 文 + ' ' * (行寬-cjklen(文))
+
+def 右補齊(文, 行寬=30):
+    from cjkwrap import cjklen
+    return ' ' * (行寬-cjklen(文)) + 文
+
+def 定寬折行補齊(文, 行寬=30, 對齊方向='左') -> list:
+    import cjkwrap
+    ls = cjkwrap.wrap(文, 行寬)
+    return [左補齊(l, 行寬) if 對齊方向=='左' else 右補齊(l, 行寬) for l in ls]
+
 def 取行內連結(行):
     '''
     一、取單行字串之首個連結。

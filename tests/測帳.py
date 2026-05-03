@@ -7,9 +7,7 @@ class Test(unittest.TestCase):
         from zhongwen.帳 import 取日記帳紀錄, 取交易表示文字
         from zhongwen.表 import 表示
         text = "115.4.11借國旅卡分期-114年度車險貸國旅卡617元，旺旺友聯產物保分12期之第12期。"
-        # text = "115.4.1借公教貸款1000元借利息20元貸土銀1020元，繳公教貸款第84之2期。"
         print(取交易表示文字(text, 30))        
-        self.assertTrue(False)
 
         d = 取日記帳紀錄(text)
         self.assertEqual(d[0][1], '國旅卡分期-114年度車險')

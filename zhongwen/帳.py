@@ -5,35 +5,10 @@ from pathlib import Path
 from functools import lru_cache
 cache = Cache(Path.home() / 'cache')
 
-def cjk_ljust(text, width, fillchar=' '):
-    from wcwidth import wcswidth
-    # 計算目前的視覺寬度
-    current_width = wcswidth(text)
-    if current_width == -1: # 處理無法識別的字元
-        current_width = len(text)
-
-    # 計算需要補多少個半形空白
-    padding_needed = width - current_width
-    if padding_needed <= 0:
-        return text
-    return text + (fillchar * padding_needed)
-
-def cjk_rjust(text, width):
-    """手動實現支援寬字元的右對齊，並保留原始空白"""
-    from wcwidth import wcswidth
-    cur_width = wcswidth(text)
-    if cur_width == -1: 
-        cur_width = len(text)
-    
-    padding_needed = width - cur_width
-    if padding_needed <= 0:
-        return text
-    # 將補位的空白加在左邊，達成右對齊，同時保留 text 本身右側的空白
-    return (' ' * padding_needed) + text
-
 def 取交易表示文字(交易, 行寬=30):
     'telegram 約三十字寬'
     from zhongwen.數 import 取中文數字 
+    from zhongwen.文 import 左補齊, 右補齊, 定寬折行補齊
     import cjkwrap
     金額寬 = 7
     科目寛 = 行寬 // 2 - 金額寬 - 2 # 貸項會右縮2空白
@@ -42,11 +17,9 @@ def 取交易表示文字(交易, 行寬=30):
     raw_data = 取日記帳紀錄(交易) if isinstance(交易, str) else 交易
 
     d = raw_data[0][0]
-    d = cjk_ljust(f'{d.month}.{d.day}({取中文數字(d.dayofweek+1)})', 首欄寬)
+    d = 左補齊(f'{d.month}.{d.day}({取中文數字(d.dayofweek+1)})', 首欄寬)
     content = raw_data[0][2]
-    m = f'{d}{content}'
-    left_lines = cjkwrap.wrap(m, width=首欄寬)
-    left_lines = [cjk_ljust(l, 首欄寬) for l in left_lines]
+    left_lines = 定寬折行補齊(f'{d}{content}', 首欄寬)
 
     right_lines = []
     for r in raw_data:
@@ -54,14 +27,14 @@ def 取交易表示文字(交易, 行寬=30):
         if (debit:=r[3]) > 0:
             rs = cjkwrap.wrap(r[1], 科目寛)
             debit = f'{debit:,}'
-            right_lines.append(f"{cjk_ljust(rs[0], 科目寛)}{cjk_rjust(debit, 金額寬)}")
+            right_lines.append(f"{左補齊(rs[0], 科目寛)}{右補齊(debit, 金額寬)}")
             for r2 in rs[1:]:
                 right_lines.append(r2)
         else:
             rs = cjkwrap.wrap(r[1], 科目寛)
             credit = r[4]
             credit = f'{credit:,}'
-            right_lines.append(f"  {cjk_ljust(rs[0], 科目寛)}{cjk_rjust(credit, 金額寬)}")
+            right_lines.append(f"  {左補齊(rs[0], 科目寛)}{右補齊(credit, 金額寬)}")
             for r2 in rs[1:]:
                 right_lines.append("  "+r2)
 
@@ -69,11 +42,10 @@ def 取交易表示文字(交易, 行寬=30):
     combined_rows=[] 
     for i in range(max_height):
         l_part = left_lines[i] if i < len(left_lines) else ""
-        l_formatted = cjk_ljust(l_part, 首欄寬) + ' '
+        l_formatted = 左補齊(l_part, 首欄寬) + ' '
         r_part = right_lines[i] if i < len(right_lines) else ""
-        r_part = cjk_ljust(r_part, 行寬-首欄寬-1)
+        r_part = 左補齊(r_part, 行寬-首欄寬-1)
         combined_rows.append(l_formatted + r_part)
-
     return "\n".join(combined_rows)
 
 def 取交易表示(交易):
