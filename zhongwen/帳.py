@@ -5,13 +5,41 @@ from pathlib import Path
 from functools import lru_cache
 cache = Cache(Path.home() / 'cache')
 
+def 取分錄明細等寬字表達(分錄明細:list, 行寬=20, 數寬=7):
+    '''
+    一、即先列借項、再列貸項，其中貸項縮進1全型字寬，即2空白寛。
+        育 400
+          現金 400
+    '''
+    from zhongwen.文 import 左補齊, 右補齊, 定寬折行補齊
+    import cjkwrap
+    es = sorted(分錄明細, key=lambda e: e[1], reverse=True)
+    貸項縮進寬 = 2
+    科目寬 = 行寬 - 數寬 - 貸項縮進寬
+    res = []
+    for e in es:
+        if e[1]>0: # 借項
+            科目文字 = cjkwrap.wrap(e[0], 科目寬)
+            數 = f'{e[1]:,}'
+            res.append(f"{左補齊(科目文字[0], 科目寬)}{右補齊(數, 數寬)}")
+            for l in 科目文字[1:]:
+                res.append(左補齊(l, 行寬))
+        else:
+            科目文字 = cjkwrap.wrap(e[0], 科目寬)
+            數 = f'{e[2]:,}'
+            res.append(f"  {左補齊(科目文字[0], 科目寬)}{右補齊(數, 數寬)}")
+            for l in 科目文字[1:]:
+                res.append(左補齊(f"  {l}", 行寬))
+    return '\n'.join(res)
+
+
 def 取交易表示文字(交易, 行寬=30):
     'telegram 約三十字寬'
     from zhongwen.數 import 取中文數字 
     from zhongwen.文 import 左補齊, 右補齊, 定寬折行補齊
     import cjkwrap
     金額寬 = 7
-    科目寛 = 行寬 // 2 - 金額寬 - 2 # 貸項會右縮2空白
+    科目寛 = 行寬 // 2 - 金額寬 - 2 # 貸項右縮進2空白即1全型
     首欄寬 = 行寬 - 科目寛 - 金額寬 - 2 - 1 # -1 是中間有空白
 
     raw_data = 取日記帳紀錄(交易) if isinstance(交易, str) else 交易

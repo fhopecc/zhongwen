@@ -23,6 +23,7 @@ dependencies = ['aiofiles'
                ,'beautifulsoup4'
                ,'build'
                ,"clipboard"
+               ,"cjkwrap"
                ,"comtypes"
                ,"diskcache"
                ,'faker'
