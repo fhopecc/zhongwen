@@ -1,4 +1,4 @@
-def 提醒日程(目錄, 提醒=False):
+def 取日程提醒(目錄):
     '提醒逾期及當日日程'
     from zhongwen.偶 import 傳訊
     from zhongwen.時 import 取日期, 取正式民國日期
@@ -8,13 +8,11 @@ def 提醒日程(目錄, 提醒=False):
     for d in sorted(s.日程):
         if 取日期(d) <= 取本週五():
             for t in s.日程[d]:
-                m.append(f'V {取正式民國日期(d, 含星期=True)}{t['title']}')
+                m.append(f'## {取正式民國日期(d, 含星期=True)}{t['title']}')
     for d in sorted(s.逾期.keys()):
         for t in s.逾期[d]:
-            m.append(f'X {取正式民國日期(d)} {t['title']}')
+            m.append(f'>< {取正式民國日期(d)} {t['title']}')
     m = '\n'.join(m)
-    if 提醒:
-        傳訊(m)
     return m
 
 def 標記完成(任務):
@@ -46,9 +44,9 @@ def 排日程(ds, 傳回物件=False):
     一、傳回日程 orgmode 文字。
     二、指定傳回物件，則回傳逾期、日程、待辦三個清單之物件。
     '''
-    from collections import defaultdict
-    from collections.abc import Iterable 
     from zhongwen.時 import 今日, 取日期, 取正式民國日期
+    from collections.abc import Iterable 
+    from collections import defaultdict
     from orgparse import load
     import os
     if isinstance(ds, str) or not isinstance(ds, Iterable):
