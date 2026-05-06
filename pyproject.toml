@@ -32,6 +32,7 @@ dependencies = ['aiofiles'
                ,'folium'
                ,'google.genai'
                ,"geopandas"
+               ,'GitPython'
                ,'gspread'
                ,"hanlp" # 中文分詞
                ,'holidays' # 世界各國假日檔
