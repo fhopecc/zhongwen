@@ -43,6 +43,7 @@ dependencies = ['aiofiles'
                ,'lxml' 
                ,"marisa_trie"
                ,'matplot'
+               ,'mapclassify'
                ,'oauth2client'
                ,'odfpy'
                ,'openai-whisper'
