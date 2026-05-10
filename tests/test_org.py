@@ -7,12 +7,13 @@ class Test(unittest.TestCase):
         from zhongwen.org import 取待辦事項, 排日程, 標記完成
         from zhongwen.org import 取日程提醒
         from zhongwen.表 import 表示
+        from 財務.日記帳 import 日記帳
         from datetime import datetime
         from pathlib import Path            
         import os
         import shutil
         d = Path(r'g:\我的雲端硬碟')
-        m = 取日程提醒(d)
+        m = 取日程提醒(d, 日記帳())
         print(m)
         self.assertTrue(False)
 

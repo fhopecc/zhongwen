@@ -362,7 +362,7 @@ def 取沖帳交易(沖帳交易):
 def 載入關鍵字模式表(f=Path(__file__).parent / 'resource' / '借項關鍵字'):
     '關鍵字表不能包含空行'
     import re
-    print(f'重新戴入{f}！')
+    logger.info(f'重新戴入{f}！')
     with open(f, 'r', encoding='utf8') as f:
         ls = f.readlines()
         for l in ls:

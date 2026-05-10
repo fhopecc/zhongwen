@@ -1,4 +1,4 @@
-def 取日程提醒(目錄):
+def 取日程提醒(目錄, 日記帳=None):
     '提醒逾期及當日日程'
     from zhongwen.偶 import 傳訊
     from zhongwen.時 import 取日期, 取正式民國日期
@@ -13,6 +13,8 @@ def 取日程提醒(目錄):
         for t in s.逾期[d]:
             m.append(f'>< {取正式民國日期(d)} {t['title']}')
     m = '\n'.join(m)
+    if 日記帳:
+        m += 日記帳.取應收應付報告()
     return m
 
 def 標記完成(任務):
