@@ -1,3 +1,30 @@
+from diskcache import Cache
+from pathlib import Path
+
+cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
+
+@cache.memoize('載入鄉鎮市區界線')
+def 載入鄉鎮市區界線(鄉鎮市區界線圖檔):
+    """
+    一、載入內政部國土測繪中心鄉鎮市區界線圖檔。
+    二、下載網址：https://data.gov.tw/dataset/7441
+    三、圖檔座標系：TWD 97(EPSG 3826)。
+    """
+    import geopandas as gpd
+    import os
+    shp_path = 鄉鎮市區界線圖檔
+    print(f"正在載入圖資：{os.path.basename(shp_path)}")
+    try:
+        gdf = gpd.read_file(shp_path)
+        # 內政部圖資若未標註 CRS，通常是 TWD97 (EPSG:3826)
+        if gdf.crs is None:
+            print("警告：圖資未包含座標系統資訊，手動設定為 EPSG:3826 (TWD97)。")
+            gdf.set_crs(epsg=3826, inplace=True)
+        return gdf
+    except Exception as e:
+        print(f"載入失敗: {e}")
+        return None
+
 def 顯示座標(緯度, 經度): 
     import folium
     import os

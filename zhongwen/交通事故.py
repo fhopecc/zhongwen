@@ -8,6 +8,12 @@ def 載入交通事故資料(事故資料目錄):
     一、座標系為經緯度，即EPSG 4326。
     二、要計算距離要先轉成TWD97(EPSG:3826：TM2，中央經線121度)之圖資，單位為公尺。
     三、欄位：發生年度、發生日期、死亡、受傷、geometry
+    四、政府資料開放平台即時交通事故資料為年初至前2週之事故資料。
+        即時交通事故資料(A1類)(https://data.gov.tw/dataset/12818)
+        即時交通事故資料(A2類)(https://data.gov.tw/dataset/13139)
+    五、112年傷亡道路交通事故資料(https://data.gov.tw/dataset/167905)
+        113年傷亡道路交通事故資料(https://data.gov.tw/dataset/172969)
+        114年傷亡道路交通事故資料(https://data.gov.tw/dataset/177136)
     '''
     from zhongwen.表 import 顯示
     from zhongwen.時 import 取日期
