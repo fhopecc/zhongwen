@@ -34,6 +34,23 @@ def 取分錄明細等寬字表達(分錄明細:list, 行寬=20, 數寬=7):
                 res.append(左補齊(f"  {l}", 行寬))
     return '\n'.join(res)
 
+def 取交易表示繪文字(交易):
+    from zhongwen.數 import 取中文星期
+    es = 取日記帳紀錄(交易) if isinstance(交易, str) else 交易
+    d = es[0][0]
+    日期 = rf'📅{d.month}.{d.day}({取中文星期(d.dayofweek)})'
+    交易 = es[0][2]
+    entries = []
+    for e in es:
+        '金額係右齊，但借方向左移2個空白。'
+        if (debit:=e[3]) > 0:
+            debit = f'{debit:,}元'
+            entries.append(f'💰{e[1]} {debit}')
+        else:
+            credit = e[4]
+            credit = f'{credit:,}元'
+            entries.append(f'🔴🔴{e[1]} {credit}')
+    return '\n'.join([日期+交易]+entries)
 
 def 取交易表示文字(交易, 行寬=30):
     'telegram 約三十字寬'

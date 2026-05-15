@@ -5,13 +5,15 @@ class Test(unittest.TestCase):
     '依方法名稱字母順序測試'
     def test(self):
         from zhongwen.帳 import 取日記帳紀錄, 取交易表示文字, 自備註取交易
-        from zhongwen.帳 import 取分錄明細等寬字表達
+        from zhongwen.帳 import 取交易表示繪文字
         from zhongwen.表 import 表示
-        text = "給品500元零用"
-        d = 取日記帳紀錄(text)
-        d = 自備註取交易(text)
-        print(d)        
+        t = "給品500元零用"
+        emoji = 取交易表示繪文字(t)
+        print(emoji)
         self.assertFalse(True)
+        d = 取日記帳紀錄(t)
+        d = 自備註取交易(t)
+        print(d)        
         l = [['國旅卡分期-114年度車險', 400, 0], ['現金', 0, 400]]
         print(取分錄明細等寬字表達(l))
         print(取交易表示文字(text, 30))        
