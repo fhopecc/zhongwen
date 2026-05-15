@@ -3,7 +3,9 @@ from datetime import datetime, timedelta
 from diskcache import Cache
 from pathlib import Path
 from functools import lru_cache
+import logging
 cache = Cache(Path.home() / 'cache')
+logger = logging.getLogger(Path(__file__).stem)
 
 def 取分錄明細等寬字表達(分錄明細:list, 行寬=20, 數寬=7):
     '''

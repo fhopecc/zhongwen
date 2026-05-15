@@ -4,15 +4,19 @@ import unittest
 class Test(unittest.TestCase):
     '依方法名稱字母順序測試'
     def test(self):
-        from zhongwen.帳 import 取日記帳紀錄, 取交易表示文字
+        from zhongwen.帳 import 取日記帳紀錄, 取交易表示文字, 自備註取交易
         from zhongwen.帳 import 取分錄明細等寬字表達
         from zhongwen.表 import 表示
+        text = "給品500元零用"
+        d = 取日記帳紀錄(text)
+        d = 自備註取交易(text)
+        print(d)        
+        self.assertFalse(True)
         l = [['國旅卡分期-114年度車險', 400, 0], ['現金', 0, 400]]
         print(取分錄明細等寬字表達(l))
-        self.assertFalse(True)
-        text = "115.4.11借國旅卡分期-114年度車險貸國旅卡617元，旺旺友聯產物保分12期之第12期。"
         print(取交易表示文字(text, 30))        
 
+        text = "115.4.11借國旅卡分期-114年度車險貸國旅卡617元，旺旺友聯產物保分12期之第12期。"
         d = 取日記帳紀錄(text)
         self.assertEqual(d[0][1], '國旅卡分期-114年度車險')
         self.assertEqual(d[1][1], '國旅卡')
