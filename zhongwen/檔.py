@@ -124,11 +124,17 @@ def 抓取(url:str
         ,return_bytes=False
         ,use_requests=None
         ):
-    '''「抓取」網頁內容，傳回字串，惟鍵結以 .xls 或 .xlsx 結尾，視同 Excel 檔，傳回位元組。
-另再就抓取網頁內容之鏈結再進行抓取者，稱「爬取」。
-會話識別網址：針對以會話識別防止爬蟲之網站，可指定本網址以連結取得會話識別後賡續爬取；如指定「網站網址」字串即網址中網站網址部分。
-抓取方式：'get' 指定使用 requests.get；'post' 係 requests.post；'selenium' 係 selenium 模組。
-回傳資料形態: 'str' 傳回字串、'json' 傳回 JSON 物件、'bytes' 傳回位元組及'StringIO' 傳回io。
+    ''' 
+一、抓取超連結內容字串。
+二、抓取方式選項：get 使用 requests.get、post 使用 requests.post、selenium 使用 selenium 模組。
+二、回傳資料形態選項如次：
+    str      字串
+    json     JSON 物件
+    bytes    位元組
+    StringIO StringIO。
+三、超連結以 .xls 或 .xlsx 結尾之 Excel 檔則傳回位元組。
+四、另再就抓取網頁內容之鏈結再進行抓取者，稱「爬取」。
+五、會話識別網址：針對以會話識別防止爬蟲之網站，可指定本網址以連結取得會話識別後賡續爬取；如指定「網站網址」字串即網址中網站網址部分。
 '''
     from urllib.parse import urlparse
     from warnings import warn
