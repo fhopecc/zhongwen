@@ -3,7 +3,7 @@ from diskcache import Cache
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 
 @cache.memoize('載入交通事故資料')
-def 載入交通事故資料(事故資料目錄):
+def 載入交通事故資料(事故資料目錄, 發生地點="花蓮縣"):
     '''
     一、座標系為經緯度，即EPSG 4326。
     二、要計算距離要先轉成TWD97(EPSG:3826：TM2，中央經線121度)之圖資，單位為公尺。
@@ -48,6 +48,7 @@ def 載入交通事故資料(事故資料目錄):
     df[['死亡', '受傷']] = df['死亡受傷人數'].str.extract(r'死亡(\d+);受傷(\d+)').astype(float)
     df['死亡'] = df.死亡.fillna(0)
     df['受傷'] = df.受傷.fillna(0)
+    df = df.query('發生地點.str.contains(@發生地點, na=False)')
     gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df['經度'], df['緯度']), crs='epsg:4326')
     # gdf = gdf.to_crs(epsg=3826)
     return gdf
