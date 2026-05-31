@@ -8,6 +8,24 @@ cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 倉頡字根表 = str.maketrans("abcdefghijklmnopqrstuvwxy"
                           ,"日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜" )
 
+def 移除文後重覆出現詞(文, 詞):
+    text = 文
+    targe = 詞
+    idx = text.find(target)
+
+    # 如果找不到，find() 會回傳 -1
+    if idx == -1:
+        return text
+
+    # 算出第一次出現的結尾位置
+    first_occurrence_end = idx + len(target)
+
+    # 保留到第一次出現結束的地方，之後的內容全部清除 target
+    keep_part = text[:first_occurrence_end]
+    clean_part = text[first_occurrence_end:].replace(target, "")
+
+    return keep_part + clean_part
+
 def 左補齊(文, 行寬=30):
     from cjkwrap import cjklen
     return 文 + ' ' * (行寬-cjklen(文))

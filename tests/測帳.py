@@ -7,6 +7,9 @@ class Test(unittest.TestCase):
         from zhongwen.帳 import 取日記帳紀錄, 取交易表示文字, 自備註取交易
         from zhongwen.帳 import 取交易表示繪文字
         from zhongwen.表 import 表示
+        import re 
+        self.assertFalse(True)
+
         t = "給品500元零用"
         emoji = 取交易表示繪文字(t)
         print(emoji)

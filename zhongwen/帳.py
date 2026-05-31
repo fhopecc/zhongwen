@@ -396,6 +396,7 @@ def 重載():
 def 取借項(desc):
     '依備註所含關鍵字推論借項科目'
     for pat in 載入關鍵字模式表(f=Path(__file__).parent / 'resource' / '借項關鍵字'):
+        print(pat)
         if pat[0].search(desc):
             return pat[1] 
     return '食'

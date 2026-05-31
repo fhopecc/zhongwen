@@ -135,8 +135,7 @@ def 取期間(期間, 全取=False):
     from pandas import Period
     import re
 
-    if isinstance(期間, Period):
-        return 期間
+    if isinstance(期間, Period): return 期間
     elif isinstance(期間, int):
         s = str(期間)
     elif isinstance(期間, str):
@@ -144,8 +143,9 @@ def 取期間(期間, 全取=False):
     else:
         logger.error(f'期間型態必須為字串、期間或整數，而非{type(期間)}！')
         return pd.NaT
-    
-    if ms:=re.findall(r'(\d{4})-([01]?\d)', s):
+    if ms:=re.findall(r'(\d{4})([01]\d)', s):
+        ps = [Period(f'{int(m[0])}{int(m[1]):02}', 'M') for m in ms]
+    elif ms:=re.findall(r'(\d{4})-([01]?\d)', s):
         ps = [Period(f'{int(m[0])}{int(m[1]):02}', 'M') for m in ms]
     elif qs:=re.findall(r'\d{4}Q[1234]', s):
         ps = [Period(q) for q in qs]
@@ -276,7 +276,7 @@ def 取民國日期(日期=None, 格式='%Y%m%d', 昨今明表達=False):
 
 def 取民國月份(時間):
     '取民國113年11月之表達字串113年11月'
-    return 取民國日期(時間, 格式='%Y年%M月')
+    return 取民國日期(取期間(時間).start_time, 格式='%Y年%M月')
 
 def 取民國季度(時間):
     '取民國113年11月之表達字串113年第4季'
@@ -399,7 +399,8 @@ def 正式民國日期(d=None):
 
 def 取民國年月(年月):
     '取如民國113年11月之表達字串11311'
-    return 取民國日期(年月+"01", 格式='%Y%m')
+    p = 取期間(年月)
+    return 取民國日期(p.start_time, 格式='%Y%m')
 
 def 取季別年數季數(季別):
     import pandas as pd
