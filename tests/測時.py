@@ -15,6 +15,7 @@ class Test(unittest.TestCase):
         from pandas import Period, Timestamp
 
         # 取期間
+        self.assertEqual(取期間(取日期('20190331')), 取日期('20190331'))
         self.assertEqual(取期間('112'), Period('2023', 'Y-DEC'))
         self.assertEqual(取期間('2024'), Period('2024', 'Y-DEC'))
         self.assertEqual(取期間('11310'), Period('202410', 'M'))
