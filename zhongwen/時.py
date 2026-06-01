@@ -132,10 +132,11 @@ def 取期間(期間, 全取=False):
     二、期間非字串、期間或整數型態者，傳回 pd.NaT。
     '''
     from zhongwen.文 import 刪空格
-    from pandas import Period
+    from pandas import Period, Timestamp
     import re
 
-    if isinstance(期間, Period): return 期間
+    if isinstance(期間, Timestamp): return 期間
+    elif isinstance(期間, Period): return 期間
     elif isinstance(期間, int):
         s = str(期間)
     elif isinstance(期間, str):
@@ -276,7 +277,13 @@ def 取民國日期(日期=None, 格式='%Y%m%d', 昨今明表達=False):
 
 def 取民國月份(時間):
     '取民國113年11月之表達字串113年11月'
-    return 取民國日期(取期間(時間).start_time, 格式='%Y年%M月')
+    try:
+        return 取民國日期(取期間(時間).start_time, 格式='%Y年%M月')
+    except Exception as e:
+        try:
+            return 取民國日期(取期間(時間), 格式='%Y年%M月')
+        except Exception as e:
+            raise ValueError(f'取民國月份({時間})發生{e}！')
 
 def 取民國季度(時間):
     '取民國113年11月之表達字串113年第4季'
