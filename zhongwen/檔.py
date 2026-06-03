@@ -244,43 +244,64 @@ def 抓取(url:str
     else:
         return r.text
 
-def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False):
-    '''下載 URL 內容至指定檔案，並且回傳檔案路徑。'''
+def 下載(url, 儲存路徑=None, 儲存目錄=None, 覆寫=False) -> "pathlib.Path":
+    '下載 URL 內容至指定檔案，並且回傳檔案路徑。'
+    from pathlib import Path
     from urllib.parse import urlparse
-    from requests.exceptions import SSLError
     import requests
+
     p = 儲存路徑
     downloads = 儲存目錄
-    重載 = 覆寫
 
+    # 1. 確保目錄與路徑處理正確
     if not downloads:
         downloads = Path.home() / 'Downloads'
         downloads.mkdir(exist_ok=True)
-    fn = urlparse(url).path.split('/')[-1]
+    else:
+        downloads = Path(downloads) # 確保傳入的字串能轉為 Path 物件
+        
+    fn = urlparse(url).path.split('/')[-1] or "downloaded_file"
     if not p:
         p = downloads / fn
+    else:
+        p = Path(p)
 
+    # 2. 檢查檔案是否存在
     if not 覆寫 and p.exists(): 
-        logger.warn(f'警告：[{url}]已下載至[{p}]！')
+        logger.warning(f'警告：[{url}]已下載至[{p}]！')
         return p
 
     if p.exists():
         p.unlink()
+
+    # 3. SSL 憑證彈性處理與串流(Stream)設定
+    session_kwargs = {"stream": True, "timeout": 30} # 加入 timeout 防止連線卡死
     try:
-        response = requests.get(url)
-    except requests.exceptions.SSLError as e:
+        response = requests.get(url, **session_kwargs)
+    except requests.exceptions.SSLError:
         import certifi
         try:
-            response = requests.get(url, verify=certifi.where())
-        except requests.exceptions.SSLError as e:
-            response = requests.get(url, verify=False)
-    
+            response = requests.get(url, verify=certifi.where(), **session_kwargs)
+        except requests.exceptions.SSLError:
+            response = requests.get(url, verify=False, **session_kwargs)
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"{url}下載失敗，係網路連線異常: {e}")
+
+    # 4. 分段串流下載，解決 100MB zip 下載不完整的問題
     if response.status_code == 200:
-        with open(p, 'wb') as file:
-            file.write(response.content)
-        logger.info(f'下載[{url}]至[{p}]成功！')
+        try:
+            with open(p, 'wb') as file:
+                # 每次只讀取 1MB 寫入硬碟，省記憶體且穩定
+                for chunk in response.iter_content(chunk_size=1024 * 1024):
+                    if chunk: 
+                        file.write(chunk)
+            logger.info(f'下載[{url}]至[{p}]成功！')
+        except Exception as e:
+            if p.exists(): p.unlink() # 若中途斷線或寫入失敗，刪除殘缺的檔案
+            raise RuntimeError(f"檔案寫入失敗: {e}")
     else:
-        raise RuntimeError(r"{url}下載失敗，原因如次：", response.status_code, response.reason)
+        raise RuntimeError(f"{url}下載失敗，原因：狀態碼 {response.status_code}, {response.reason}")
+        
     return p
 
 @通知執行時間
@@ -293,9 +314,9 @@ def 解壓(壓縮檔, 目錄):
         try:
             壓縮檔 = zipfile.ZipFile(壓縮檔)
         except zipfile.BadZipFile:
-            raise IOError(f'{壓縮檔}非ZipFile格式')
+            raise IOError(f'{壓縮檔.filename}非ZipFile格式')
     壓縮檔.extractall(目錄)
-    print(f'解壓[{壓縮檔}]成功！')
+    print(f'{壓縮檔.filename}解壓成功！')
 
 模式集 ={"python":r'File "(?P<path>.+)", line (?P<line>\d+).*'
         ,"python_warn":r'^(?P<path>.+):(?P<line>\d+):.*'
