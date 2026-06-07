@@ -2,6 +2,8 @@ from pathlib import Path
 import logging
 logger = logging.getLogger(Path(__file__).stem)
 
+停止快取=False
+
 def 快取至記憶體(func):
     '確保原始函數描述資料數據複製至裝飾器'
     import functools
@@ -17,7 +19,6 @@ def 刪除指定名稱快取(快取, 名稱):
     for key in keys_to_delete:
         c.delete(key)
 
-停止快取=False
 def 增加快取時序分析結果(取時序函數, 名稱欄位, 時間欄位, 快取檔案, 分析時序名稱=''):
     '''
     一、依指定取時序函數、名稱欄位、時間欄位、快取檔案增加分析函數快取時序分析結果功能。

@@ -206,6 +206,71 @@ def 繪季節解析圖(時序):
     r.plot()
     return r
 
+def 繪各年月份數據週期對比圖(revenue_series):
+    """將 10 年的月營收 pd.Series 按月份對齊，並繪製多折線圖以比較各年份的季節性週期。
+
+    Parameters:
+    revenue_series (pd.Series): 索引必須為 DatetimeIndex，值為營收數值的 Series。
+    """
+    # 1. 內置所有繪圖與資料處理需要的套件
+    import matplotlib.cm as cm
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import pandas as pd
+
+    # 2. 檢查輸入資料格式，確保防呆機制
+    if not isinstance(revenue_series, pd.Series):
+        m = f"輸入應係 pd.Series，實際係{type(revenue_series)}"
+        if isinstance(revenue_series, pd.DataFrame):
+            m += f'[{",".join(revenue_series.columns)}]'
+        raise TypeError(m)
+    if not isinstance(revenue_series.index, (pd.DatetimeIndex, pd.PeriodIndex)):
+        m = "index 必須是 DatetimeIndex"
+        m += f"，實際係{type(revenue_series.index)}"
+        raise ValueError(m)
+
+    # 3. 資料重塑：將 1D 時間序列轉為 2D 矩陣 (欄為年份、列為月份)
+    df = pd.DataFrame({"Revenue": revenue_series})
+    df["Year"] = df.index.year
+    df["Month"] = df.index.month
+
+    # 透過 pivot 讓 X 軸固定為 1~12 月，各年份自成一欄
+    pivot_df = df.pivot(index="Month", columns="Year", values="Revenue")
+
+    # 4. 開始繪圖設定
+    # 調整中文字型以防 Windows/Mac 系統出現框框亂碼
+    plt.rcParams["font.sans-serif"] = ["Microsoft JhengHei", "SimHei", "sans-serif"]
+    plt.rcParams["axes.unicode_minus"] = False  # 正常顯示負號
+
+    plt.figure(figsize=(12, 6))
+
+    # 使用 colormap (viridis) 讓年份顏色呈現漸層，越新的年份顏色越深
+    years = pivot_df.columns
+    colors = cm.viridis(np.linspace(0, 1, len(years)))
+
+    # 依年份逐條繪製折線
+    for i, year in enumerate(years):
+        plt.plot(
+            pivot_df.index,
+            pivot_df[year],
+            marker="o",  # 每個月份加上圓點標記
+            label=str(year),  # 圖例標籤
+            color=colors[i],  # 漸層色
+        )
+
+    # 5. 優化圖表視覺細節
+    plt.title("10 年月營收年週期比較圖 (按月對齊)", fontsize=16, fontweight="bold")
+    plt.xlabel("月份", fontsize=12)
+    plt.ylabel("營收金額", fontsize=12)
+    plt.xticks(range(1, 13))  # 強制 X 軸精準顯示 1 到 12 月
+    plt.grid(True, linestyle="--", alpha=0.6)  # 加上格線方便對齊檢視
+    plt.legend(
+        title="年份", bbox_to_anchor=(1.05, 1), loc="upper left"
+    )  # 將年份圖例移到右側外，不擋住線條
+
+    plt.tight_layout()
+    plt.show()
+
 if __name__ == '__main__':
     pass
     from 股票分析.股票基本資料分析 import 查股票代號
