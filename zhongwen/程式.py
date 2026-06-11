@@ -25,7 +25,7 @@ def 通知執行時間(f):
     return update_wrapper(wrap, f)
 
 def 列出函數執行時間表():
-    from zhongwen.表 import 顯示
+    from zhongwen.表 import 表示
     import pandas as pd
     ts = pd.DataFrame(__函數執行時間表__)
     ts = ts.groupby('函數', as_index=False
@@ -36,7 +36,7 @@ def 列出函數執行時間表():
     ts = ts.sort_values('總執行時間', ascending=False)
     ts = ts.reset_index(drop=True)
     ts.index = ts.index+1
-    顯示(ts)
+    表示(ts)
 
 def 安裝程式(應用程式):
     from collections.abc import Iterable 
