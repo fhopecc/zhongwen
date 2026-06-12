@@ -5,7 +5,9 @@ logger = logging.getLogger(Path(__file__).stem)
 停止快取=False
 
 def 快取至記憶體(func):
-    '確保原始函數描述資料數據複製至裝飾器'
+    '''
+    一、確保原始函數描述資料數據複製至裝飾器。
+    '''
     import functools
     @functools.wraps(func)
     @functools.cache
