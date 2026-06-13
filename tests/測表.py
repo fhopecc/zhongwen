@@ -5,7 +5,7 @@ class Test(unittest.TestCase):
         from pathlib import Path
         self.甲 = (Path(__file__).parent / '表測例甲.txt').read_text(encoding='utf-8')
 
-    def test表示(self):
+    def test(self):
         from zhongwen.表 import 表示
         from zhongwen.文 import 隨機中文 
         import pandas as pd
@@ -44,15 +44,17 @@ class Test(unittest.TestCase):
         表示(s.to_html())
         表示(df)
     
-    def test_char_width(self):
         from zhongwen.表 import 字寬
         self.assertEqual(字寬('-'), 1)
         self.assertEqual(字寬('字'), 2)
+        # Series 顯示成索引及值兩欄
+        s = pd.Series({"項甲":"值甲", "項乙":"值乙"})
+        s.name = '值'
+        表示(s)
+        self.assertFalse(True)
+
 
 if __name__ == '__main__':
     import logging
     logging.basicConfig(level=logging.INFO)
-    # unittest.main()
-    suite = unittest.TestSuite()
-    suite.addTest(Test('test表示'))
-    unittest.TextTestRunner().run(suite)
+    unittest.main()

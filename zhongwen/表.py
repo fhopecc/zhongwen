@@ -198,8 +198,9 @@ def 表示(df
         ):
     '''
     一、字串視為超文件檔案直接顯示；序列、系列、集合、陣列及資料框以表格顯示。
+    二、Series、list、set 以索引與值對應表表達。
     二、如設不顯示，傳回樣式及可顯示資料框，可顯示資料框用來設定工具提示。
-    二、原始資料是原始傳入之數據。
+    三、原始資料是原始傳入之數據。
     '''
     from pathlib import Path
     import pandas as pd
@@ -217,18 +218,14 @@ def 表示(df
             time.sleep(2)
         return 
 
-    if isinstance(df, list):
-        df = pd.Series(df).to_frame()
-        顯示索引 = True
-    elif isinstance(df, set):
-        df = pd.Series(list(df)).to_frame()
-        顯示索引 = True
-    elif isinstance(df, np.ndarray):
-        df = pd.Series(df).to_frame()
-        顯示索引 = True
-    elif isinstance(df, pd.Series):
+    if isinstance(df, pd.Series):
         df = df.to_frame()
+        df.index.name = '索引'
         顯示索引 = True
+    elif isinstance(df, (list, np.ndarray)):
+        表示(pd.Series(df))
+    elif isinstance(df, set):
+        表示(pd.Series(list(df)))
     elif isinstance(df, pd.DataFrame):
         df = df.dropna(axis='columns', how='all')
         if not df.index.is_unique:
