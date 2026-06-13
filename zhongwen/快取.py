@@ -6,13 +6,17 @@ logger = logging.getLogger(Path(__file__).stem)
 
 def 快取至記憶體(func):
     '''
-    一、確保原始函數描述資料數據複製至裝飾器。
+    一、確保快取函數維持原始函數之名稱及說明。
     '''
     import functools
-    @functools.wraps(func)
     @functools.cache
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
+
+    # 將原始函數屬性複製給回傳快取物件
+    wrapper.__name__ = func.__name__
+    wrapper.__doc__ = func.__doc__
+    wrapper.__module__ = func.__module__
     return wrapper
 
 def 刪除指定名稱快取(快取, 名稱):
