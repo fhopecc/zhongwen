@@ -222,7 +222,7 @@ def 表示(df
         df = df.to_frame()
         df.index.name = '索引'
         顯示索引 = True
-    elif isinstance(df, (list, np.ndarray)):
+    elif isinstance(df, (list, dict, np.ndarray)):
         表示(pd.Series(df))
     elif isinstance(df, set):
         表示(pd.Series(list(df)))

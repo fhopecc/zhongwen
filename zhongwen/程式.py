@@ -20,7 +20,10 @@ def 通知執行時間(f):
         te = time()
         runtime = time()-ts
         __函數執行時間表__.append({"函數":f.__name__, "執行時間":runtime})
-        logger.info(f'{f.__name__}費時{runtime:.2f}秒。')
+        if len(args) > 0:
+            logger.info(f'{f.__name__}({args[0]})費時{runtime:.2f}秒。')
+        else:
+            logger.info(f'{f.__name__}費時{runtime:.2f}秒。')
         return result
     return update_wrapper(wrap, f)
 

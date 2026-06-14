@@ -9,6 +9,7 @@ def 快取至記憶體(func):
     一、確保快取函數維持原始函數之名稱及說明。
     '''
     import functools
+
     @functools.cache
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
