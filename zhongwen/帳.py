@@ -417,22 +417,17 @@ def 取金額(desc):
         return sum(map(取數值, m))
     return None
 
-def 自備註取交易日(desc):
-    from zhongwen.時 import 今日
-    import re
-    pat = r'^(\d{3}\.\d{1,2}\.\d{1,2})'
-    if m:=re.search(pat, desc):
-        return 取交易日(m)
- 
-    pat = r'^(\d{1,2}\.\d{1,2})'
-    if m:=re.search(pat, desc):
-        return 取交易日(m)
-    return ''
+def 自備註取交易日(備註):
+    from zhongwen.時 import 取相對日期
+    return 取相對日期(備註)
 
 def 自備註取交易(備註):
     from zhongwen.數 import 取數值
+    from zhongwen.時 import 取相對日期
     日期 = 借項科目 = 貸項科目 = 金額 = ''
-    日期 = 取交易日(自備註取交易日(備註))
+    日期, (日期起, 日期迄)= 取相對日期(備註, True)
+    日期 = 取交易日(日期 )
+    備註 = 備註[:日期起] + 備註[日期迄:]
     借項科目 = 取借項(備註)
     貸項科目 = 取貸項(備註)
     金額 = 取金額(備註)

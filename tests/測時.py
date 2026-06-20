@@ -6,15 +6,24 @@ class Test(unittest.TestCase):
         from zhongwen.時 import 取時間, 一分鐘, 擇日, 取期間
         from zhongwen.時 import 取日期, 今日, 取小寫民國日期
         from zhongwen.時 import 取正式民國日期
+        from zhongwen.時 import 取民國期間
+        from zhongwen.時 import 取相對日期
         from zhongwen.時 import 取本週五
         from pandas import Timestamp, Timedelta
         from datetime import datetime, date
-        import pandas as pd
-        from zhongwen.時 import 取期間, 取民國期間
         from zhongwen.時 import 上月, 上年度
-        from pandas import Period, Timestamp
+        from pandas import Period
+        import pandas as pd
 
-        # 取期間
+        # 取相對日期
+        # self.assertEqual(取相對日期('19'), 取日期('20260619'))
+        # self.assertEqual(取相對日期('5.19'), 取日期('20260519'))
+        # self.assertEqual(取相對日期('昨'), 取日期('20260619'))
+        # self.assertEqual(取相對日期('我昨'), 取日期('20260619'))
+        # self.assertEqual(取相對日期('我昨', True)[0], 取日期('20260619'))
+        # self.assertEqual(取相對日期('昨', True), 取日期('20260619'))
+        # self.assertFalse(True)
+
         self.assertEqual(取期間(取日期('20190331')), 取日期('20190331'))
         self.assertEqual(取期間('112'), Period('2023', 'Y-DEC'))
         self.assertEqual(取期間('2024'), Period('2024', 'Y-DEC'))
@@ -99,9 +108,6 @@ class Test(unittest.TestCase):
         self.assertEqual(今日, Timestamp.today().normalize())
         self.assertEqual(取小寫民國日期('115年1月24日'), '一月二十四日')
         self.assertEqual(取正式民國日期('115年2月4日', 含星期=True), '115年2月4日(三)')
-
-
-
 
 if __name__ == '__main__':
     import logging

@@ -534,6 +534,86 @@ def 取本週五():
     days_to_friday = wait_days[current_weekday]
     return today + pd.Timedelta(days=days_to_friday)
     
+def 取相對日期(文, 傳回日期起迄位置=False):
+    """
+    從輸入字串中尋找相對日期描述，一律以執行當日為基準。
+    若輸入為空字串或 None，則預設為今日。
+    
+    :param 文: str，包含相對日期描述的完整字串
+    :param 傳回日期起迄位置: bool，預設為 False。
+                            為 True 時傳回 (pd.Timestamp, (int, int)) -> (日期, (起點, 終點))；
+                            為 False 時僅傳回 pd.Timestamp。
+    :return: pd.Timestamp 或 tuple (pd.Timestamp, tuple)
+    """
+    import pandas as pd
+    from datetime import datetime
+    import re
+
+    # 一律為執行當日
+    base_date = pd.Timestamp(datetime.now().date())
+
+    # 處理空字串或 None 的情況，直接歸類為今日
+    if 文 is None or str(文).strip() == "":
+        if 傳回日期起迄位置:
+            return base_date, (0, 0)
+        return base_date
+
+    文 = str(文)
+    weekday_map = {'一': 0, '二': 1, '三': 2, '四': 3, '五': 4, '六': 5, '日': 6, '天': 6}
+    
+    # 用於統一處理回傳邏輯的內部輔助函數
+    def _format_return(date_obj, match_obj):
+        if 傳回日期起迄位置:
+            return date_obj, match_obj.span()
+        return date_obj
+
+    # --- 1. 匹配浮點數 (例如: 4.6 -> 4月6日) ---
+    match = re.search(r'\d+\.\d+', 文)
+    if match:
+        try:
+            month, day = map(int, match.group().split('.'))
+            return _format_return(base_date.replace(month=month, day=day), match)
+        except ValueError:
+            pass
+
+    # --- 2. 匹配純數字 (例如: 5 -> 本月5日) ---
+    match = re.search(r'(?<!\.)\b\d+\b(?!\.)', 文)
+    if match:
+        day = int(match.group())
+        return _format_return(base_date.replace(day=day), match)
+
+    # --- 3. 匹配特定中文關鍵字 (昨、昨日、前、前日、今、今日) ---
+    match = re.search(r'(前日|昨日|今日|前|昨|今)', 文)
+    if match:
+        s = match.group()
+        if '前' in s:
+            return _format_return(base_date - pd.Timedelta(days=2), match)
+        elif '昨' in s:
+            return _format_return(base_date - pd.Timedelta(days=1), match)
+        elif '今' in s:
+            return _format_return(base_date, match)
+
+    # --- 4. 匹配周/星期相關 (例如: 上周五、本週一、五) ---
+    match = re.search(r'([上本下]?(?:周|週|星期)?[一二三四五六天日])', 文)
+    if match:
+        s = match.group()
+        target_day_char = s[-1]
+        
+        if target_day_char in weekday_map:
+            target_weekday = weekday_map[target_day_char]
+            current_weekday = base_date.weekday()
+            
+            is_last_week = '上' in s
+            
+            if is_last_week:
+                days_diff = target_weekday - current_weekday - 7
+            else:
+                days_diff = target_weekday - current_weekday
+                
+            return _format_return(base_date + pd.Timedelta(days=days_diff), match)
+
+    raise ValueError(f"無法在字串中解析到任何相對日期格式: {文}")
+
 一日 = pd.Timedelta(days=1)
 一週 = pd.Timedelta(days=7)
 一月 = pd.DateOffset(months=1)

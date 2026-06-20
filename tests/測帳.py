@@ -6,8 +6,13 @@ class Test(unittest.TestCase):
     def test(self):
         from zhongwen.帳 import 取日記帳紀錄, 取交易表示文字, 自備註取交易
         from zhongwen.帳 import 取交易表示繪文字
+        from zhongwen.帳 import 自備註取交易, 重載
         from zhongwen.表 import 表示
         import re 
+        重載()
+        t = '昨至佛堂獻晚香，回程走小路撞到狗，提款至美崙洗車400元'
+        t = 自備註取交易(t) 
+        print(t)
         self.assertFalse(True)
 
         t = "給品500元零用"
