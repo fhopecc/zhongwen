@@ -536,9 +536,7 @@ def 取本週五():
     
 def 取相對日期(文, 傳回日期起迄位置=False):
     """
-    從輸入字串中尋找相對日期描述，一律以執行當日為基準。
-    若輸入為空字串或 None，則預設為今日。
-    
+    一、自文取出第一個相對日期描述，找不到傳回今日。
     :param 文: str，包含相對日期描述的完整字串
     :param 傳回日期起迄位置: bool，預設為 False。
                             為 True 時傳回 (pd.Timestamp, (int, int)) -> (日期, (起點, 終點))；
@@ -551,12 +549,6 @@ def 取相對日期(文, 傳回日期起迄位置=False):
 
     # 一律為執行當日
     base_date = pd.Timestamp(datetime.now().date())
-
-    # 處理空字串或 None 的情況，直接歸類為今日
-    if 文 is None or str(文).strip() == "":
-        if 傳回日期起迄位置:
-            return base_date, (0, 0)
-        return base_date
 
     文 = str(文)
     weekday_map = {'一': 0, '二': 1, '三': 2, '四': 3, '五': 4, '六': 5, '日': 6, '天': 6}
@@ -611,9 +603,10 @@ def 取相對日期(文, 傳回日期起迄位置=False):
                 days_diff = target_weekday - current_weekday
                 
             return _format_return(base_date + pd.Timedelta(days=days_diff), match)
-
-    raise ValueError(f"無法在字串中解析到任何相對日期格式: {文}")
-
+    if 傳回日期起迄位置:
+        return 今日, (0, 0)
+    else:
+        return 今日
 一日 = pd.Timedelta(days=1)
 一週 = pd.Timedelta(days=7)
 一月 = pd.DateOffset(months=1)

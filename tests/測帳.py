@@ -9,8 +9,9 @@ class Test(unittest.TestCase):
         from zhongwen.帳 import 自備註取交易, 重載
         from zhongwen.表 import 表示
         import re 
-        重載()
+        # 重載()
         t = '昨至佛堂獻晚香，回程走小路撞到狗，提款至美崙洗車400元'
+        t = '美崙牛排午餐800元'
         t = 自備註取交易(t) 
         print(t)
         self.assertFalse(True)

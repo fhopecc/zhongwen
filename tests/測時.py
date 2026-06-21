@@ -16,13 +16,13 @@ class Test(unittest.TestCase):
         import pandas as pd
 
         # 取相對日期
-        # self.assertEqual(取相對日期('19'), 取日期('20260619'))
+        self.assertEqual(取相對日期('美崙牛排500元', True), 今日)
         # self.assertEqual(取相對日期('5.19'), 取日期('20260519'))
         # self.assertEqual(取相對日期('昨'), 取日期('20260619'))
         # self.assertEqual(取相對日期('我昨'), 取日期('20260619'))
         # self.assertEqual(取相對日期('我昨', True)[0], 取日期('20260619'))
         # self.assertEqual(取相對日期('昨', True), 取日期('20260619'))
-        # self.assertFalse(True)
+        self.assertFalse(True)
 
         self.assertEqual(取期間(取日期('20190331')), 取日期('20190331'))
         self.assertEqual(取期間('112'), Period('2023', 'Y-DEC'))

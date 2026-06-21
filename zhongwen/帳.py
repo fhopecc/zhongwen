@@ -403,6 +403,7 @@ def 取借項(desc):
     return '食'
 
 def 取貸項(desc):
+    '依 desc 內容關鍵字推論貸項'
     for pat in 載入關鍵字模式表(f=Path(__file__).parent / 'resource' / '貸項關鍵字'):
         if pat[0].search(desc):
             return pat[1] 
