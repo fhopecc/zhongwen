@@ -231,6 +231,65 @@ def doc2docx(docs, outputdir=None):
         word.Quit()
 
 def doc2pdf(words, output_dir=None):
+    '轉成 PDF/A (Archiving)'
+    from collections.abc import Iterable 
+    from pathlib import Path
+    import win32com.client
+    
+    if isinstance(words, str) or not isinstance(words, Iterable):
+        words = [words]
+        
+    # 初始化 Word 應用程式
+    word = win32com.client.Dispatch('Word.Application')
+    # 建議加上這行，避免 Word 視窗彈出干擾，並加快處理速度
+    word.Visible = False 
+    
+    # Word WdExportFormat 列舉值：17 代表 PDF
+    wdExportFormatPDF = 17 
+    # Word WdExportOptimizeFor 列舉值：0 代表列印品質（品質較佳，適合封存）
+    wdExportOptimizeForPrint = 0 
+    
+    try:
+        for w in words:
+            w = Path(w).resolve() # 使用 resolve() 確保使用絕對路徑
+            if not w.exists():
+                print(f"找不到檔案: {w}")
+                continue
+                
+            if output_dir:
+                pdf = Path(output_dir) / w.with_suffix('.pdf').name
+            else:
+                pdf = w.with_suffix('.pdf')
+                
+            pdf = pdf.resolve()
+            
+            # 開啟 Word 文件
+            doc = word.Documents.Open(str(w))
+            
+            # 使用 ExportAsFixedFormat 來指定 PDF/A 標準
+            doc.ExportAsFixedFormat(
+                OutputFileName=str(pdf),
+                ExportFormat=wdExportFormatPDF,
+                OpenAfterExport=False,
+                OptimizeFor=wdExportOptimizeForPrint,
+                CreateBookmarks=1, # 1 代表 wdExportCreateHeadingBookmarks（從標題自動建立書籤，利於導覽）
+                DocStructureTags=True, # 包含文件結構標籤（有助於提高無障礙與符合性）
+                BitmapMissingFonts=True, # 如果缺少字型則以點陣圖替代
+                UseISO19005_1=True # 關鍵核心：設為 True 即可強制存為符合 ISO 19005-1 (PDF/A) 標準的檔案
+            )
+            
+            # 關閉文件（不儲存變更）
+            doc.Close(SaveChanges=0) # 0 代表 wdDoNotSaveChanges
+            print(f"已成功匯出 PDF/A: {pdf}")
+            
+    except Exception as e:
+        print(f"處理過程中發生錯誤: {e}")
+        
+    finally:
+        # 確保不論成功與否，都會關閉 Word 處理程序
+        word.Quit()
+
+def doc2pdf_old(words, output_dir=None):
     from collections.abc import Iterable 
     from pathlib import Path
     import win32com.client
