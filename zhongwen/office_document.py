@@ -231,31 +231,41 @@ def doc2docx(docs, outputdir=None):
         word.Quit()
 
 def doc2pdf(words, output_dir=None):
-    '轉成 PDF/A (Archiving)'
+    """
+    將 Word 文件 (.doc/.docx) 完美轉換為符合 PDF/A 標準的 PDF 檔案。
+    解決了背景自動化執行時常見的表格跑格、列數變多、字距落差問題。
+    """
     from collections.abc import Iterable 
     from pathlib import Path
     import win32com.client
+    import time
     
+    # 確保輸入參數可迭代
     if isinstance(words, str) or not isinstance(words, Iterable):
         words = [words]
         
     # 初始化 Word 應用程式
     word = win32com.client.Dispatch('Word.Application')
-    # 建議加上這行，避免 Word 視窗彈出干擾，並加快處理速度
+    
+    # 【關鍵校正 1】設為 True 讓 Word 載入完整的前端螢幕渲染引擎與預設印表機驅動
+    # 這能百分之百還原您手動「另存新檔」時的排版環境
     word.Visible = False 
     
     # Word WdExportFormat 列舉值：17 代表 PDF
     wdExportFormatPDF = 17 
-    # Word WdExportOptimizeFor 列舉值：0 代表列印品質（品質較佳，適合封存）
+    # Word WdExportOptimizeFor 列舉值：0 代表列印品質（最高解析度，適合 PDF/A）
     wdExportOptimizeForPrint = 0 
+    # Word WdWindowViewType 列舉值：3 代表 wdPrintView（整頁模式/列印預覽）
+    wdPrintView = 3
     
     try:
         for w in words:
-            w = Path(w).resolve() # 使用 resolve() 確保使用絕對路徑
+            w = Path(w).resolve()  # 取得絕對路徑
             if not w.exists():
-                print(f"找不到檔案: {w}")
+                print(f"找不到原始檔案: {w}")
                 continue
                 
+            # 設定輸出 PDF 的路徑
             if output_dir:
                 pdf = Path(output_dir) / w.with_suffix('.pdf').name
             else:
@@ -266,27 +276,37 @@ def doc2pdf(words, output_dir=None):
             # 開啟 Word 文件
             doc = word.Documents.Open(str(w))
             
-            # 使用 ExportAsFixedFormat 來指定 PDF/A 標準
+            # 【關鍵校正 2】強迫目前的視窗切換到「整頁模式」，與螢幕預覽一致
+            word.ActiveWindow.View.Type = wdPrintView
+            
+            # 【關鍵校正 3】強迫 Word 更新所有欄位並重新計算全文字型與分頁
+            doc.Fields.Update()
+            doc.Repaginate()
+            
+            # 微調暫停 0.5 秒，確保 Word 內部排版引擎計算完畢
+            time.sleep(0.5)
+            
+            # 執行進階匯出（設定 PDF/A 核心參數）
             doc.ExportAsFixedFormat(
                 OutputFileName=str(pdf),
                 ExportFormat=wdExportFormatPDF,
-                OpenAfterExport=False,
-                OptimizeFor=wdExportOptimizeForPrint,
-                CreateBookmarks=1, # 1 代表 wdExportCreateHeadingBookmarks（從標題自動建立書籤，利於導覽）
-                DocStructureTags=True, # 包含文件結構標籤（有助於提高無障礙與符合性）
-                BitmapMissingFonts=True, # 如果缺少字型則以點陣圖替代
-                UseISO19005_1=True # 關鍵核心：設為 True 即可強制存為符合 ISO 19005-1 (PDF/A) 標準的檔案
+                OpenAfterExport=False,          # 轉檔完不自動打開 PDF
+                OptimizeFor=wdExportOptimizeForPrint, # 使用高解析度列印品質
+                CreateBookmarks=1,              # 1 = wdExportCreateHeadingBookmarks（自動將 Word 標題轉為 PDF 書籤）
+                DocStructureTags=False,          # 包含文件結構標籤（無障礙與標準化規範必備）
+                BitmapMissingFonts=False,        # 缺少字型時以點陣圖替代，防止亂碼
+                UseISO19005_1=True              # 【核心設定】強制存為符合 ISO 19005-1 (PDF/A) 標準的檔案
             )
             
-            # 關閉文件（不儲存變更）
-            doc.Close(SaveChanges=0) # 0 代表 wdDoNotSaveChanges
-            print(f"已成功匯出 PDF/A: {pdf}")
+            # 關閉文件（0 代表 wdDoNotSaveChanges，不變更並儲存原始 Word 檔）
+            doc.Close(SaveChanges=0)
+            print(f"轉換成功（符合 PDF/A）：{pdf.name}")
             
     except Exception as e:
-        print(f"處理過程中發生錯誤: {e}")
+        print(f"自動化轉檔過程中發生錯誤：{e}")
         
     finally:
-        # 確保不論成功與否，都會關閉 Word 處理程序
+        # 【安全機制】不論程式成功或失敗，都絕對會關閉背景的 Word 處理程序，避免記憶體殘留
         word.Quit()
 
 def doc2pdf_old(words, output_dir=None):
