@@ -232,40 +232,33 @@ def doc2docx(docs, outputdir=None):
 
 def doc2pdf(words, output_dir=None):
     """
-    將 Word 文件 (.doc/.docx) 完美轉換為符合 PDF/A 標準的 PDF 檔案。
-    解決了背景自動化執行時常見的表格跑格、列數變多、字距落差問題。
+    一、轉換 doc/docx 至 PDF/A 標準檔案。
+    二、不主動觸發更新，直接鎖定現有螢幕外觀並匯出，防止目錄洗掉或出錯。
     """
     from collections.abc import Iterable 
     from pathlib import Path
     import win32com.client
     import time
     
-    # 確保輸入參數可迭代
     if isinstance(words, str) or not isinstance(words, Iterable):
         words = [words]
         
-    # 初始化 Word 應用程式
     word = win32com.client.Dispatch('Word.Application')
     
-    # 【關鍵校正 1】設為 True 讓 Word 載入完整的前端螢幕渲染引擎與預設印表機驅動
-    # 這能百分之百還原您手動「另存新檔」時的排版環境
-    word.Visible = False 
+    # 必須設為 True，讓 Word 完整載入前端排版引擎與印表機環境，確保表格列數與螢幕一致
+    word.Visible = True 
     
-    # Word WdExportFormat 列舉值：17 代表 PDF
     wdExportFormatPDF = 17 
-    # Word WdExportOptimizeFor 列舉值：0 代表列印品質（最高解析度，適合 PDF/A）
     wdExportOptimizeForPrint = 0 
-    # Word WdWindowViewType 列舉值：3 代表 wdPrintView（整頁模式/列印預覽）
     wdPrintView = 3
     
     try:
         for w in words:
-            w = Path(w).resolve()  # 取得絕對路徑
+            w = Path(w).resolve()
             if not w.exists():
                 print(f"找不到原始檔案: {w}")
                 continue
                 
-            # 設定輸出 PDF 的路徑
             if output_dir:
                 pdf = Path(output_dir) / w.with_suffix('.pdf').name
             else:
@@ -276,56 +269,37 @@ def doc2pdf(words, output_dir=None):
             # 開啟 Word 文件
             doc = word.Documents.Open(str(w))
             
-            # 【關鍵校正 2】強迫目前的視窗切換到「整頁模式」，與螢幕預覽一致
+            # 1. 強制設定為整頁模式（確保畫面渲染與手動開啟一致）
             word.ActiveWindow.View.Type = wdPrintView
             
-            # 【關鍵校正 3】強迫 Word 更新所有欄位並重新計算全文字型與分頁
-            doc.Fields.Update()
-            doc.Repaginate()
+            # 2. 強制進行重新分頁（這只計算頁碼邊界和表格高度，不主動去動目錄的功能變數）
+            doc.Repaginate() 
+            time.sleep(0.5) # 給排版引擎半秒鐘時間穩定版面
             
-            # 微調暫停 0.5 秒，確保 Word 內部排版引擎計算完畢
-            time.sleep(0.5)
+            # 3. 【關鍵】中斷現有目錄連結，將其固化為靜態文字
+            # 避免重刷目錄發生「找不到目錄項目」錯誤
+            for table in doc.TablesOfContents:
+                table.Range.Fields.Unlink()
             
-            # 執行進階匯出（設定 PDF/A 核心參數）
+            # 4. 執行進階匯出 (PDF/A)
             doc.ExportAsFixedFormat(
                 OutputFileName=str(pdf),
                 ExportFormat=wdExportFormatPDF,
-                OpenAfterExport=False,          # 轉檔完不自動打開 PDF
-                OptimizeFor=wdExportOptimizeForPrint, # 使用高解析度列印品質
-                CreateBookmarks=1,              # 1 = wdExportCreateHeadingBookmarks（自動將 Word 標題轉為 PDF 書籤）
-                DocStructureTags=False,          # 包含文件結構標籤（無障礙與標準化規範必備）
-                BitmapMissingFonts=False,        # 缺少字型時以點陣圖替代，防止亂碼
-                UseISO19005_1=True              # 【核心設定】強制存為符合 ISO 19005-1 (PDF/A) 標準的檔案
+                OpenAfterExport=False,
+                OptimizeFor=wdExportOptimizeForPrint,
+                CreateBookmarks=0,              
+                DocStructureTags=True,          # 包含文件結構標籤
+                BitmapMissingFonts=True,        # 缺少字型時以點陣圖替代
+                UseISO19005_1=True              # 強制符合 PDF/A 標準
             )
             
-            # 關閉文件（0 代表 wdDoNotSaveChanges，不變更並儲存原始 Word 檔）
+            # 5. 關閉文件（0 = 不儲存變更，確保 Word 檔維持原狀）
             doc.Close(SaveChanges=0)
-            print(f"轉換成功（符合 PDF/A）：{pdf.name}")
-            
+            print(f"{pdf.name}轉換完成！")
     except Exception as e:
-        print(f"自動化轉檔過程中發生錯誤：{e}")
-        
+        print(f"{pdf.name}轉檔發生{e}")
     finally:
-        # 【安全機制】不論程式成功或失敗，都絕對會關閉背景的 Word 處理程序，避免記憶體殘留
         word.Quit()
-
-def doc2pdf_old(words, output_dir=None):
-    from collections.abc import Iterable 
-    from pathlib import Path
-    import win32com.client
-    if isinstance(words, str) or not isinstance(words, Iterable):
-        words = [words]
-    word = win32com.client.Dispatch('Word.Application')
-    for w in words:
-        w = Path(w)
-        if output_dir:
-            pdf = output_dir / w.with_suffix('.pdf').name
-        else:
-            pdf = w.with_suffix('.pdf')
-        doc = word.Documents.Open(str(w))
-        doc.SaveAs(str(pdf), FileFormat=17)
-        doc.Close()
-    word.Quit()
 
 def 標題階層編號轉中文編號(標題):
     from zhongwen.number import 中文數字, 大寫中文數字
