@@ -4,17 +4,22 @@ import unittest
 class Test(unittest.TestCase):
     '依方法名稱字母順序測試'
     def test(self):
+        from zhongwen.帳 import 分錄, 交易  
         from zhongwen.帳 import 取日記帳紀錄, 取交易表示文字, 自備註取交易
         from zhongwen.帳 import 取交易表示繪文字
         from zhongwen.帳 import 自備註取交易, 重載
         from zhongwen.表 import 表示
         import re 
-        # 重載()
-        t = '昨至佛堂獻晚香，回程走小路撞到狗，提款至美崙洗車400元'
-        t = '美崙牛排午餐800元'
-        t = 自備註取交易(t) 
+
+        t = 交易('115.6.19'
+                ,'至佛堂獻端午晚香，回程開車經小路撞到狗，回到美崙提款洗車'
+                ,'行', 400, '現金', -400)
+        self.assertTrue(t.分錄清單[0].科目, '行')
         print(t)
         self.assertFalse(True)
+        t = ''
+        t = '美崙牛排午餐800元'
+        t = 自備註取交易(t) 
 
         t = "給品500元零用"
         emoji = 取交易表示繪文字(t)

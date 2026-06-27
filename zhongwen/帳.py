@@ -2,10 +2,50 @@ from lark import Lark, Transformer, Tree
 from datetime import datetime, timedelta
 from diskcache import Cache
 from pathlib import Path
-from functools import lru_cache
+from dataclasses import dataclass
+from zhongwen.快取 import 快取至記憶體
 import logging
 cache = Cache(Path.home() / 'cache')
 logger = logging.getLogger(Path(__file__).stem)
+
+@dataclass
+class 分錄:
+    '''
+    一、分錄由科目及金額組成，金額正數為借項、負數為貸項。
+    二、預設表達如次：「借食400元」及「貸現金400元」。
+    '''
+    科目: str
+    金額: int
+
+    def __str__(self):
+        借貸 = '借' if (金額:=self.金額) > 0 else '貸'
+        return f"{借貸}{self.科目}{abs(金額)}元"
+
+    def __repr__(self):
+        return self.__str__() # 除錯模式亦套用相同表達
+
+class 交易:
+    '''
+    一、交易欄位：日期、交易事項、分錄清單。
+    二、檢核交易之分錄清單是否平衡，即金額加總應為零。
+    三、預設表達如次：
+        115.6.19借行400元貸現金400元，至佛堂獻端午晚香，回程開車經小路撞到狗，回到美崙提款洗車
+    '''
+    @staticmethod
+    def 取分錄清單(分錄清單):
+        return [分錄(科目, 金額) for 科目, 金額 in zip(分錄清單[0::2], 分錄清單[1::2])]
+
+    def __init__(self, 日期, 交易事項: str, *分錄清單):
+        from zhongwen.時 import 取日期
+        self.日期 = 取日期(日期)
+        self.交易事項 = 交易事項
+        self.分錄清單 = self.取分錄清單(分錄清單)
+
+    def __str__(self):
+        return f'{取交易日(self.日期)}{''.join(str(e) for e in self.分錄清單)}，{self.交易事項}'
+
+    def __repr__(self):
+        return self.__str__() # 除錯模式亦套用相同表達
 
 def 取分錄明細等寬字表達(分錄明細:list, 行寬=20, 數寬=7):
     '''
@@ -356,7 +396,7 @@ def 取沖帳交易(沖帳交易):
     return s
 
 # 備註推論交易
-@lru_cache
+@快取至記憶體
 @cache.memoize(tag='關鍵字模式表')
 def 載入關鍵字模式表(f=Path(__file__).parent / 'resource' / '借項關鍵字'):
     '關鍵字表不能包含空行'
@@ -396,16 +436,12 @@ def 取金額(desc):
         return sum(map(取數值, m))
     return None
 
-def 自備註取交易日(備註):
-    from zhongwen.時 import 取相對日期
-    return 取相對日期(備註)
-
 def 自備註取交易(備註):
     from zhongwen.數 import 取數值
     from zhongwen.時 import 取相對日期
     日期 = 借項科目 = 貸項科目 = 金額 = ''
     日期, (日期起, 日期迄)= 取相對日期(備註, True)
-    日期 = 取交易日(日期 )
+    日期 = 取交易日(日期)
     備註 = 備註[:日期起] + 備註[日期迄:]
     借項科目 = 取借項(備註)
     貸項科目 = 取貸項(備註)
@@ -414,3 +450,81 @@ def 自備註取交易(備註):
         raise ValueError(f'「{備註}」無金額！')
     print('自備註取交易')
     return f'{日期}借{借項科目}貸{貸項科目}{金額:.0f}元，{備註}'
+
+交易文法 = r"""
+    # 強制必填的 date
+    start: date items summary
+
+    # 只保留完整日期格式
+    date: full_date
+    full_date: YEAR "." MONTH "." DAY
+
+    YEAR: /\d+/
+    MONTH: /\d+/
+    DAY: /\d+/
+
+    ?items: shorthand_items | standard_items
+    
+    # 1 借 1 貸 1 金額模式
+    shorthand_items: "借" DNAME "貸" CNAME AMOUNT "元"
+
+    standard_items: (debit_item | credit_item)+
+    debit_item: "借" DNAME AMOUNT "元"
+    credit_item: "貸" CNAME AMOUNT "元"
+    
+    summary: "，" SUMMARY_CONTENT
+    
+    # 【邏輯核心】
+    DNAME: /((?!\d+元)\d+|[^\d借貸元，\s]|貸(?=款))++/
+    CNAME: /((?!\d+元)\d+|[^\d借貸元，\s]|貸(?=款))++/
+    
+    AMOUNT: /\d+/
+    SUMMARY_CONTENT: /.+/
+
+    %import common.WS
+    %ignore WS
+"""
+
+# --- 2. 交易解析器 ---
+class 交易解析器(Transformer):
+
+    def full_date(self, children):
+        y, m, d = map(int, children)
+        if y < 1000: y += 1911 
+        return datetime(y, m, d)
+
+    def shorthand_items(self, children):
+        n_debit, n_credit = str(children[0]).strip(), str(children[1]).strip()
+        amt = int(children[2])
+        return [(n_debit, amt), (n_credit, -amt)]
+
+    def standard_items(self, children):
+        return children
+
+    def debit_item(self, children):
+        return (str(children[0]).strip(), int(children[1]))
+
+    def credit_item(self, children):
+        return (str(children[0]).strip(), -int(children[1]))
+
+    def summary(self, children):
+        return str(children[0]).strip()
+
+    def start(self, children):
+        # 1. 取得強制要求的日期物件
+        dt = children[0]
+        
+        roc_year = dt.year - 1911
+        formatted_date = f"{roc_year}.{dt.month}.{dt.day}"
+        
+        # 2. 尋找分錄項目並將其平鋪化
+        items_list = next(c for c in children if isinstance(c, list))
+        flattened_entries = []
+        for name, amount in items_list:
+            flattened_entries.extend([name, amount])
+            
+        # 3. 尋找摘要
+        sum_content = str(children[-1])
+
+        # 4. 實例化並回傳「交易」物件
+        return 交易(formatted_date, sum_content, *flattened_entries)
