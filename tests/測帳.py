@@ -10,11 +10,11 @@ class Test(unittest.TestCase):
         from zhongwen.帳 import 自備註取交易, 重載
         from zhongwen.表 import 表示
         import re 
-
+        
+        self.assertTrue(t.分錄清單[0].科目, '行')
         t = 交易('115.6.19'
                 ,'至佛堂獻端午晚香，回程開車經小路撞到狗，回到美崙提款洗車'
                 ,'行', 400, '現金', -400)
-        self.assertTrue(t.分錄清單[0].科目, '行')
         print(t)
         self.assertFalse(True)
         t = ''
