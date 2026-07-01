@@ -7,7 +7,6 @@ from zhongwen.快取 import 快取至記憶體
 import logging
 cache = Cache(Path.home() / 'cache')
 logger = logging.getLogger(Path(__file__).stem)
-
 @dataclass
 class 紀錄:
     '''
