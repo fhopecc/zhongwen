@@ -4,19 +4,23 @@ import unittest
 class Test(unittest.TestCase):
     '依方法名稱字母順序測試'
     def test(self):
-        from zhongwen.帳 import 紀錄, 交易  
+        from zhongwen.帳 import 紀錄, 交易
         from zhongwen.帳 import 取日記帳紀錄, 取交易表示文字, 自備註取交易
         from zhongwen.帳 import 取交易表示繪文字
         from zhongwen.帳 import 自備註取交易, 重載
         from zhongwen.表 import 表示
         from 財務.日記帳 import 日記帳
-        import re 
+        import re
+
+        t = 交易.自文字解析("115.4.1繳公教貸款第84之2期，分錄為借記公教貸款1000元、利息20元，貸記土銀1020元")
+        print(t)
+        self.assertFalse(True)
+
         t = 交易.自文字解析('申請6月18時加班費，分錄為借記應收6月加班費6516元，貸記薪資6516元')
         print(t)
         j = 日記帳()
         j.插入交易(t)
-        self.assertFalse(True)
-        t = 交易.自文字解析('6.19至佛堂獻端午晚香，回程開車經小路撞到狗，回到美崙提款洗車，分錄為借記行400元，貸記現金400元')        
+        t = 交易.自文字解析('6.19至佛堂獻端午晚香，回程開車經小路撞到狗，回到美崙提款洗車，分錄為借記行400元，貸記現金400元')
         t = 交易('115.6.19'
                 ,'至佛堂獻端午晚香，回程開車經小路撞到狗，回到美崙提款洗車'
                 ,'行', 400, '現金', -400)
@@ -33,7 +37,7 @@ class Test(unittest.TestCase):
         self.assertFalse(True)
         d = 取日記帳紀錄(t)
         d = 自備註取交易(t)
-        print(d)        
+        print(d)
         l = [['國旅卡分期-114年度車險', 400, 0], ['現金', 0, 400]]
         print(取分錄明細等寬字表達(l))
         print(取交易表示文字(text, 30))        
@@ -75,12 +79,9 @@ class Test(unittest.TestCase):
         print(d)
         text = "115.4.1沖土銀應付泰銘股款1000元。"
         print(text)
-                
         d = 取日記帳紀錄(text)
         print(d)
 
-        text = "115.4.1借公教貸款1000元借利息20元貸土銀1020元，繳公教貸款第84之2期。"
-        print(text)
         d = 取日記帳紀錄(text)
         print(d)
         text = "借公教貸款貸土銀1000元，繳公教貸款第84之2期。"
