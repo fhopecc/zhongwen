@@ -9,9 +9,9 @@ cache = Cache(Path.home() / 'cache')
 logger = logging.getLogger(Path(__file__).stem)
 
 @dataclass
-class 分錄:
+class 紀錄:
     '''
-    一、分錄由科目及金額組成，金額正數為借項、負數為貸項。
+    一、紀錄由科目及金額組成，金額正數為借項、負數為貸項。
     二、預設表達如次：「借食400元」及「貸現金400元」。
     '''
     科目: str
@@ -26,26 +26,87 @@ class 分錄:
 
 class 交易:
     '''
-    一、交易欄位：日期、交易事項、分錄清單。
-    二、檢核交易之分錄清單是否平衡，即金額加總應為零。
+    一、交易欄位：日期、交易事項、紀錄清單。
+    二、檢核交易之紀錄清單是否平衡，即金額加總應為零。
     三、預設表達如次：
-        115.6.19借行400元貸現金400元，至佛堂獻端午晚香，回程開車經小路撞到狗，回到美崙提款洗車
+        115.6.19至佛堂獻端午晚香，回程開車經小路撞到狗，回到美崙提款洗車，分錄為借記行400元，貸記現金400元
     '''
     @staticmethod
-    def 取分錄清單(分錄清單):
-        return [分錄(科目, 金額) for 科目, 金額 in zip(分錄清單[0::2], 分錄清單[1::2])]
+    def 取紀錄清單(紀錄清單):
+        return [紀錄(科目, 金額) for 科目, 金額 in zip(紀錄清單[0::2], 紀錄清單[1::2])]
 
-    def __init__(self, 日期, 交易事項: str, *分錄清單):
+    def __init__(self, 日期, 交易事項: str, *紀錄清單):
         from zhongwen.時 import 取日期
         self.日期 = 取日期(日期)
         self.交易事項 = 交易事項
-        self.分錄清單 = self.取分錄清單(分錄清單)
+        self.紀錄清單 = self.取紀錄清單(紀錄清單)
 
     def __str__(self):
-        return f'{取交易日(self.日期)}{''.join(str(e) for e in self.分錄清單)}，{self.交易事項}'
+        ds = (d for d in self.紀錄清單 if d.金額 > 0)
+        cs = (c for c in self.紀錄清單 if c.金額 < 0)
+        es = f'借記'
+        es += '、'.join(f'{d.科目}{d.金額:,.0f}元' for d in ds)
+        es += '，貸記'
+        es += '、'.join(f'{c.科目}{-c.金額:,.0f}元' for c in cs)
+        return f'{取交易日(self.日期)}{self.交易事項}，分錄為{es}'
 
     def __repr__(self):
         return self.__str__() # 除錯模式亦套用相同表達
+
+    @classmethod
+    def 自文字解析(cls, 文:str):
+        from zhongwen.數 import 取數值
+        from zhongwen.時 import 取相對日期
+        日期 = 借項科目 = 貸項科目 = 金額 = ''
+        日期, (日期起, 日期迄)= 取相對日期(文, True)
+        日期 = 取交易日(日期)
+
+        交易事項 = 文[:日期起] + 文[日期迄:]
+        try:
+            交易事項, 紀錄清單 = 交易事項.split('，分錄為')
+            紀錄清單 = cls.解析複合紀錄(紀錄清單)
+            from itertools import chain
+            紀錄清單 = list(chain.from_iterable(紀錄清單))
+        except ValueError: 
+            借項科目 = 取借項(交易事項)
+            貸項科目 = 取貸項(交易事項)
+            金額 = 取金額(交易事項)
+            if 金額 is None:
+                raise ValueError(f'「{交易事項}」無金額！')
+            紀錄清單 = (借項科目, 金額, 貸項科目, -金額)
+        return cls(日期, 交易事項, *紀錄清單)
+
+    @staticmethod
+    def 解析複合紀錄(分錄文字: str):
+        import re
+        # 1. 利用「貸記」作為分界點，拆出借方區塊與貸方區塊
+        # split_parts[0] 會是借方文字，split_parts[1] 會是貸方文字
+        split_parts = re.split(r'貸記', 分錄文字)
+        
+        借方文字 = split_parts[0]
+        # 補回被切掉的「貸記」以便後續統一模式比對
+        貸方文字 = '貸記' + split_parts[1] if len(split_parts) > 1 else ''
+
+        # 2. 定義提取科目與金額的通用模式
+        # 匹配：中文字/英數字(科目) + 數字(金額) + 元
+        item_pattern = r"([\u4e00-\u9fa5\w]+?)(\d+)元"
+        
+        結果清單 = []
+
+        # 3. 解析借方區（金額為正）
+        借方項目 = re.findall(item_pattern, 借方文字)
+        for 科目, 金額文字 in 借方項目:
+            # 排除可能不小心抓到「借記」這兩個字的情況
+            乾淨科目 = 科目.replace('借記', '').strip()
+            結果清單.append((乾淨科目, int(金額文字)))
+
+        # 4. 解析貸方區（金額為負）
+        貸方項目 = re.findall(item_pattern, 貸方文字)
+        for 科目, 金額文字 in 貸方項目:
+            乾淨科目 = 科目.replace('貸記', '').strip()
+            結果清單.append((乾淨科目, -int(金額文字)))
+
+        return 結果清單
 
 def 取分錄明細等寬字表達(分錄明細:list, 行寬=20, 數寬=7):
     '''

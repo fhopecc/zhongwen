@@ -1,15 +1,17 @@
 from pathlib import Path
-import pandas as pd
 import logging
 from zhongwen.date import 全是日期嗎
+import pandas as pd
 
 logger = logging.getLogger(Path(__file__).stem)
 
 def 取日期(日期=None, 傳回全部日期=False, 包含位置=False):
     '''
-    一、解析輸入字串所有日期字串並傳回 pd.Timestamp.normalize()，即不包含時間之日期。
-    二、預設傳回第一個日期 pd.Timestamp，但可指定「傳回全部日期」參數，傳回所有日期 list。
-    四、可指定含字串位置選項，就回傳成(日期, 起, 迄) list。
+    一、取日期內所解析第一個 pd.Timestamp 物件。
+    二、取日期內若未解析到任何日期，傳回 None。
+    二、設定「包含位置」選項，就回傳成(日期, 起, 迄) list。
+    三、設定「傳回全部日期」則傳回所有日期 list。
+    四、解析輸入字串所有日期字串並傳回 pd.Timestamp.normalize()，即不包含時間之日期。
     五、支援日期格式如次：
         2026.5.2
         2026/5/2
@@ -26,9 +28,6 @@ def 取日期(日期=None, 傳回全部日期=False, 包含位置=False):
     八、解析輸入數字之字串表達之日期字串，如20260502整數就解成 2026.5.2
     九、解析輸入 date, datetime, Timestamp 等類日期物件，就回傳其對應之 Timestamp。
 '''
-    """
-    解析輸入字串或物件中的日期。
-    """
     import re
     import pandas as pd
     from datetime import date, datetime
@@ -546,6 +545,12 @@ def 取相對日期(文, 傳回日期起迄位置=False):
     import pandas as pd
     from datetime import datetime
     import re
+    d = 取日期(文, 包含位置=傳回日期起迄位置)
+    if d:
+        if 傳回日期起迄位置:
+            return d[0], (d[1], d[2])
+        else:
+            return d
 
     # 一律為執行當日
     base_date = pd.Timestamp(datetime.now().date())

@@ -4,19 +4,25 @@ import unittest
 class Test(unittest.TestCase):
     '依方法名稱字母順序測試'
     def test(self):
-        from zhongwen.帳 import 分錄, 交易  
+        from zhongwen.帳 import 紀錄, 交易  
         from zhongwen.帳 import 取日記帳紀錄, 取交易表示文字, 自備註取交易
         from zhongwen.帳 import 取交易表示繪文字
         from zhongwen.帳 import 自備註取交易, 重載
         from zhongwen.表 import 表示
+        from 財務.日記帳 import 日記帳
         import re 
-        
-        self.assertTrue(t.分錄清單[0].科目, '行')
+        t = 交易.自文字解析('申請6月18時加班費，分錄為借記應收6月加班費6516元，貸記薪資6516元')
+        print(t)
+        j = 日記帳()
+        j.插入交易(t)
+        self.assertFalse(True)
+        t = 交易.自文字解析('6.19至佛堂獻端午晚香，回程開車經小路撞到狗，回到美崙提款洗車，分錄為借記行400元，貸記現金400元')        
         t = 交易('115.6.19'
                 ,'至佛堂獻端午晚香，回程開車經小路撞到狗，回到美崙提款洗車'
                 ,'行', 400, '現金', -400)
-        print(t)
-        self.assertFalse(True)
+        self.assertEqual(t.紀錄清單[0].科目, '行')
+        t = 交易.自文字解析('115.6.19至佛堂獻端午晚香，回程開車經小路撞到狗，回到美崙提款洗車，分錄為借記行400元，貸記現金400元')        
+        self.assertEqual(t.紀錄清單[0].科目, '行')
         t = ''
         t = '美崙牛排午餐800元'
         t = 自備註取交易(t) 

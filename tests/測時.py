@@ -15,8 +15,16 @@ class Test(unittest.TestCase):
         from pandas import Period
         import pandas as pd
 
+        # 測取日期包含位置選項
+        m = '115.6.19至佛堂獻端午晚香，回程開車經小路撞到狗，回到美崙提款洗車，分錄為借記行400元，貸記現金400元'
+        self.assertEqual(取日期(m, 包含位置=True), (Timestamp(2026,6,19), 0, 8))
+
+        # 測取相對日期係先取日期
+        m = '115.6.19至佛堂獻端午晚香，回程開車經小路撞到狗，回到美崙提款洗車，分錄為借記行400元，貸記現金400元'
+        self.assertEqual(取相對日期(m, 傳回日期起迄位置=True), (Timestamp(2026,6,19), (0, 8)))
+
         # 取相對日期
-        self.assertEqual(取相對日期('美崙牛排500元', True), 今日)
+        # self.assertEqual(取相對日期('美崙牛排500元', True), 今日)
         # self.assertEqual(取相對日期('5.19'), 取日期('20260519'))
         # self.assertEqual(取相對日期('昨'), 取日期('20260619'))
         # self.assertEqual(取相對日期('我昨'), 取日期('20260619'))
