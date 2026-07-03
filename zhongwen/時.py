@@ -536,11 +536,7 @@ def 取本週五():
 def 取相對日期(文, 傳回日期起迄位置=False):
     """
     一、自文取出第一個相對日期描述，找不到傳回今日。
-    :param 文: str，包含相對日期描述的完整字串
-    :param 傳回日期起迄位置: bool，預設為 False。
-                            為 True 時傳回 (pd.Timestamp, (int, int)) -> (日期, (起點, 終點))；
-                            為 False 時僅傳回 pd.Timestamp。
-    :return: pd.Timestamp 或 tuple (pd.Timestamp, tuple)
+    二、如設定傳回日期起迄位置則傳回 (pd.Timestamp, (int, int)) -> (日期, (起點, 終點))；
     """
     import pandas as pd
     from datetime import datetime
@@ -554,10 +550,8 @@ def 取相對日期(文, 傳回日期起迄位置=False):
 
     # 一律為執行當日
     base_date = pd.Timestamp(datetime.now().date())
-
     文 = str(文)
     weekday_map = {'一': 0, '二': 1, '三': 2, '四': 3, '五': 4, '六': 5, '日': 6, '天': 6}
-    
     # 用於統一處理回傳邏輯的內部輔助函數
     def _format_return(date_obj, match_obj):
         if 傳回日期起迄位置:
@@ -591,7 +585,7 @@ def 取相對日期(文, 傳回日期起迄位置=False):
             return _format_return(base_date, match)
 
     # --- 4. 匹配周/星期相關 (例如: 上周五、本週一、五) ---
-    match = re.search(r'([上本下]?(?:周|週|星期)?[一二三四五六天日])', 文)
+    match = re.search(r'(?:[上本下]?(?:周|週|星期)[一二三四五六天日])', 文)
     if match:
         s = match.group()
         target_day_char = s[-1]
@@ -612,6 +606,7 @@ def 取相對日期(文, 傳回日期起迄位置=False):
         return 今日, (0, 0)
     else:
         return 今日
+
 一日 = pd.Timedelta(days=1)
 一週 = pd.Timedelta(days=7)
 一月 = pd.DateOffset(months=1)

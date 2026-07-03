@@ -14,7 +14,13 @@ class Test(unittest.TestCase):
         from zhongwen.時 import 上月, 上年度
         from pandas import Period
         import pandas as pd
-
+        t = '全家代付品寄送二手書至讀冊費用45元'
+        d = 取相對日期(t)
+        print(d)
+        t = '周四全家代付品寄送二手書至讀冊費用45元'
+        d = 取相對日期(t)
+        print(d)
+        self.assertFalse(True)
         # 測取日期包含位置選項
         m = '115.6.19至佛堂獻端午晚香，回程開車經小路撞到狗，回到美崙提款洗車，分錄為借記行400元，貸記現金400元'
         self.assertEqual(取日期(m, 包含位置=True), (Timestamp(2026,6,19), 0, 8))
