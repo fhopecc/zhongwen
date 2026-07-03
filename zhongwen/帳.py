@@ -4,6 +4,7 @@ from diskcache import Cache
 from pathlib import Path
 from dataclasses import dataclass
 from zhongwen.快取 import 快取至記憶體
+from typing import Self
 import logging
 cache = Cache(Path.home() / 'cache')
 logger = logging.getLogger(Path(__file__).stem)
@@ -52,8 +53,30 @@ class 交易:
     def __repr__(self):
         return self.__str__() # 除錯模式亦套用相同表達
 
+    @property
+    def 多行表達(self) -> str:
+        '''體例：
+        7.2(四)縣府福利社購當歸茶葉蛋2顆
+        借：食25元
+          貸：現金25元
+        '''
+        from zhongwen.數 import 取中文星期
+        d = self.日期
+        ms = []
+        日期 = f'{d.month}.{d.day}({取中文星期(d.dayofweek)})'
+        ms.append(日期+self.交易事項)
+        for e in self.紀錄清單:
+            if (debit:=e.金額) > 0:
+                debit = f'{debit:,}元'
+                ms.append(f'{e.科目} {debit}')
+            else:
+                credit = -e.金額
+                credit = f'{credit:,}元'
+                ms.append(f'  {e.科目} {credit}')
+        return '\n'.join(ms)
+
     @classmethod
-    def 自文字解析(cls, 文:str):
+    def 自文字解析(cls, 文:str) -> Self:
         from zhongwen.數 import 取數值
         from zhongwen.時 import 取相對日期
         日期 = 借項科目 = 貸項科目 = 金額 = ''
