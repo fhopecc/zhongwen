@@ -437,7 +437,6 @@ def 擷取頁面(源檔, 頁面=None, 目的檔=None):
     else:
         output_pdf = 目的檔
 
-
     reader = PdfReader(input_pdf)
     writer = PdfWriter()
     pages = 剖析頁碼字串(page_str)
