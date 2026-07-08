@@ -703,7 +703,7 @@ def 設定環境():
     from zhongwen.windows import 建立傳送到項目
     from zhongwen.windows import 增加檔案右鍵選單功能
     import sys
-    cmd = f"powershell.exe -NoExit -Command \"$env:Path += ';$env:LOCALAPPDATA\\Microsoft\\WinGet\\Links'; py -m zhongwen.文 -o -c -f '%1'\""
+    cmd = f"powershell.exe -NoExit -Command \"$env:Path += ';$env:LOCALAPPDATA\\Microsoft\\WinGet\\Links'; py -m zhongwen.文 -o -c -f %*\""
     建立傳送到項目('轉錄至文檔', cmd)
     cmd = f'{sys.executable} -m zhongwen.文 -c -f "%1"' 
     增加檔案右鍵選單功能('複製文字', cmd, r'SystemFileAssociations\.txt')
