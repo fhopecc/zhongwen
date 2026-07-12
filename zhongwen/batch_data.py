@@ -6,7 +6,7 @@ logger = logging.getLogger(Path(__file__).stem)
 def 載入批次資料(資料庫檔, 表格, 批號欄名, 時間欄位=None, 期間欄位=None, 最小批號=None):
     from zhongwen.庫 import 查無批號錯誤, 批次載入
     return 批次載入(資料庫檔, 表格, 批號欄名, 時間欄位, 期間欄位, 最小批號)
-    
+
 def 通知執行時間(f):
     from functools import wraps
     from time import time
@@ -81,7 +81,6 @@ def 期日資料批次寫入(資料庫檔, 資料名稱, 資料日期欄名, 預
                 return df
         return 批次寫入爬取資料
     return 增加結果批次寫入
-    
 
 def 結果批次寫入(資料庫檔, 資料名稱, 批號欄名, 預設批號組=[], 指定欄位=None):
     '''「預設批號組」指定一組批號逐批寫入查詢結果，舉如：
@@ -98,7 +97,7 @@ def 結果批次寫入(資料庫檔, 資料名稱, 批號欄名, 預設批號組
                 批號組 = 預設批號組
             if isinstance(批號組, str) or not isinstance(批號組, Iterable):
                 批號組 = [批號組]
-            db = 取資料庫(資料庫檔) 
+            db = 取資料庫(資料庫檔)
             for 批號 in 批號組:
                 df = 爬取資料函數(批號, **kargs)
                 if df.empty:
