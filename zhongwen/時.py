@@ -603,9 +603,9 @@ def 取相對日期(文, 傳回日期起迄位置=False):
                 
             return _format_return(base_date + pd.Timedelta(days=days_diff), match)
     if 傳回日期起迄位置:
-        return 今日, (0, 0)
+        return 取日期(), (0, 0)
     else:
-        return 今日
+        return 取日期()
 
 一日 = pd.Timedelta(days=1)
 一週 = pd.Timedelta(days=7)
