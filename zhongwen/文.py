@@ -8,6 +8,35 @@ cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 倉頡字根表 = str.maketrans("abcdefghijklmnopqrstuvwxy"
                           ,"日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜" )
 
+def mhtml2txt(mhtml) -> str:
+    from email import message_from_file
+    from bs4 import BeautifulSoup
+
+    # 1. 讀取 MHTML 檔案
+    with open(str(mhtml), 'r', encoding='utf-8', errors='ignore') as f:
+        msg = message_from_file(f)
+
+    # 2. 遍歷檔案零件，找出 HTML 核心內容
+    html_content = ""
+    for part in msg.walk():
+        if part.get_content_type() == "text/html":
+            # 取得解碼後的 HTML 原始碼
+            html_content = part.get_payload(decode=True).decode('utf-8', errors='ignore')
+            break
+
+    # 3. 移除標籤並擷取純文字
+    if html_content:
+        soup = BeautifulSoup(html_content, 'html.parser')
+        
+        # 移除不用要的腳本與樣式
+        for tags in soup(['script', 'style']):
+            tags.extract()
+            
+        pure_text = soup.get_text(separator='\n', strip=True)
+        return f"mhtml：{mhtml}\n{pure_text}"
+    else:
+        raise ValueError("找不到 HTML 內容")
+
 def 移除文後重覆出現詞(文, 詞):
     text = 文
     targe = 詞
@@ -552,6 +581,8 @@ def 轉錄文字(源檔集) -> str:
             text += 取內文(s)
         elif s.suffix == ".m4a":
             text += 音訊轉錄文字(s)
+        elif s.suffix == ".mhtml":
+            text += mhtml2txt(s)
         else:
             text += "源檔：{s}尚無轉錄文字程式。"
         text += "\n\n"
