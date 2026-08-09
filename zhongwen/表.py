@@ -151,6 +151,7 @@ def 顯示(df
         ,漸層上限=None
         ,漸層下限=None
         ,百分比漸層欄位=[]
+        ,百分比漸層由小至大欄位=[]
         ,百分比漸層按值區間欄位=[]
         ,顯示筆數=100, 採用民國日期格式=False, 標題=None
         ,傳回超文件內容=False
@@ -169,12 +170,13 @@ def 顯示(df
         ,漸層上限
         ,漸層下限
         ,百分比漸層欄位
+        ,百分比漸層由小至大欄位
         ,百分比漸層按值區間欄位
         ,顯示筆數, 採用民國日期格式, 標題
         ,傳回超文件內容
         ,顯示索引
         ,無格式
-        ,不顯示) 
+        ,不顯示)
 
 def 表示(df
         ,編號欄位=[], 整數欄位=[]
@@ -186,6 +188,7 @@ def 表示(df
         ,漸層上限=None
         ,漸層下限=None
         ,百分比漸層欄位=[]
+        ,百分比漸層由小至大欄位=[]
         ,百分比漸層按值區間欄位=[]
         ,顯示筆數=100
         ,採用民國日期格式=False
@@ -262,19 +265,21 @@ def 表示(df
             整數欄位 = set(整數欄位).union(df.select_dtypes(include=['int']).columns)
             整數欄位 -= set(編號欄位)
             百分比欄位 = set(百分比欄位)
+            百分比漸層由小至大欄位 = set(百分比漸層由小至大欄位)
             實數欄位 = set(實數欄位).union(df.select_dtypes(include=['float']).columns)
             實數欄位 -= 整數欄位
             實數欄位 -= 百分比欄位
+            實數欄位 -= 百分比漸層由小至大欄位
             百分比漸層按值區間欄位 = set(百分比漸層按值區間欄位)
             百分比漸層欄位 = set(百分比漸層欄位).union(set(百分比欄位))
-            百分比漸層欄位 -= 百分比漸層按值區間欄位 
+            百分比漸層欄位 -= 百分比漸層按值區間欄位
             漸層欄位 = set(漸層欄位).union(整數欄位, 實數欄位)
             漸層欄位 -= 百分比漸層欄位
             漸層欄位 = 漸層欄位.union(百分比漸層按值區間欄位)
             漸層欄位 -= set(指定漸層上下限欄位)
             日期欄位 = df.select_dtypes(include=['datetime']).columns
             期間欄位 = [c for c in df.columns if 'period' in df.dtypes[c].name]
-            文字欄位 = df.select_dtypes(include=['object']).columns
+            文字欄位 = df.select_dtypes(include=['str']).columns
 
             浮動提示 = df.copy()
             可顯示資料框 = df.copy()
@@ -294,7 +299,12 @@ def 表示(df
             df = df.format(str, subset=期間欄位, na_rep='')
             df = df.format(str, subset=文字欄位, na_rep='')
             df = df.background_gradient(axis=0, cmap='RdYlGn', vmax=1, vmin=-1
-                                       ,subset=list(百分比漸層欄位)
+                                       ,subset=list(百分比欄位)
+                                       )
+            df = df.format(lambda v: f"{v*100:.0f}", subset=list(百分比漸層由小至大欄位)
+                          ,na_rep='')
+            df = df.background_gradient(axis=0, cmap='RdYlGn_r', vmax=1, vmin=-1
+                                       ,subset=list(百分比漸層由小至大欄位)
                                        )
             if 指定漸層上下限欄位 and 漸層上限 and 漸層下限:
                 df = df.background_gradient(axis=0, cmap='RdYlGn', subset=list(指定漸層上下限欄位)

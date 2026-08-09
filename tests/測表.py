@@ -14,6 +14,7 @@ class Test(unittest.TestCase):
         df['整數欄位'] = np.random.randint(-5000, 5000, size=10)
         df['實數欄位'] = np.random.uniform(-100, 100, size=df.shape[0])
         df['百分比欄位'] = np.random.uniform(-3, 3, size=df.shape[0])
+        df['百分比由小到大欄位'] = np.random.uniform(-1, 1, size=df.shape[0])
         df['期間欄位'] = pd.period_range(start='2024Q3', periods=df.shape[0], freq='Q')
         df['日期欄位'] = pd.date_range(start='2024-11-24', periods=df.shape[0], freq='W')
         df['文字欄位'] = df.日期欄位.map(lambda _: 隨機中文(10))
@@ -38,12 +39,13 @@ class Test(unittest.TestCase):
         print(type(df))
         df = df.rename(columns={"日期欄位":r"日期\A欄位"})
         s, dfn = 表示(df, 顯示索引=True, 不顯示=True
-                     ,整數欄位=['整數欄位'], 百分比欄位=['百分比欄位']
+                     ,整數欄位=['整數欄位']
+                     ,百分比欄位=['百分比欄位']
+                     ,百分比漸層由小至大欄位=['百分比由小到大欄位']
                      ,隱藏欄位=['隱藏欄位'])
-         
         表示(s.to_html())
         表示(df)
-    
+        self.assertFalse(True)
         from zhongwen.表 import 字寬
         self.assertEqual(字寬('-'), 1)
         self.assertEqual(字寬('字'), 2)
