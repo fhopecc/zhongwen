@@ -279,7 +279,7 @@ def 表示(df
             漸層欄位 -= set(指定漸層上下限欄位)
             日期欄位 = df.select_dtypes(include=['datetime']).columns
             期間欄位 = [c for c in df.columns if 'period' in df.dtypes[c].name]
-            文字欄位 = df.select_dtypes(include=['str']).columns
+            文字欄位 = df.select_dtypes(include=['object', 'string']).columns
 
             浮動提示 = df.copy()
             可顯示資料框 = df.copy()
