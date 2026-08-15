@@ -314,7 +314,7 @@ def 解壓(壓縮檔, 目錄):
         try:
             壓縮檔 = zipfile.ZipFile(壓縮檔)
         except zipfile.BadZipFile:
-            raise IOError(f'{壓縮檔.filename}非ZipFile格式')
+            raise IOError(f'{壓縮檔} 非 ZipFile！')
     壓縮檔.extractall(目錄)
     print(f'{壓縮檔.filename}解壓成功！')
 
