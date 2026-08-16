@@ -160,9 +160,10 @@ def 校正中文字(字串:str):
     t = str.maketrans(重碼字, 正體字)
     return 字串.translate(t)
 
-def 刪空格(n):
+def 刪空格(字串:str) -> str:
+    '刪半型及全型空格字元'
     import re
-    try: return re.sub(r'[\s　]+', '', n)
+    try: return re.sub(r'[\s　]+', '', 字串)
     except TypeError: return n
 
 class 萌典尚無定義之字詞(Exception):pass
