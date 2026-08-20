@@ -1,17 +1,17 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling >= 1.26, < 1.32"]
 build-backend = "hatchling.build"
 
 [project]
 name = "zhongwen"
-version = "5.35.14"
+version = "5.35.17"
 authors = [
   { name="fhopecc", email="fhopecc@gmail.com" },
 ]
 description = "以中文命名之文、數、時、表及檔等處理工具集。"
 readme = "README.md"
 license = {text = "GPL-3.0-only"} 
-requires-python = ">=3.7"
+requires-python = ">=3.13"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",

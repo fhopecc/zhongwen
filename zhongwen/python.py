@@ -100,8 +100,9 @@ def 布署(檔案:Path=None):
         try:
             n = 套件名稱('pyproject.toml') 
             cmd =  rf'del dist\* && py -m build && twine upload dist\* && '
-            cmd += rf'python -m pip install {n} -U && '
-            cmd += rf'python -m pip install {n} -U'
+            # cmd =  rf'py -m build && twine upload dist\* && '
+            # cmd += rf'py -m pip install {n} -U && '
+            # cmd += rf'py -m pip install {n} -U'
             os.system(cmd)
         except FileNotFoundError:
             logger.error(f'當前目錄 {os.getcwd()} 無 pyproject.toml 檔案！')
@@ -229,6 +230,12 @@ def 安裝套件(套件名稱):
 
 if __name__ == '__main__':
     import argparse
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    logging.getLogger('googleclient').setLevel(logging.CRITICAL)
+    logging.getLogger('matplotlib').setLevel(logging.CRITICAL)
+    logging.getLogger('faker').setLevel(logging.CRITICAL)
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--deploy2pypi"
                        ,help="布署至PyPI，執行目錄下應有 pyproject.toml 檔。"
