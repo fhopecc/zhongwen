@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zhongwen"
-version = "5.35.17"
+version = "5.35.21"
 authors = [
   { name="fhopecc", email="fhopecc@gmail.com" },
 ]
@@ -18,11 +18,11 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = ['aiofiles'
-               ,'aider-install'
+               # ,'aider-install'
                ,'backupy'
                ,'beautifulsoup4'
-               ,'build'
-               ,"clipboard"
+               # ,'build'
+               # ,"clipboard"
                ,"cjkwrap"
                ,"comtypes"
                ,"diskcache"
@@ -34,7 +34,7 @@ dependencies = ['aiofiles'
                ,"geopandas"
                ,'GitPython'
                ,'gspread'
-               ,"hanlp" # 中文分詞
+               # ,"hanlp" # 中文分詞
                ,'holidays' # 世界各國假日檔
                ,'html5lib'
                ,'jedi' 
@@ -46,7 +46,7 @@ dependencies = ['aiofiles'
                ,'mapclassify'
                ,'oauth2client'
                ,'odfpy'
-               ,'openai-whisper'
+               # ,'openai-whisper'
                ,'opencc-python-reimplemented'  # 中文簡繁轉換
                ,'openpyxl'
                ,'orjson'
@@ -63,10 +63,9 @@ dependencies = ['aiofiles'
                ,"pyperclip"
                ,"pypandoc"
                ,'pyxirr'
-               ,"pytesseract"
+               # ,"pytesseract"
                ,"python-docx"
                ,"python-telegram-bot"
-               ,"pywin32"
                ,"PyMuPDF"
                ,"PyPDF2"
                ,"requests"
@@ -75,16 +74,15 @@ dependencies = ['aiofiles'
                ,'sympy'
                ,'tabulate'
                ,'tkcalendar'
-               ,'torch'
-               ,'torchvision'
-               ,'torchaudio'
+               # ,'torch'
+               # ,'torchvision'
+               # ,'torchaudio'
                ,'treelib'
                ,'twine'
                ,'wcwidth' # 使tabulate 支援中文表格輸出
                ,'webdriver_manager'
-               ,"winshell"
-               ,'windows_tools'
-               ,'winshell'
+               # ,"winshell"
+               # ,'windows_tools'
                ,'wmi'
                ,'xlrd'
                ,'yfinance'

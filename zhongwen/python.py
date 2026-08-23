@@ -98,9 +98,12 @@ def 布署(檔案:Path=None):
        os.chdir(old_cwd)
     else:
         try:
-            n = 套件名稱('pyproject.toml') 
-            cmd =  rf'del dist\* && py -m build && twine upload dist\* && '
+            n = 套件名稱('pyproject.toml')
+            # cmd =  rf'del dist\* && py -m build && twine upload dist\* && '
+            # cmd =  rf'py -m build && twine upload dist\*'
+            cmd =  rf'del dist\* && py -m build && twine upload dist\*'
             # cmd =  rf'py -m build && twine upload dist\* && '
+            # cmd =  rf'py -m build && twine upload dist\*'
             # cmd += rf'py -m pip install {n} -U && '
             # cmd += rf'py -m pip install {n} -U'
             os.system(cmd)
