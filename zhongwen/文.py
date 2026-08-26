@@ -2,7 +2,6 @@ from zhongwen.text import 刪空格, 轉樣式表字串
 from diskcache import Cache
 from pathlib import Path
 import functools
-
 cache = Cache(Path.home() / 'cache' / Path(__file__).stem)
 
 倉頡字根表 = str.maketrans("abcdefghijklmnopqrstuvwxy"
@@ -525,9 +524,14 @@ def 合併(文檔集):
             print(f"讀取檔案 {filename} 時發生錯誤: {e}")
     return merged_content
 
+
 def 取完整路徑(檔案集):
     "處理檔案清單，並為沒有路徑的檔案加上當前目錄。"
     from pathlib import Path
+    if len(檔案集) == 1:
+        目錄 = Path(檔案集[0])
+        if 目錄.is_dir():
+            return [p for p in 目錄.rglob('*') if p.is_file()]
     # 取得當前工作目錄的 Path 物件
     current_directory = Path.cwd()
     # 使用列表推導式來處理每個路徑
@@ -566,9 +570,11 @@ def 轉錄文字(源檔集) -> str:
     from zhongwen.信 import 取信函內文
     from pyperclip import paste
     import os
+    print(f'轉錄參數：{源檔集}')    
     源檔集 = 取完整路徑(源檔集)
     text = ''
     for s in 源檔集:
+        print(f'處理檔案：{s}')
         if s.suffix == ".txt":
             text += s.read_text(encoding='utf8')
         elif s.suffix == ".eml":
@@ -732,12 +738,17 @@ $objFolder.CopyHere("{font}")
 
 def 設定環境():
     from zhongwen.windows import 建立傳送到項目
-    from zhongwen.windows import 增加檔案右鍵選單功能
+    from zhongwen.windows import 增加檔案右鍵選單功能, 增加資料夾右鍵選單功能
     import sys
     cmd = f"powershell.exe -NoExit -Command \"$env:Path += ';$env:LOCALAPPDATA\\Microsoft\\WinGet\\Links'; py -m zhongwen.文 -o -c -f %*\""
     建立傳送到項目('轉錄至文檔', cmd)
+
+    cmd = f'{sys.executable} -m zhongwen.文 -o -c -f "%1"' 
+    增加資料夾右鍵選單功能('轉錄至文檔', cmd)
+
     cmd = f'{sys.executable} -m zhongwen.文 -c -f "%1"' 
     增加檔案右鍵選單功能('複製文字', cmd, r'SystemFileAssociations\.txt')
+
 
 def python_re_to_vim_magic(py_pattern: str) -> str:
     """

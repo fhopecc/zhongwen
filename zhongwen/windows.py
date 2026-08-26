@@ -90,6 +90,28 @@ def 建立傳送到項目(名稱:str, 命令:str):
     批次檔.write_text(命令)
     logger.info(f'建立傳送到【{名稱}】。')
 
+def 增加資料夾右鍵選單功能(功能名稱:str, 指令:str):
+    import winreg as reg
+    import sys
+
+    context_menu_name = 功能名稱
+    
+    key_path = fr'Directory\shell\{context_menu_name}'
+    command_key_path = fr'Directory\shell\{context_menu_name}\command'
+
+    try:
+        reg.CreateKey(reg.HKEY_CLASSES_ROOT, key_path)
+        reg.CreateKey(reg.HKEY_CLASSES_ROOT, command_key_path)
+        
+        with reg.OpenKey(reg.HKEY_CLASSES_ROOT, key_path, 0, reg.KEY_WRITE) as key:
+            reg.SetValue(key, '', reg.REG_SZ, context_menu_name)
+
+        with reg.OpenKey(reg.HKEY_CLASSES_ROOT, command_key_path, 0, reg.KEY_WRITE) as key:
+            reg.SetValue(key, '', reg.REG_SZ, 指令)
+        logger.info(f"【{資料夾}】右鍵選單增加【{功能名稱}】項目。")
+    except Exception as e:
+        logger.info(f"添加右鍵選單項目時出錯: {e}")
+
 def 增加檔案右鍵選單功能(功能名稱:str, 指令:str, 副檔名='*'):
     import winreg as reg
     import sys
