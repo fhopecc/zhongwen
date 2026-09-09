@@ -54,11 +54,6 @@ def 顯示地圖(gdf):
     二、點選各圖徵彈出屬性窗。
     '''
     from folium.features import GeoJsonPopup
-    from shapely.geometry import mapping
-    from pathlib import Path
-    import tempfile
-    import folium
-    import time
     import os
     gdf = gdf.to_crs(epsg='4326')
     m = folium.Map(location=[gdf.centroid.y.mean(), gdf.centroid.x.mean()], zoom_start=10)
@@ -79,8 +74,6 @@ def 顯示地圖(gdf):
     os.system(f'start {html}')
 
 def 顯示地點(gdf, 編號欄位='編號'):
-    from shapely.geometry import Point
-    import geopandas as gpd
     import folium
     import os
 
@@ -93,14 +86,12 @@ def 顯示地點(gdf, 編號欄位='編號'):
     m = folium.Map(location=[avg_lat, avg_lon], zoom_start=13)
 
     # 3. 使用 GeoJson 顯示圓點與彈出表格
-    # 我們利用 marker_options 讓它顯示為圓點 (CircleMarker)
     popup_fields = gdf.columns.drop('geometry').tolist() # 取得所有欄位名稱（排除幾何欄位）
 
     for col in gdf.columns:
         # 檢查該欄位中是否有任何值是 set 類型
         if gdf[col].apply(lambda x: isinstance(x, set)).any():
             gdf[col] = gdf[col].apply(lambda x: list(x) if isinstance(x, set) else x)
-            # 註：轉成 list 後 JSON 就能識別了；若要顯示好看，建議用上面方法一的 ', '.join()
 
     folium.GeoJson(
         gdf,
@@ -117,7 +108,6 @@ def 顯示地點(gdf, 編號欄位='編號'):
 
     # 4. 繪製帶有數字編號的實心圓
     for _, row in gdf.iterrows():
-        # 使用 DivIcon 自定義 HTML/CSS 畫出實心圓與文字
         icon_html = f"""
         <div style="
             background-color: #0078FF;
@@ -152,9 +142,10 @@ def 顯示地點(gdf, 編號欄位='編號'):
     os.system(f'start {html}')
 
 def 顯示互動地圖(gdf, 數值欄位=None, 分類欄位=None, 標記欄位=None, 
-            圖例名稱=None, 變色範圍='四分位數', 顯示圖例=False):
+            圖例名稱=None, 變色範圍='四分位數', 顯示圖例=False, 緩衝區半徑公尺長=None):
     """
     使用 explore 顯示交互式地圖。
+    - 支援「緩衝區半徑公尺長」參數：可畫出以幾何為中心（如點）的半透明緩衝區，緩衝區顏色深淺由「數值欄位」決定 (透明度上限為 50%)。
     - 標記偏移：若多個標記位置相同，透過微幅隨機偏移避免重疊。
     """
     import numpy as np
@@ -166,12 +157,11 @@ def 顯示互動地圖(gdf, 數值欄位=None, 分類欄位=None, 標記欄位=N
     import folium
     import random
 
-
     if gdf is None or gdf.empty:
         print("資料為空")
         return None
 
-    # 1. 處理數值映射邏輯 (用於透明度)
+    # 1. 處理數值映射邏輯 (用於透明度與深淺計算)
     vmin, vmax = None, None
     if 數值欄位 and 數值欄位 in gdf.columns:
         if 變色範圍 == '四分位數':
@@ -187,30 +177,57 @@ def 顯示互動地圖(gdf, 數值欄位=None, 分類欄位=None, 標記欄位=N
             vmin, vmax = gdf[數值欄位].min(), gdf[數值欄位].max()
             if vmin == vmax: vmax += 1
 
-    # 2. 核心繪圖邏輯 (強化分類顏色)
+    # 2. 處理緩衝區圖層 (若有指定緩衝區半徑，自動轉為公尺投影坐標系計算再轉回 EPSG:4326)
+    plot_gdf = gdf
+    if 緩衝區半徑公尺長 is not None and 緩衝區半徑公尺長 > 0:
+        buffered_gdf = gdf.to_crs(epsg=3826).copy()
+        buffered_gdf['geometry'] = buffered_gdf.geometry.buffer(緩衝區半徑公尺長)
+        plot_gdf = buffered_gdf.to_crs(epsg=4326)
+
+    # 3. 核心繪圖邏輯與樣式設定 (透明度深淺控制上限為 50% / 0.5)
     color_col = 分類欄位 if 分類欄位 else 數值欄位
-    style_kwds = {'weight': 6, 'opacity': 1.0} 
+    style_kwds = {'weight': 2, 'opacity': 0.8} 
     
     if 分類欄位 and 分類欄位 in gdf.columns:
         categories = gdf[分類欄位].unique()
-        cmap = plt.get_cmap('Set1') 
+        cmap_obj = plt.get_cmap('Set1') 
         num_cats = len(categories)
-        color_list = [mcolors.to_hex(cmap(i / max(1, num_cats - 1))) for i in range(num_cats)]
+        color_list = [mcolors.to_hex(cmap_obj(i / max(1, num_cats - 1))) for i in range(num_cats)]
         color_map = dict(zip(categories, color_list))
         
         def style_fn(feature):
             cat = feature['properties'].get(分類欄位, None)
             base_color = color_map.get(cat, "#3388ff")
+            style_dict = {"color": base_color, "weight": 2, "opacity": 0.8, "fillColor": base_color}
             if 數值欄位 and 數值欄位 in gdf.columns:
                 val = feature['properties'].get(數值欄位, 0)
-                norm_val = (val - vmin) / (vmax - vmin) if (vmax - vmin) != 0 else 1.0
-                alpha = float(np.clip(norm_val, 0.4, 1.0)) 
-                return {"color": base_color, "weight": 6, "opacity": 1.0, "fillOpacity": alpha}
-            return {"color": base_color, "weight": 6, "opacity": 1.0}
+                if val is not None and not np.isnan(val):
+                    norm_val = (val - vmin) / (vmax - vmin) if (vmax - vmin) != 0 else 0.5
+                    # 透明度 (fillOpacity) 控制在 0.1 到 0.5 (最大 50%) 之間
+                    alpha = float(np.clip(norm_val * 0.4 + 0.1, 0.1, 0.5))
+                    style_dict["fillOpacity"] = alpha
+                else:
+                    style_dict["fillOpacity"] = 0.3
+            else:
+                style_dict["fillOpacity"] = 0.3
+            return style_dict
+        style_kwds["style_function"] = style_fn
+    elif 數值欄位 and 數值欄位 in gdf.columns:
+        def style_fn(feature):
+            val = feature['properties'].get(數值欄位, 0)
+            style_dict = {"weight": 2, "opacity": 0.8}
+            if val is not None and not np.isnan(val):
+                norm_val = (val - vmin) / (vmax - vmin) if (vmax - vmin) != 0 else 0.5
+                # 透明度 (fillOpacity) 控制在 0.1 到 0.5 (最大 50%) 之間
+                alpha = float(np.clip(norm_val * 0.4 + 0.1, 0.1, 0.5))
+                style_dict["fillOpacity"] = alpha
+            else:
+                style_dict["fillOpacity"] = 0.3
+            return style_dict
         style_kwds["style_function"] = style_fn
 
-    # 3. 呼叫 explore
-    m = gdf.explore(
+    # 4. 呼叫 explore
+    m = plot_gdf.explore(
         column=color_col,
         cmap="turbo" if 數值欄位 and not 分類欄位 else None,
         vmin=vmin, vmax=vmax,
@@ -220,19 +237,15 @@ def 顯示互動地圖(gdf, 數值欄位=None, 分類欄位=None, 標記欄位=N
         style_kwds=style_kwds
     )
 
-    # 4. 增加「具偏移功能」的文字標記層
+    # 5. 增加「具偏移功能」的文字標記層 (使用原圖 gdf 的質心)
     if 標記欄位 and 標記欄位 in gdf.columns:
         temp_gdf = gdf.to_crs(epsg=4326)
-        # 用來記錄已標記的位置，避免完全重疊
-        # 這裡設定一個微小的隨機偏移量 (約 3-5 公尺的經緯度差距)
         jitter = 0.00005 
 
         for _, row in temp_gdf.iterrows():
             text = str(row[標記欄位])
             if text and text.lower() not in ['none', 'nan', '無']:
                 centroid = row.geometry.centroid
-                
-                # 執行微幅偏移：讓每個標記在質心周圍隨機抖動
                 lat_offset = (random.random() - 0.5) * jitter
                 lon_offset = (random.random() - 0.5) * jitter
                 
@@ -246,7 +259,7 @@ def 顯示互動地圖(gdf, 數值欄位=None, 分類欄位=None, 標記欄位=N
                     )
                 ).add_to(m)
 
-    # 5. 儲存與開啟
+    # 6. 儲存與開啟
     fd, path = tempfile.mkstemp(suffix='.html')
     try:
         m.save(path)
