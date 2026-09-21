@@ -17,6 +17,14 @@ def 設定環境():
     )
     print(f'建立捷徑[截圖辨字]。')
 
+def 安裝語言資料():
+    from zhongwen.檔 import 下載
+    tessdata_dir = next(Path(os.environ['ProgramFiles']).glob(r'**/tesseract.exe')).parent / 'tessdata'
+    jpn_url = 'https://github.com/tesseract-ocr/tessdata_fast/blob/main/jpn.traineddata'
+    jpn_vert_url = 'https://github.com/tesseract-ocr/tessdata_fast/blob/main/jpn_vert.traineddata'
+    for url in [jpn_url, jpn_vert_url]:
+        下載(url, 儲存目錄=tessdata_dir) 
+
 def 取圖陣列(圖):
     '取圖的 ndarray 表示'
     from PIL import Image
@@ -150,9 +158,12 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--setup", help="設定環境", action="store_true")
+    parser.add_argument("--install_lang", help="安裝語言資料", action="store_true")
     parser.add_argument("--OCR", help="啟動截圖辨字", action="store_true")
     args = parser.parse_args()
     if args.setup:
         設定環境()
+    elif args.install_lang:
+        安裝語言資料()
     elif args.OCR:
         截圖辨字()
