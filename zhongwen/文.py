@@ -904,6 +904,46 @@ def 審核意見轉通知(意見:str) -> str:
     意見 = 意見.replace('該府', '貴府')
     return 意見
 
+
+def 分割文檔(input_file, char_limit=450000, encoding="utf-8"):
+    '預設45萬字'
+    import os
+    # 取得原始檔名（不含副檔名）與副檔名
+    base_name, ext = os.path.splitext(input_file)
+
+    file_count = 1
+    current_char_count = 0
+    current_lines = []
+
+    with open(input_file, "r", encoding=encoding) as f:
+        for line in f:
+            line_len = len(line)
+
+            # 如果加上這行會超過字數上限，且目前已有內容，先寫出為「原始檔名_N.txt」
+            if current_char_count + line_len > char_limit and current_lines:
+                output_filename = f"{base_name}_{file_count}{ext}"
+                with open(output_filename, "w", encoding=encoding) as out_f:
+                    out_f.writelines(current_lines)
+                print(
+                    f"已寫入 {output_filename}，共 {current_char_count} 字"
+                )
+
+                # 重置變數準備下一個檔案
+                file_count += 1
+                current_lines = []
+                current_char_count = 0
+
+            current_lines.append(line)
+            current_char_count += line_len
+
+        # 寫入最後剩餘的內容
+        if current_lines:
+            output_filename = f"{base_name}_{file_count}{ext}"
+            with open(output_filename, "w", encoding=encoding) as out_f:
+                out_f.writelines(current_lines)
+            print(f"已寫入 {output_filename}，共 {current_char_count} 字")
+
+
 if __name__ == "__main__":
     from pyperclip import copy
     from pathlib import Path
