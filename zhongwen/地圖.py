@@ -226,16 +226,30 @@ def 顯示互動地圖(gdf, 數值欄位=None, 分類欄位=None, 標記欄位=N
             return style_dict
         style_kwds["style_function"] = style_fn
 
-    # 4. 呼叫 explore
+    #4. 呼叫 explore
     m = plot_gdf.explore(
         column=color_col,
         cmap="turbo" if 數值欄位 and not 分類欄位 else None,
         vmin=vmin, vmax=vmax,
-        tiles="OpenStreetMap", 
+        # tiles="OpenStreetMap", 
+        tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+        attr="Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community",
         legend=顯示圖例,
         tooltip=True, popup=True,
         style_kwds=style_kwds
     )
+
+    # 使用 Esri 的免費淡色底圖 (Esri World Gray Canvas)
+    # m = plot_gdf.explore(
+    #     column=color_col,
+    #     cmap="turbo" if 數值欄位 and not 分類欄位 else None,
+    #     vmin=vmin, vmax=vmax,
+    #     tiles="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+    #     attr="Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ",
+    #     legend=顯示圖例,
+    #     tooltip=True, popup=True,
+    #     style_kwds=style_kwds
+    # )
 
     # 5. 增加「具偏移功能」的文字標記層 (使用原圖 gdf 的質心)
     if 標記欄位 and 標記欄位 in gdf.columns:
@@ -259,15 +273,25 @@ def 顯示互動地圖(gdf, 數值欄位=None, 分類欄位=None, 標記欄位=N
                     )
                 ).add_to(m)
 
-    # 6. 儲存與開啟
+    # 6. 儲存與開啟 (修改地圖.py 的這一段)
     fd, path = tempfile.mkstemp(suffix='.html')
     try:
         m.save(path)
+        
+        # 【新增這幾行】：讀取 HTML 並寫入 referrer 政策
+        with open(path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        
+        # 在 <head> 中插入政策，允許本地檔案傳送 Referer
+        meta_tag = '<meta name="referrer" content="no-referrer-when-downgrade">'
+        html_content = html_content.replace('<head>', f'<head>{meta_tag}')
+        
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+        
         webbrowser.open(f'file://{os.path.realpath(path)}')
     finally:
         os.close(fd)
-    return m
-
 
 if __name__ == '__main__':
     import argparse
