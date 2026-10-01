@@ -7,6 +7,7 @@ logger = logging.getLogger(Path(__file__).stem)
 def 快取至記憶體(func):
     '''
     一、確保快取函數維持原始函數之名稱及說明。
+    二、受裝飾函數仍有 cache_clear() 方法。
     '''
     import functools
 
