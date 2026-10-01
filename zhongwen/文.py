@@ -671,34 +671,69 @@ def 校正中文字(字串:str):
     t = str.maketrans(重碼字, 正體字)
     return 字串.translate(t)
 
-def 字元切換(string:str):
-    '''就大小寫字母，舉如拉丁字母，進行大小寫切換；重碼字母進行校正；中文字母進行簡繁切換；日文字母平片假名切換；符號則為全半型轉換(Todo)。
-'''
-    from opencc import OpenCC
-    if string == '': return string
-    def switch_case(c:str):
-        if c == '[': return '「'
-        if c == ']': return '」'
 
+from opencc import OpenCC
+
+# 預先初始化 OpenCC 實例，避免重複建立以提升效能
+cc_s2t = OpenCC('s2t')
+cc_t2s = OpenCC('t2s')
+
+# 定義標點符號與全半形映射表
+PUNCT_MAP = {
+    '(': '「', '「': '(',
+    ')': '」', '」': ')',
+    '[': '【', '【': '[',
+    ']': '】', '】': ']',
+    ',': '，', '，': ',',
+    ';': '；', '；': ';',
+    '.': '。', '。': '.',
+    '?': '？', '？': '?',
+    ':': '：', '：': ':',
+}
+
+def 字元切換(string: str) -> str:
+    '''
+    一、大小寫字母，舉如拉丁字母，進行大小寫切換。
+    二、中文字母進行簡繁切換。
+    三、日文字母平片假名切換。
+    四、符號則為全半型轉換。
+    五、重碼字母進行校正。
+    '''
+    if not string:
+        return string
+
+    def switch_case(c: str) -> str:
+        # 1. 標點符號與全半形轉換
+        if c in PUNCT_MAP:
+            return PUNCT_MAP[c]
+
+        # 2. 重碼字校正
         if 是否為重碼字(c):
             return 校正中文字(c)
 
+        # 3. 中文字元簡繁切換
         if 是否為中文字元(c):
-            # 簡繁切換
-            r = OpenCC('s2t').convert(c)
+            r = cc_s2t.convert(c)
             if r == c:
-                return OpenCC('t2s').convert(c)
+                return cc_t2s.convert(c)
             return r
+
+        # 4. 日文平片假名切換 (注意 Unicode 邊界值修正)
         if 是否為平假名(c):
-            return chr(ord(c)-0x3041+0x30A1)
+            return chr(ord(c) + 0x60)
         if 是否為片假名(c):
-            return chr(ord(c)-0x30A1+0x3041)
+            return chr(ord(c) - 0x60)
+
+        # 5. 拉丁字母大小寫轉換 (若無其他規則則直接進行大小寫切換)
         if c.islower():
             return c.upper()
-        else:
+        elif c.isupper():
             return c.lower()
 
-    if len(string) == 1: return switch_case(string)
+        return c
+
+    if len(string) == 1:
+        return switch_case(string)
 
     return ''.join(map(switch_case, string))
 
