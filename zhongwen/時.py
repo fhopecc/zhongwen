@@ -152,7 +152,7 @@ def 取期間(期間, 全取=False):
     elif ms:=re.findall(r'(?<=\A)(?P<Y1>\d{4})(?=(\D|\Z))|(?<=\D)(?P<Y2>\d{4})(?=(\D|\Z))', s):
         取年數 = lambda t: next((s for s in t if isinstance(s, str) and s.strip()), None)
         ps = [Period(f'{int(取年數(m))}', 'Y') for m in ms]
-    elif ms:=re.findall(r'(\d{3})[/]?([01]?\d)', s):
+    elif ms:=re.findall(r'(\d{3})[/.]?([01]?\d)', s):
         try:
             ps = [Period(f'{int(m[0])+1911}{int(m[1]):02}', 'M') for m in ms]
         except Exception:
