@@ -253,7 +253,7 @@ def 取一階節點(org, 節點序號):
     if 1 <= 節點序號 <= len(nodes):
         return nodes[節點序號 - 1]
     else:
-        print(f"Error: 找不到第 {節點序號} 個節點 (總共有 {le節點序號(nodes)} 個)", file=sys.stderr)
+        print(f"Error: 找不到第 {節點序號} 個節點 (總共有 {len(nodes)} 個)", file=sys.stderr)
         return None
 
 def org2docx(org, 節點序號=0):
