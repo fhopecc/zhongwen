@@ -47,6 +47,12 @@ class 交易:
         self.日期 = 取日期(日期)
         self.交易事項 = 交易事項
         self.紀錄清單 = self.取紀錄清單(紀錄清單)
+        i = 0
+        for e in self.紀錄清單:
+            i+=e.金額
+        if i > 0:
+            msg = f'交易分錄{self.紀錄清單}借貸不平衡，借貸散總為{i}'
+            raise ValueError(msg)
 
     def __str__(self):
         ds = (d for d in self.紀錄清單 if d.金額 > 0)
