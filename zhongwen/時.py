@@ -607,6 +607,62 @@ def 取相對日期(文, 傳回日期起迄位置=False):
     else:
         return 取日期()
 
+
+def 取期間斷點(period_series):
+    """
+    一、取連續期間中不連續斷點。
+    二、欄位：斷點前期、斷點後期、缺漏期數、缺漏期別明細
+    三、支援任意 Period 頻率，包含如 'Q' 季、'M' 月、'Y' 年。
+    """
+    import pandas as pd
+    # 1. 轉為 PeriodIndex 並取得其頻率
+    p_idx = pd.PeriodIndex(period_series)
+    freq = p_idx.freqstr or p_idx.freq
+
+    # 排序並去除重複
+    sorted_p = pd.Series(p_idx.drop_duplicates()).sort_values().reset_index(drop=True)
+
+    if len(sorted_p) < 2:
+      print('資料筆數不足，無法檢核斷點。')
+      return pd.DataFrame(
+          columns=['斷點前期', '斷點後期', '缺漏期數', '缺漏期別明細']
+      )
+
+    # 2. 計算底層整數差值
+    int_vals = sorted_p.astype('int64')
+    diffs = int_vals.diff()
+    break_mask = diffs > 1
+
+    if not break_mask.any():
+      print('資料完全連續，無任何斷點。')
+      return pd.DataFrame(
+          columns=['斷點前期', '斷點後期', '缺漏期數', '缺漏期別明細']
+      )
+
+    break_indices = diffs[break_mask].index
+
+    # 3. 提取斷點細節與實際缺漏的期別
+    results = []
+    for idx in break_indices:
+      prev_p = sorted_p.iloc[idx - 1]
+      curr_p = sorted_p.iloc[idx]
+      missing_count = int(diffs.loc[idx] - 1)
+
+      # 利用 period_range 自動展開中間缺漏的具體期別
+      missing_periods = pd.period_range(
+          start=prev_p + 1, end=curr_p - 1, freq=freq
+      )
+
+      results.append({
+          '斷點前一期': str(prev_p),
+          '斷點後新期': str(curr_p),
+          '中間缺漏期數': missing_count,
+          '缺漏期別列表': [str(p) for p in missing_periods],
+      })
+
+    return pd.DataFrame(results)
+
+
 一日 = pd.Timedelta(days=1)
 一週 = pd.Timedelta(days=7)
 一月 = pd.DateOffset(months=1)
