@@ -564,13 +564,14 @@ def get_pandoc_text(source):
         print("錯誤：Pandoc 未安裝或不在系統路徑中。")
 
 def 轉錄文字(源檔集) -> str:
+    '將 .docx、.m4a、.pdf 轉錄文字'
     from zhongwen.音 import 轉錄文字 as 音訊轉錄文字
     from zhongwen.office_document import get_doc_text
     from zhongwen.pdf import 取內文
     from zhongwen.信 import 取信函內文
     from pyperclip import paste
     import os
-    print(f'轉錄參數：{源檔集}')    
+    print(f'轉錄參數：{源檔集}')
     源檔集 = 取完整路徑(源檔集)
     text = ''
     for s in 源檔集:
