@@ -291,36 +291,66 @@ def org2docx(org, 節點序號=0):
     document = Document(str(docx))
 
     def 取中文階層編號(編號, 階層):
+        from zhongwen.數 import 取天干
         if 階層==0:
             return ''
         if 階層==1:
+            return f'{取天干(編號)}、'
+        if 階層==2: 
             return f'{取大寫中文數字(編號)}、'
-        elif 階層==2: 
+        if 階層==3: 
             return f'{取中文數字(編號)}、'
-        elif 階層==3: 
+        if 階層==4: 
             return f'({取中文數字(編號)})'
-        elif 階層==4: 
+        if 階層==5: 
             return f'{編號}.'
-        elif 階層==5: 
+        if 階層==6: 
             return f'({編號})'
         return 編號
 
     階層 = 0
     for paragraph in document.paragraphs:
         print(paragraph.style.name)
-        if m:='Heading' in paragraph.style.name:
+        if 'Heading' in paragraph.style.name:
             runs = list(paragraph.runs)
+            pat = r'(核有下列|核有：|核有以下)'
+            if m:=re.search(pat, paragraph.text):
+                print(f'長標題不黑體')
+                for run in runs:
+                    run.bold = False
+
             if len(runs) > 0 and (number_run:=runs[0]):
                 text = number_run.text
                 pat = r'^((\d+.)*(\d+))$'
                 if m:=re.match(pat, text):
                     階層 = m[1].count('.')
                     編號 = 取中文階層編號(m[3], int(階層))
-                    number_run.text = text.replace(m[1], 編號)
+                    if 階層 == 0:
+                        # 刪除編號
+                        number_run.text = text.replace(m[1], '')
+                        # 刪除 Pandoc 編號後留下的 tab / 空白
+                        for run in runs[1:]:
+                            if run.text.strip() == '':
+                                run.text = ''
+                            else:
+                                break
+                    else:
+                        number_run.text = text.replace(m[1], 編號)
+
         if 'Normal' in paragraph.style.name or 'Body Text' in paragraph.style.name:
             if int(階層)>0:
-                print(f'{階層} -> 內文{階層+1}')
-                paragraph.style = f'內文{階層+1}'
+                pats = [(3, r'^[\(（][一二三四五六七八九十百千]+[\)）]')
+                       ,(4, r'^\d\.')
+                       ]
+                for l, p in pats:
+                    if 階層 == l and re.match(p, paragraph.text):
+                        print(f'{階層} -> 序數內文{階層+1}')
+                        paragraph.style = f'序數內文{階層+1}'
+                        break
+                else:
+                    print(f'{階層} -> 內文{階層+1}')
+                    paragraph.style = f'內文{階層+1}'
+
     document.save(str(docx))
     os.system(f'start {docx}')
 

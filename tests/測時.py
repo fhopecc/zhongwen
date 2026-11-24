@@ -8,15 +8,17 @@ class Test(unittest.TestCase):
         from zhongwen.時 import 取正式民國日期
         from zhongwen.時 import 取民國期間
         from zhongwen.時 import 取相對日期
+        from zhongwen.時 import 取干支紀年
         from zhongwen.時 import 取本週五
         from pandas import Timestamp, Timedelta
         from datetime import datetime, date
         from zhongwen.時 import 上月, 上年度
         from pandas import Period
         import pandas as pd
+        y = 取干支紀年('68.7.29')
+        self.assertFalse(True)
         p = 取期間('115.8')
         print(p)
-        self.assertFalse(True)
         t = '全家代付品寄送二手書至讀冊費用45元'
         d = 取相對日期(t)
         print(d)

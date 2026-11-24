@@ -5,6 +5,17 @@ import pandas as pd
 
 logger = logging.getLogger(Path(__file__).stem)
 
+def 取干支紀年(日期) -> str:
+    天干 = "甲乙丙丁戊己庚辛壬癸"
+    地支 = "子丑寅卯辰巳午未申酉戌亥"
+
+    西元年 = 取日期(日期).year
+
+    干 = 天干[(西元年 - 4) % 10]
+    支 = 地支[(西元年 - 4) % 12]
+
+    return 干 + 支
+
 def 取日期(日期=None, 傳回全部日期=False, 包含位置=False):
     '''
     一、取日期內所解析第一個 pd.Timestamp 物件。
