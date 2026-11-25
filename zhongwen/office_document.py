@@ -256,7 +256,7 @@ def doc2pdf(words, output_dir=None):
         for w in words:
             w = Path(w).resolve()
             if not w.exists():
-                print(f"找不到原始檔案: {w}")
+                logger.error(f"找不到原始檔案: {w}")
                 continue
                 
             if output_dir:
@@ -295,9 +295,10 @@ def doc2pdf(words, output_dir=None):
             
             # 5. 關閉文件（0 = 不儲存變更，確保 Word 檔維持原狀）
             doc.Close(SaveChanges=0)
-            print(f"{pdf.name}轉換完成！")
+            logger.info(f"{pdf.name}轉換完成！")
+            return pdf
     except Exception as e:
-        print(f"{pdf.name}轉檔發生{e}")
+        logger.error(f"{pdf.name}轉檔發生{e}")
     finally:
         word.Quit()
 
@@ -429,6 +430,362 @@ def to_xlsx(odses_or_pdfs):
         except Exception as e:
             logger.info(f"{ods.name}轉換失敗：{e}")
 
+def to_docx(源檔, 輸出檔=None):
+    """
+    使用 Microsoft Word 將舊式 .doc 文件轉換為 .docx。
+
+    參數
+    ----
+    源檔 : str | Path
+        原始 .doc 文件。
+
+    輸出檔 : str | Path | None
+        指定輸出的 .docx 路徑。
+        若未指定，預設輸出到原 .doc 所在目錄，
+        檔名相同、副檔名改為 .docx。
+
+    回傳
+    ----
+    Path
+        轉換後的 .docx 路徑。
+
+    環境需求
+    --------
+    - Windows
+    - 已安裝桌面版 Microsoft Word
+    """
+
+    from pathlib import Path
+    import subprocess
+
+    源檔 = Path(源檔).expanduser().resolve()
+
+    # --------------------------------------------------------
+    # 檢查來源
+    # --------------------------------------------------------
+
+    if not 源檔.exists():
+        raise FileNotFoundError(
+            f"找不到 Word 文件：{源檔}"
+        )
+
+    if 源檔.suffix.lower() != ".doc":
+        raise ValueError(
+            f"doc2docx 僅接受 .doc 文件：{源檔}"
+        )
+
+    # --------------------------------------------------------
+    # 決定輸出位置
+    # --------------------------------------------------------
+
+    if 輸出檔 is None:
+
+        輸出檔 = 源檔.with_suffix(".docx")
+
+    else:
+
+        輸出檔 = (
+            Path(輸出檔)
+            .expanduser()
+            .resolve()
+        )
+
+        if 輸出檔.suffix.lower() != ".docx":
+            輸出檔 = 輸出檔.with_suffix(".docx")
+
+    # 如果指定的資料夾不存在，自動建立。
+    輸出檔.parent.mkdir(
+        parents=True,
+        exist_ok=True
+    )
+
+    # --------------------------------------------------------
+    # PowerShell 路徑字串處理
+    # --------------------------------------------------------
+
+    # PowerShell 單引號字串內，
+    # 單引號需寫成兩個單引號。
+    源路徑 = str(源檔).replace(
+        "'",
+        "''"
+    )
+
+    輸出路徑 = str(輸出檔).replace(
+        "'",
+        "''"
+    )
+
+    # --------------------------------------------------------
+    # 使用 Word COM 轉檔
+    # --------------------------------------------------------
+
+    powershell = f"""
+$ErrorActionPreference = 'Stop'
+
+$word = $null
+$document = $null
+
+try {{
+
+    $word = New-Object -ComObject Word.Application
+
+    $word.Visible = $false
+    $word.DisplayAlerts = 0
+
+    $document = $word.Documents.Open(
+        '{源路徑}',
+        $false,
+        $true
+    )
+
+    # 16 = wdFormatDocumentDefault
+    # 即 Office Open XML .docx
+    $document.SaveAs2(
+        '{輸出路徑}',
+        16
+    )
+}}
+finally {{
+
+    if ($null -ne $document) {{
+        $document.Close($false)
+    }}
+
+    if ($null -ne $word) {{
+        $word.Quit()
+    }}
+}}
+"""
+
+    結果 = subprocess.run(
+        [
+            "powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            powershell,
+        ],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+
+    # --------------------------------------------------------
+    # 檢查轉換結果
+    # --------------------------------------------------------
+
+    if 結果.returncode != 0:
+
+        raise RuntimeError(
+            "Word DOC → DOCX 轉換失敗。\n"
+            f"來源：{源檔}\n"
+            f"輸出：{輸出檔}\n"
+            f"錯誤：{結果.stderr.strip()}"
+        )
+
+    if not 輸出檔.exists():
+
+        raise RuntimeError(
+            "Microsoft Word 執行完成，"
+            "但沒有產生 DOCX："
+            f"{輸出檔}"
+        )
+
+    return 輸出檔
+
+
+def 轉錄文字(源檔) -> str:
+    """
+    將 Microsoft Word .doc 或 .docx 文件轉錄為純文字。
+
+    .docx：
+        直接使用 python-docx 讀取。
+
+    .doc：
+        使用 doc2docx() 轉為暫存 .docx，
+        讀取完成後自動刪除暫存檔。
+
+    讀取內容
+    --------
+    - 一般段落
+    - Word 表格
+    - 段落與表格保持原文件中的先後順序
+
+    表格
+    ----
+    - 儲存格之間使用 Tab 分隔
+    - 每列使用換行分隔
+
+    參數
+    ----
+    源檔 : str | Path
+        .doc 或 .docx 文件。
+
+    回傳
+    ----
+    str
+        Word 文件的純文字內容。
+    """
+
+    from pathlib import Path
+    from tempfile import TemporaryDirectory
+
+    from docx import Document
+    from docx.table import Table
+    from docx.text.paragraph import Paragraph
+
+    源檔 = Path(源檔).expanduser().resolve()
+
+    # --------------------------------------------------------
+    # 檢查來源
+    # --------------------------------------------------------
+
+    if not 源檔.exists():
+
+        raise FileNotFoundError(
+            f"找不到 Word 文件：{源檔}"
+        )
+
+    副檔名 = 源檔.suffix.lower()
+
+    if 副檔名 not in {
+        ".doc",
+        ".docx",
+    }:
+
+        raise ValueError(
+            f"目前僅支援 .doc、.docx：{源檔}"
+        )
+
+    # --------------------------------------------------------
+    # 讀取 DOCX
+    # --------------------------------------------------------
+
+    def 讀取docx(docx檔) -> str:
+
+        doc = Document(
+            str(docx檔)
+        )
+
+        內容 = []
+
+        # 不能單獨使用 doc.paragraphs，
+        # 否則會遺失表格在正文中的位置。
+        for 元素 in doc.element.body.iterchildren():
+
+            標籤 = (
+                元素.tag
+                .split("}")[-1]
+            )
+
+            # =================================================
+            # 一般段落
+            # =================================================
+
+            if 標籤 == "p":
+
+                段落 = Paragraph(
+                    元素,
+                    doc
+                )
+
+                文字 = (
+                    段落
+                    .text
+                    .strip()
+                )
+
+                if 文字:
+                    內容.append(
+                        文字
+                    )
+
+            # =================================================
+            # 表格
+            # =================================================
+
+            elif 標籤 == "tbl":
+
+                表格 = Table(
+                    元素,
+                    doc
+                )
+
+                表格列 = []
+
+                for 列 in 表格.rows:
+
+                    欄位 = []
+
+                    for 儲存格 in 列.cells:
+
+                        # 儲存格可能包含數個段落。
+                        文字 = " ".join(
+                            p.text.strip()
+                            for p in 儲存格.paragraphs
+                            if p.text.strip()
+                        )
+
+                        欄位.append(
+                            文字
+                        )
+
+                    # Tab 可保留基本欄位關係。
+                    表格列.append(
+                        "\t".join(欄位)
+                    )
+
+                if 表格列:
+
+                    內容.append(
+                        "\n".join(
+                            表格列
+                        )
+                    )
+
+        # 一般段落間保留空白行。
+        return "\n\n".join(
+            內容
+        )
+
+    # --------------------------------------------------------
+    # DOCX：直接讀取
+    # --------------------------------------------------------
+
+    if 副檔名 == ".docx":
+
+        return 讀取docx(
+            源檔
+        )
+
+    # --------------------------------------------------------
+    # DOC：
+    #
+    # 1. 建立臨時資料夾
+    # 2. doc2docx()
+    # 3. 讀取暫存 DOCX
+    # 4. 離開 with 後自動刪除
+    # --------------------------------------------------------
+
+    with TemporaryDirectory(
+        prefix="doc2docx_"
+    ) as 暫存資料夾:
+
+        暫存docx = (
+            Path(暫存資料夾)
+            / f"{源檔.stem}.docx"
+        )
+
+        to_docx(
+            源檔,
+            暫存docx
+        )
+
+        return 讀取docx(
+            暫存docx
+        )
+
 if __name__ == '__main__':
     import argparse
     logging.basicConfig(level=logging.INFO)
@@ -445,10 +802,24 @@ if __name__ == '__main__':
     parser.add_argument("--copy_text", type=str, help="複製文字", required=False)
     parser.add_argument("--save_highlight", help="另存醒目文字")
 
+    parser.add_argument("--doc", type=str, help="指定檔案並顯示檔案文字", required=False)
+    parser.add_argument("--to_docx", help="將指定檔案轉成 docx 格式。", action="store_true")
+    parser.add_argument("--to_pdf", help="將指定檔案轉成 pdf 格式。", action="store_true")
+
+
     args = parser.parse_args()
 
     if args.setup:
         設定環境()
+    elif doc := args.doc:
+        if args.to_docx:
+            docx = to_docx(doc)
+            logger.info(f'{doc} -> {docx}')
+        elif args.to_pdf:
+            pdf = doc2pdf(doc)
+            logger.info(f'{doc} -> {pdf}')
+        text = 轉錄文字(doc)
+        print(text)
     elif docs := args.print:
         列印(docs)
     elif args.setup_template:

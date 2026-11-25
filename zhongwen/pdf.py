@@ -184,7 +184,7 @@ def 設定環境():
 
     cmd = f'cmd.exe /c "{sys.executable} -m zhongwen.pdf --arrange %1 || pause"'
     增加檔案右鍵選單功能('整理頁面', cmd, 'pdf')
-    增加檔案右鍵選單功能('整理頁面', cmd, 'FoxitReader.Document')
+
 
 def 解鎖(pdfs, 覆蓋原檔=False):
     import PyPDF2
@@ -243,43 +243,6 @@ def 合併(pdfs, 合併檔名='合併檔案.pdf'):
     output = filedir / 合併檔名
     merger.write(output)
     merger.close()
-
-
-def 去空白頁(源檔, 轉換檔=None):
-    if not 轉換檔: 
-        轉換檔 = 源檔.with_stem(源檔.stem+"去空白頁")
-    input_file = 源檔 
-    output_file = 轉換檔
-
-    import fitz
-    doc = fitz.open(input_file)
-
-    非空白頁碼清單 = []
-    import numpy as np 
-    from PIL import Image
-    for page_number in range(len(doc)):
-        page = doc.load_page(page_number)
-        pix = page.get_pixmap()
-        
-        # 将Pixmap对象转换为PIL的Image对象
-        image = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-        
-        # 将图像转换为灰度图像
-        gray_image = image.convert("L")
-
-        # 将灰度图像转换为NumPy数组
-        np_image = np.array(gray_image)
-        
-        # 计算像素值的均值
-        mean_value = np.mean(np_image)
-        
-        # 设置阈值来判断页面是否为空白
-        threshold = 200  # 可根据需要进行调整
-
-        if mean_value < threshold: 
-            非空白頁碼清單.append(page_number)
-    doc.select(非空白頁碼清單)
-    doc.save(output_file)
 
 def to_xlsx(pdf):
     '''
@@ -544,8 +507,11 @@ def 取空白頁碼(pdf_path: str) -> list[int]:
     return blank_page_numbers
 
 def 去空白頁(pdf):
+    from pathlib import Path
+    pdf = Path(pdf)
     空白頁碼 = 取空白頁碼(pdf) 
-    刪除(pdf, 空白頁碼)
+    目的檔 = pdf.with_stem(f'{pdf.stem}_去空白頁')
+    刪除(pdf, 空白頁碼, 目的檔)
 
 def 解密(input_pdf_path, password):
     import pypdf

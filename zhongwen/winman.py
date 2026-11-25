@@ -70,35 +70,41 @@ def 建立傳送到項目(名稱:str, 命令:str):
     批次檔.write_text(命令)
     logger.info(f'建立傳送到【{名稱}】。')
 
-def 增加檔案右鍵選單功能(功能名稱:str, 指令:str, 副檔名='*'):
+def 增加檔案右鍵選單功能(功能名稱: str, 指令: str, 副檔名: str = '*') -> bool:
+    '''
+    一、在目前使用者（HKCU）登錄檔註冊檔案右鍵選單項目，不需系統管理員權限。
+    二、副檔名參數：
+        '*'                     : 所有檔案
+        'pdf' 或 '.pdf'         : 該副檔名，寫入 SystemFileAssociations，不受預設開啟程式影響
+        'FoxitReader.Document'  : 指定 ProgID，僅在該程式為預設開啟程式時有效
+    三、由 opus5.5 修正。
+    '''
     import winreg as reg
-    import os
-    import sys
 
-    # 功能名稱
-    context_menu_name = 功能名稱
-    
-    key_path = fr'{副檔名}\shell\{context_menu_name}'
-    command_key_path = fr'{副檔名}\shell\{context_menu_name}\command'
+    if 副檔名 == '*':
+        根路徑 = '*'
+    elif 副檔名.startswith('.') or '.' not in 副檔名:
+        根路徑 = rf'SystemFileAssociations\.{副檔名.lstrip(".")}'
+    else:
+        根路徑 = 副檔名  # 視為 ProgID
 
-    # 創建註冊表項目
+    key_path = rf'Software\Classes\{根路徑}\shell\{功能名稱}'
+    command_key_path = key_path + r'\command'
+
     try:
-        reg.CreateKey(reg.HKEY_CLASSES_ROOT, key_path)
-        reg.CreateKey(reg.HKEY_CLASSES_ROOT, command_key_path)
-        
-        # 設置右鍵選單項目名稱
-        with reg.OpenKey(reg.HKEY_CLASSES_ROOT, key_path, 0, reg.KEY_WRITE) as key:
-            reg.SetValue(key, '', reg.REG_SZ, context_menu_name)
+        with reg.CreateKeyEx(reg.HKEY_CURRENT_USER, key_path, 0, reg.KEY_WRITE) as key:
+            reg.SetValueEx(key, '', 0, reg.REG_SZ, 功能名稱)
+        with reg.CreateKeyEx(reg.HKEY_CURRENT_USER, command_key_path, 0, reg.KEY_WRITE) as key:
+            reg.SetValueEx(key, '', 0, reg.REG_SZ, 指令)
+    except OSError as e:
+        logger.error(f'添加右鍵選單項目【{功能名稱}】時出錯（HKCU\\{key_path}）：{e}')
+        return False
 
-        # 設置指令
-        with reg.OpenKey(reg.HKEY_CLASSES_ROOT, command_key_path, 0, reg.KEY_WRITE) as key:
-            reg.SetValue(key, '', reg.REG_SZ, 指令)
-        if 副檔名 == '*':
-            logger.info(f"所有檔案右鍵選單增加【{功能名稱}】項目。")
-        else:
-            logger.info(f"{副檔名} 右鍵選單增加【{功能名稱}】項目。")
-    except Exception as e:
-        logger.info(f"添加右鍵選單項目時出錯: {e}")
+    if 副檔名 == '*':
+        logger.info(f'所有檔案右鍵選單增加【{功能名稱}】項目。')
+    else:
+        logger.info(f'{副檔名} 右鍵選單增加【{功能名稱}】項目（HKCU\\{key_path}）。')
+    return True
 
 def where(command):
     '查找指定的可執行檔，以Windows where.exe 實作。'
